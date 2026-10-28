@@ -1,0 +1,16 @@
+# Raw evidence and credentials must never be committed
+evidence_raw/
+private_raw/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+.DS_Store
+Thumbs.db
