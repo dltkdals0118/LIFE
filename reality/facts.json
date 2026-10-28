@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "q001_q017_confirmed_food_and_poker_ledger_pending",
+  "status": "spend_measured_transfers_and_poker_ledger_pending",
   "facts": [
     {
       "id": "FACT-0001",
@@ -1636,10 +1636,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "'식비는 모르겠어. 월마다 달라.' **0 으로 채우지 않는다.** 월별 편차가 크면 기억으로 묻는 것이 맞지 않다 — 카드 명세 한 달치를 보는 편이 빠르고 정확하다(Q-018).",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0080",
@@ -1655,10 +1655,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "'기타 한 달 생활비도 잘 모르겠어. 월마다 달라.' 식비와 같은 이유로 Q-018 로 넘긴다.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0081",
@@ -1746,10 +1746,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "'아직 마이너스일거야. 3k정도' — **추정이고 원장 대조 전이다.** 9/28 기준 플랫폼 순입금 1,503.77 USDT(FACT-0050)와 규모가 약 2배 다르다. 9/28 이후 추가 입금이 있었거나 어느 한쪽이 틀렸다. POKER_LEDGER_SPEC 2번대로 **계정 간 이전과 실제 손익은 다른 수치**이므로 같은 것으로 보지 않는다. 확정은 원장 재구성 후.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0085",
@@ -1834,10 +1834,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "현금은 약 3개월에 800만원 줄었고 채무는 400만원 줄었다 → **순자산 약 400만원 감소, 월 약 133만원.** 같은 기간 수입에서 확인된 유출(FACT-0087)을 빼면 월 +41~51 이 남았어야 하므로 **설명되지 않는 유출이 있다.** 후보는 식비·기타 생활비와 포커다. 전제의 한계: 8/10 채무는 '약 5,000만원'이고 7/30 현금도 어림값이며, 두 항목의 관측 기간도 다르다(현금 90일·채무 79일). 정기 상환 80만원 중 원금 비중도 모른다 — 일시 상환이 섞였다면 설명되지 않는 금액이 더 커진다. **적자 확정이 아니라 다음에 확인할 곳을 가리키는 수치다.**",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0089",
@@ -1859,6 +1859,317 @@
       "review_status": "draft",
       "supersedes": null,
       "note": "퇴사 후 수입 0 을 가정했을 때 현금 600만원(FACT-0062)으로 버티는 기간. 확인된 유출 239만원만 쓰면 약 2.5개월, 포커 지출(FACT-0085 하한 $1,160~1,856)이 지금 수준으로 이어지면 약 1.3~1.5개월이다. 보증금 2,000만원(FACT-0071)은 퇴거해야 회수되므로 이 계산에 넣지 않았다. **이것은 예측이 아니라 현재 값을 그대로 연장했을 때의 산술이다.** 퇴사 시점(2027년 1~3월, FACT-0086)까지 현금·지출·포커가 달라지면 전부 바뀐다. 실업급여·퇴직금·이직 소득은 확인 전이라 넣지 않았다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0090",
+      "domain": "재정",
+      "key": "monthly_spend_202608",
+      "value": {
+        "이체": 1803794,
+        "카페·간식": 1022100,
+        "식비": 792962,
+        "그 외 11개": 2240675,
+        "합계": 5859531
+      },
+      "unit": "KRW/month",
+      "kind": "verified",
+      "as_of": "2026-08-31",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "가계부 앱 8월 소비 분석 화면에서 직접 읽었다. 합계는 네 항목의 산술합이며 화면에 표시된 값이 아니다. '이체'와 '그 외 11개'는 분해되지 않아 순소비가 아니다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0091",
+      "domain": "재정",
+      "key": "monthly_spend_202609",
+      "value": {
+        "이체": 2215770,
+        "카페·간식": 1215500,
+        "식비": 827181,
+        "그 외 9개": 1901002,
+        "합계": 6159453
+      },
+      "unit": "KRW/month",
+      "kind": "verified",
+      "as_of": "2026-09-30",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "9월 화면 직접 판독. 같은 한계가 적용된다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0092",
+      "domain": "재정",
+      "key": "monthly_spend_202610_partial",
+      "value": {
+        "이체": 1466120,
+        "카페·간식": 1412000,
+        "식비": 1393388,
+        "그 외 10개": 2685174,
+        "합계": 6956682
+      },
+      "unit": "KRW/month",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "**10월 1~28일까지이며 월 전체가 아니다.** 사흘이 남았는데 이미 8·9월 전체를 넘었다. 앱도 9월 대비 '더 쓰는 중'으로 표시한다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0093",
+      "domain": "재정",
+      "key": "monthly_food_related_spend",
+      "value": {
+        "2026-08": 1815062,
+        "2026-09": 2042681,
+        "2026-10_1to28": 2805388
+      },
+      "unit": "KRW/month",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "카페·간식 + 식비. **이 둘만으로 월 180~280만원이다.** 분류가 명확해 '이체'·'그 외'와 달리 순소비로 읽을 수 있다. 10월은 28일까지인데 8월 전체의 1.5배다. 2차 묶음에서 식비를 '모르겠다'고 한 것이 이해되는 규모이고, **기억으로 답할 수 있는 금액이 아니었다.**",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0094",
+      "domain": "재정",
+      "key": "large_single_day_outflows",
+      "value": [
+        {
+          "date": "2026-08-31",
+          "amount": -313556
+        },
+        {
+          "date": "2026-09-27",
+          "amount": -231000
+        },
+        {
+          "date": "2026-09-28",
+          "amount": -1244610
+        },
+        {
+          "date": "2026-09-29",
+          "amount": -23665
+        },
+        {
+          "date": "2026-09-30",
+          "amount": -21047
+        },
+        {
+          "date": "2026-10-25",
+          "amount": -25800
+        },
+        {
+          "date": "2026-10-26",
+          "amount": -1360459
+        },
+        {
+          "date": "2026-10-27",
+          "amount": -221100
+        },
+        {
+          "date": "2026-10-28",
+          "amount": -56230
+        }
+      ],
+      "unit": "KRW",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "화면에 보이는 말일 부근 며칠치만 옮겼다. **9/28 −124만원과 10/26 −136만원이 단일 일자로 크다.** 용처 미확인. 9/28 은 Career 스냅샷 날짜(FACT-0049)와 겹치고 10/26 은 핸드 기록 마지막 날(FACT-0042)과 겹치는데, **겹친다는 것만으로 포커 입금이라 단정하지 않는다.** 내역 확인이 필요하다(Q-024).",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0095",
+      "domain": "재정",
+      "key": "spend_breakdown_unopened",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "unknown",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "'이체'(월 147~222만)와 '그 외 9~11개'(월 190~269만)가 분해되지 않았다. 이 안에 월세·어머니 지원·대출 상환·보험·통신이 들어 있을 수 있고, **자기 계좌 간 이동과 포커 입금도 섞여 있을 수 있다.** 분해 전에는 FACT-0087(확인된 유출 239만)과 합산하면 **이중 계상**이 된다. Q-023.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0096",
+      "domain": "시간",
+      "key": "current_work_hours",
+      "value": 9.5,
+      "unit": "hour/day",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'9시부터 6시 반 정도까지' — 휴게시간 포함 여부와 야근 빈도는 미확인. 통근 1시간 미만은 별도(FACT-0068).",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0097",
+      "domain": "시간",
+      "key": "daily_time_budget_observed",
+      "value": {
+        "수면": 7.2,
+        "근무": 9.5,
+        "통근": 1.0,
+        "포커": "4~5",
+        "합계": "21.7~22.7",
+        "남는_시간": "1.3~2.3"
+      },
+      "unit": "hour/day",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "최근 수면 평균 7.2h(FACT-0073) + 근무 9.5h(FACT-0096) + 통근 1h 미만(FACT-0068) + 포커 4~5h(FACT-0081) = **21.7~22.7시간.** 식사·씻기·이동 외 모든 것에 **하루 1.3~2.3시간**이 남는다. 포커가 수면 다음으로 큰 블록이다. GTO 공부·핸드 리뷰(FACT-0058)가 포커 4~5h 안에 포함되는지는 미확인. 주말·휴일은 따로 묻지 않아 평일 기준이다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0098",
+      "domain": "직장",
+      "key": "exit_financial_conditions",
+      "value": {
+        "퇴직금": "수령 예상",
+        "퇴직금_예상액": null,
+        "실업급여": "신청 안 함 — 바로 재취업 의향"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'퇴직금은 받을 거 같아. 실업급여는 X 다시 일 할거야.' 퇴직금 예상액은 미확인이고 2026-01-22 입사(FACT-0027) 기준 근속 1년 남짓이다. 실업급여를 받지 않는다는 것은 **퇴사 후 무수입 구간을 퇴직금과 현금으로만 버틴다**는 뜻이다. 재취업 시점·조건은 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0099",
+      "domain": "포커",
+      "key": "lifetime_net_result_self_report",
+      "value": -3000,
+      "unit": "USD",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0084",
+      "note": "'토너먼트 수익금으로 다시 바이인해서 잃은 것까지 포함한 거야' — **실현 손실 총액이고 통장에서 나간 돈이 아니다.** 9/28 기준 플랫폼 순입금 1,503.77 USDT(FACT-0050)와 **모순이 아니다.** 두 수치는 서로 다른 것을 잰다(POKER_LEDGER_SPEC 2번). 차액 약 $1,500 은 포커에서 벌어 포커에서 잃은 돈이라 통장을 거치지 않았다. **본인 주머니에서 실제로 나간 금액은 순입금 쪽에 가깝다.** 직전 기록(FACT-0084)이 이 둘을 불일치로 적었던 것을 정정한다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0100",
+      "domain": "재정",
+      "key": "no_lump_debt_repayment_jul_oct",
+      "value": "없음",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'7~10월에 지출은 꽤 크게 있었는데, 대출 상황은 없어' — 일시 상환이 없었다는 뜻으로 읽었다. **그러면 채무가 400만원 줄 수 없다.** 정기 상환 80만원 × 약 2.5개월 = 200만원이고 그중 원금은 더 적다. 8/10 '약 5,000만원'과 10/28 '약 4,600만원'이 **둘 다 어림값이라 반올림 오차일 가능성**이 높다. 채무 델타는 신뢰하지 않는다(FACT-0101).",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0101",
+      "domain": "재정",
+      "key": "networth_change_reconciliation",
+      "value": {
+        "cash_20260730": 14000000,
+        "cash_20261028": 6000000,
+        "cash_delta": -8000000,
+        "cash_delta_monthly": -2670000,
+        "debt_delta_claimed": -4000000,
+        "debt_delta_reliability": "낮음 — 양쪽 다 '약' 값이고 일시 상환 없음",
+        "monthly_gross_spend_observed": {
+          "2026-08": 5859531,
+          "2026-09": 6159453,
+          "2026-10_1to28": 6956682
+        },
+        "monthly_income": "2800000~2900000"
+      },
+      "unit": "KRW",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:05:00+09:00",
+      "source_ids": [
+        "SRC-032"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": "FACT-0088",
+      "note": "**FACT-0088 을 정정한다.** 두 가지가 바뀌었다. (1) 채무 400만원 감소는 일시 상환이 없었다는 확인(FACT-0100)과 맞지 않아 반올림 오차로 본다 — 순자산 변화를 −400만원으로 계산했던 것을 철회한다. 믿을 수 있는 것은 **현금 800만원 감소(월 약 267만원)**다. (2) 가계부 실측 월 총유출 586~696만원은 수입 280~290만원의 **2배가 넘는다.** 현금이 월 267만원만 줄었으므로 **급여 외 유입이 상당히 있다** — 포커 출금과 자기 계좌 간 이체가 후보다. 즉 앞선 '설명되지 않는 월 170만원'은 과소평가였고, 실제로는 **유출과 유입이 둘 다 큰 구조**다. '이체'·'그 외'가 분해되고(Q-023) 포커 입출금이 나오기(Q-019) 전에는 순지출을 확정할 수 없다. **적자 금액을 확정한 것이 아니다.**",
       "current_validity": "unconfirmed"
     }
   ]
