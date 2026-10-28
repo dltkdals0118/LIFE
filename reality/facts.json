@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "baseline_v1_ready_poker_ledger_pending",
+  "status": "poker_cost_ledger_built_revenue_side_pending",
   "facts": [
     {
       "id": "FACT-0001",
@@ -720,7 +720,7 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "직접 집계. 파일명은 02/01 시작으로 표시되지만 첫 실제 핸드는 06/26.",
       "current_validity": "historical_only"
@@ -1768,10 +1768,10 @@
         "max": 1856
       },
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "10/1~26 고유 토너먼트 ID 232개(FACT-0043) × 현재 바이인 $5~8(FACT-0082) = **$1,160~1,856**. 재참가·리바이·애드온·수수료를 포함하지 않아 **하한**이다(POKER_LEDGER_SPEC 6번: ID 개수와 공식 Played·re-entry 는 각각 세야 한다). 상금 차감 전 총 원가이지 순손실이 아니다. 10월 바이인 구간이 내내 $5~8 이었는지는 미확인. KRW 환산은 적용일·환율 출처가 없어 하지 않는다.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0086",
@@ -2325,6 +2325,148 @@
       "supersedes": null,
       "note": "**퇴사 후** 수입 0(실업급여 미신청, FACT-0098)에서 현금 600만 + 퇴직금 300만 = 900만원으로 버티는 기간.\n· 지금 생활 수준(월 547~557만원) 유지 시 **약 1.6개월**\n· 확인된 고정비(월 229만원 — 주거95·대출80·어머니30·보험10·통신7·교통7)만 쓰면 **약 3.9개월**\n퇴사 의향 시점은 2027년 1~3월이고 지금부터 2~5개월 뒤다(FACT-0086). **즉 퇴사 시점의 현금은 600만원이 아니라 그때까지 더 줄어든 값**이며, FACT-0107 대로면 퇴사 전에 바닥날 수도 있다. 이 계산은 그 감소를 반영하지 않은 상한이다. 재취업 시점·소득은 미확인이라 넣지 않았다. **예측이 아니라 산술이고, 어떻게 할지는 사용자가 정한다.**",
       "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0109",
+      "domain": "포커",
+      "key": "hand_history_full_parse",
+      "value": {
+        "hands": 42494,
+        "unique_tournament_ids": 701,
+        "period_first": "2026/06/26 17:15:18",
+        "period_last": "2026/10/28 00:52:29",
+        "games": {
+          "NLH": 42491,
+          "PLO 4": 3
+        },
+        "monthly_hands": {
+          "2026-06": 1867,
+          "2026-07": 8734,
+          "2026-08": 8284,
+          "2026-09": 11484,
+          "2026-10": 12125
+        }
+      },
+      "unit": "count",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T14:20:00+09:00",
+      "source_ids": [
+        "SRC-034"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "원본 42,494핸드 전수 파싱(`tools/parse_coinpoker.py`, 계약 coinpoker-ledger/1). **이전 회차의 41,436핸드를 대체한다** — 그때는 파일 2개로 나뉘어 9/28~30 이 비어 있었고 지금은 한 파일로 그 공백이 메워졌다. 교차 검증: 10/1~10/26 구간만 떼면 핸드 12,100 · 고유 토너먼트 232개로 FACT-0042·0043 과 정확히 일치한다. 서로 다른 파서가 같은 값을 냈다. 파일명의 2026-02-01 은 **요청 범위**일 뿐이고 실제 첫 핸드는 2026-06-26 이다 — 2~6월에 플레이가 없었다는 뜻으로 읽는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0110",
+      "domain": "포커",
+      "key": "monthly_tournament_entries",
+      "value": {
+        "2026-06": 26,
+        "2026-07": 133,
+        "2026-08": 116,
+        "2026-09": 195,
+        "2026-10": 234
+      },
+      "unit": "unique_id/month",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T14:20:00+09:00",
+      "source_ids": [
+        "SRC-034"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "고유 토너먼트 ID 기준 월별 참가 수(하한). 6월 26 → 7월 133 → 8월 116 → 9월 195 → 10월 234. POKER_LEDGER_SPEC 6번대로 ID 개수는 공식 Played·재참가 건수와 각각 다른 수치다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0111",
+      "domain": "포커",
+      "key": "monthly_buyin_cost_lower_bound",
+      "value": {
+        "2026-06": 72.68,
+        "2026-07": 744.9,
+        "2026-08": 1354.46,
+        "2026-09": 2637.06,
+        "2026-10": 2560.86
+      },
+      "unit": "CoinPoker_₮/month",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T14:20:00+09:00",
+      "source_ids": [
+        "SRC-034"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0085",
+      "note": "**월별 바이인 원가 하한.** 6월 ₮73 → 7월 ₮745 → 8월 ₮1,354 → 9월 ₮2,637 → 10월 ₮2,561. **6월 대비 9월이 36배다.** 토너먼트 1개당 1회 참가로 계산했으므로 재참가·리바이·애드온·수수료가 빠진 하한이고, 새털라이트 14종은 바이인 미상이라 제외했다. ₮ 가 USDT 와 같은 단위인지 미확인이라 KRW 로 환산하지 않았다. 앞 회차의 10월 추정 $1,160~1,856(FACT-0085)은 **실측 ₮2,561 보다 낮았다** — 바이인 구간 $5~8 로 일률 계산했는데 실제로는 ₮11·₮15·₮22·₮25 대회가 섞여 있었다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0112",
+      "domain": "포커",
+      "key": "total_buyin_cost_lower_bound",
+      "value": 7334.76,
+      "unit": "CoinPoker_₮",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T14:20:00+09:00",
+      "source_ids": [
+        "SRC-034"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "2026-06-26 ~ 2026-10-28 누적 바이인 원가 **하한 ₮7,334.76** (바이인 미상 14개 제외). 재참가 후보 103건(휴리스틱)과 수수료를 더하면 올라간다. **본인 진술과 맞물린다**: 누적 상금 $6,000 초과(FACT-0083), 실현 손실 약 −$3,000(FACT-0099) → 역산한 총 바이인 약 $9,000. 하한 ₮7,335 에 재참가·수수료를 더하면 그 근처다. **서로 독립된 두 경로(기억과 원본)가 같은 규모를 가리킨다.** 다만 정확히 같다는 뜻은 아니다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0113",
+      "domain": "포커",
+      "key": "reentry_candidates_heuristic",
+      "value": 103,
+      "unit": "count",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T14:20:00+09:00",
+      "source_ids": [
+        "SRC-034"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "**추정값이고 확정이 아니다.** 한 토너먼트 안에서 Hero 스택이 시작 스택의 절반 아래로 떨어졌다가 시작 스택 수준으로 돌아온 횟수를 셌다(103건). 큰 팟을 이겨도 같은 모양이 나오므로 상한도 하한도 아니다. 확정 재참가 건수는 플랫폼 원장에만 있다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0114",
+      "domain": "포커",
+      "key": "ledger_capability_limit",
+      "value": "핸드 히스토리로는 비용만 재구성된다 — 상금·입출금은 불가",
+      "unit": "text",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T14:20:00+09:00",
+      "source_ids": [
+        "SRC-034"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "원본 파일 전수에 payout·prize·bounty·buy-in·entry fee 키워드가 **0건**이다(실측). 핸드 히스토리는 플레이 기록이고 정산 기록이 아니다. 따라서 `docs/POKER_LEDGER_SPEC.md` 의 `poker_event.prize_received`·`bounty_received`·`poker_transfer`·`poker_snapshot` 은 **이 경로로 채울 수 없다.** 순손익·ROI 는 플랫폼 거래 내역(입출금·상금 지급)이 있어야 확정된다. 채울 수 있는 것은 event_id·tournament_id·entry_date_kst·buyin_amount(하한)·poker_session 시간뿐이다.",
+      "current_validity": "current"
     }
   ]
 }
