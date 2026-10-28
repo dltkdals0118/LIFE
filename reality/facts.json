@@ -705,6 +705,491 @@
       "supersedes": null,
       "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
       "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0038",
+      "domain": "포커",
+      "key": "hh_20260626_20260927_hands",
+      "value": 29336,
+      "unit": "hand",
+      "kind": "verified",
+      "as_of": "2026-09-27",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-020"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "직접 집계. 파일명은 02/01 시작으로 표시되지만 첫 실제 핸드는 06/26.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0039",
+      "domain": "포커",
+      "key": "hh_20260626_20260927_unique_tournament_ids",
+      "value": 455,
+      "unit": "unique_id",
+      "kind": "verified",
+      "as_of": "2026-09-27",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-020"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "고유 토너먼트 ID는 실제 결제 엔트리·리엔트리 수와 다름.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0040",
+      "domain": "포커",
+      "key": "hh_20260626_20260927_monthly_hands",
+      "value": {
+        "2026-06": 1867,
+        "2026-07": 8734,
+        "2026-08": 8284,
+        "2026-09": 10451
+      },
+      "unit": "hand_per_month",
+      "kind": "verified",
+      "as_of": "2026-09-27",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-020"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "6/26 시작, 9/27 종료로 6월·9월은 부분 월.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0041",
+      "domain": "포커",
+      "key": "hh_20260626_20260927_monthly_pfr_vpip",
+      "value": {
+        "2026-06": {
+          "vpip_pct": 21.05,
+          "pfr_pct": 16.18
+        },
+        "2026-07": {
+          "vpip_pct": 24.94,
+          "pfr_pct": 19.02
+        },
+        "2026-08": {
+          "vpip_pct": 26.93,
+          "pfr_pct": 20.76
+        },
+        "2026-09": {
+          "vpip_pct": 26.79,
+          "pfr_pct": 19.07
+        }
+      },
+      "unit": "percent",
+      "kind": "verified",
+      "as_of": "2026-09-27",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-020"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "프리플랍 Hero voluntary call/raise/allin 기준 재계산. 정밀 홀덤 HUD 통계와 정의 차이 가능.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0042",
+      "domain": "포커",
+      "key": "hh_20261001_20261026_hands",
+      "value": 12100,
+      "unit": "hand",
+      "kind": "verified",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-021"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "파일명 10/27이지만 가장 늦은 게임 시각은 10/26 23:04 KST.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0043",
+      "domain": "포커",
+      "key": "hh_20261001_20261026_unique_tournament_ids",
+      "value": 233,
+      "unit": "unique_id",
+      "kind": "verified",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-021"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "2026-10-27 과거 GPT 분석의 232라는 수치와 1개 차이; 원본 고유 ID 재집계값 사용.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0044",
+      "domain": "포커",
+      "key": "hh_20261001_20261026_game_mix",
+      "value": {
+        "NLH": 12097,
+        "PLO4": 3,
+        "max_6_hands": 3662,
+        "max_7_hands": 8438
+      },
+      "unit": "hand",
+      "kind": "verified",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-021"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "NLH 6/7max 및 PLO4 3핸드 포함; 형식별 합산 정확.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0045",
+      "domain": "포커",
+      "key": "hh_20261001_20261026_vpip",
+      "value": 24.52,
+      "unit": "percent",
+      "kind": "verified",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-021"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "직접 재계산. PLO 포함 전체12,100핸드 기준 Hero voluntary action.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0046",
+      "domain": "포커",
+      "key": "hh_20261001_20261026_pfr",
+      "value": 17.65,
+      "unit": "percent",
+      "kind": "verified",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-021"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "직접 재계산. PLO 포함 전체12,100핸드 기준 Hero preflop raise/allin.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0047",
+      "domain": "포커",
+      "key": "career_snapshot_20260827",
+      "value": {
+        "played": 236,
+        "cashes": 47,
+        "final_tables": 16,
+        "wins": 0,
+        "gross_winnings": 2157,
+        "best_score": 541.71
+      },
+      "unit": "CoinPoker_display_₮",
+      "kind": "self_report",
+      "as_of": "2026-08-27",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-022"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 사용자 Career 화면에 대한 회고 요약. 당일 스냅샷이며 누적 엔트리 합산 대상 아님.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0048",
+      "domain": "포커",
+      "key": "career_snapshot_20260921",
+      "value": {
+        "played": 337,
+        "cashes": 66,
+        "final_tables": 19,
+        "wins": 1,
+        "gross_winnings": 3041
+      },
+      "unit": "CoinPoker_display_₮",
+      "kind": "self_report",
+      "as_of": "2026-09-21",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-023"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 사용자 Career 화면 요약. 토너먼트 고유 ID와 played 정의 달라 수치 불일치 가능.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0049",
+      "domain": "포커",
+      "key": "career_snapshot_20260928",
+      "value": {
+        "played": 436,
+        "cashes": 79,
+        "final_tables": 23,
+        "wins": 1,
+        "gross_winnings": 4107
+      },
+      "unit": "CoinPoker_display_₮",
+      "kind": "self_report",
+      "as_of": "2026-09-28",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-024"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "매 시점 누적 Career 화면 요약. Gross winnings은 ROI·실손익 아님.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0050",
+      "domain": "포커",
+      "key": "account_transfers_to_20260928",
+      "value": {
+        "deposits_usdt": 2204.27051,
+        "withdrawals_usdt": 700.5,
+        "net_outflow_from_personal_accounts_usdt": 1503.77051
+      },
+      "unit": "USDT",
+      "kind": "estimate",
+      "as_of": "2026-09-28",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-025"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 분석에 나온 입출금 수치를 재수집. 개인계좌 관점의 순이체액이며 실제 포커 순손실이나 ROI가 아님. 기말 잔액/보너스/수수료 미상.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0051",
+      "domain": "포커",
+      "key": "gecko_snapshot_20260902",
+      "value": {
+        "decisions_approx": 199,
+        "accuracy_pct": 78.7,
+        "avg_ev_loss_bb_per_decision": 1.43,
+        "elo": 1598,
+        "river_accuracy_pct": 46
+      },
+      "unit": "trainer_metrics",
+      "kind": "self_report",
+      "as_of": "2026-09-02",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-026"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "당시 화면은 약 197/199 의사결정. EV loss 단위·계산 설정의 완전한 동등성 미확인.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0052",
+      "domain": "포커",
+      "key": "gecko_snapshot_20260904",
+      "value": {
+        "decisions": 1000,
+        "accuracy_pct": 84.6,
+        "avg_ev_loss_bb_per_decision": 0.18,
+        "elo": 3464,
+        "river_accuracy_pct": 63
+      },
+      "unit": "trainer_metrics",
+      "kind": "self_report",
+      "as_of": "2026-09-04",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-026"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "EV loss 분모·설정 차이 가능. 학습 통계는 실전 수익 증명 아님.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0053",
+      "domain": "포커",
+      "key": "gecko_snapshot_20260907",
+      "value": {
+        "decisions": 1000,
+        "accuracy_pct": 80.5,
+        "avg_ev_loss_bb_per_decision": 0.25,
+        "elo": 3242,
+        "peak_elo": 3576
+      },
+      "unit": "trainer_metrics",
+      "kind": "self_report",
+      "as_of": "2026-09-07",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-026"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "같은 1000 decisions라고 해도 훈련 표본과 설정 동일성이 검증되지 않음.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0054",
+      "domain": "포커",
+      "key": "gecko_snapshot_20260914",
+      "value": {
+        "decisions": 1000,
+        "accuracy_pct": 83.6,
+        "avg_ev_loss_bb_per_decision": 0.32,
+        "elo": 4364,
+        "river_accuracy_pct": 66,
+        "total_ev_leaked_bb": 319.2
+      },
+      "unit": "trainer_metrics",
+      "kind": "self_report",
+      "as_of": "2026-09-14",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-026"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "리버 누수 -185bb 보고; 계측/버전 설정과 표본 구성 비교 주의.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0055",
+      "domain": "포커",
+      "key": "gecko_snapshot_20261019",
+      "value": {
+        "elo": 5161,
+        "peak_elo": 5171,
+        "rank": 70,
+        "rank_population": 6331
+      },
+      "unit": "trainer_metrics",
+      "kind": "estimate",
+      "as_of": "2026-10-19",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-029"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 어시스턴트의 사용자 화면 해석 기반. 화면 직접 재검증 전.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0056",
+      "domain": "포커",
+      "key": "poker_play_duration_daily_oct2026",
+      "value": null,
+      "unit": "hour/day",
+      "kind": "self_report",
+      "as_of": "2026-10-23",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-027"
+      ],
+      "range": {
+        "min": 4,
+        "max": 5
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "사용자 보고: 하루 약4~5시간. 실제 로그 계측 시간 아님.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0057",
+      "domain": "포커",
+      "key": "poker_weekly_buyin_oct2026",
+      "value": null,
+      "unit": "KRW/week",
+      "kind": "self_report",
+      "as_of": "2026-10-23",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-027"
+      ],
+      "range": {
+        "min": 200000,
+        "max": 400000
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "사용자 보고: 주20~40만원 지출은 바이인으로, 실제 확정 순손실로 처리하지 않음.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0058",
+      "domain": "포커",
+      "key": "poker_learning_routine_oct2026",
+      "value": "GTO 영상 시청·GTO 공부·핸드 리뷰를 매일 한다고 보고",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-19",
+      "recorded_at": "2026-10-28T10:30:00+09:00",
+      "source_ids": [
+        "SRC-028"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "학습량이 실전 ROI 상승으로 자동 연결된다고 해석하지 않음.",
+      "current_validity": "historical_only"
     }
   ]
 }

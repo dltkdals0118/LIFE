@@ -287,6 +287,116 @@
       "redacted_summary": "178개 파일, 에이전트 md30, 명령 md21, work/ 하위 Python54. 최신 동기화 2026-10-02.",
       "access_mode": "repository",
       "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-020",
+      "type": "document",
+      "title": "2026-06-26~09-27 CoinPoker NLH 원본",
+      "stated_at": "2026-09-27",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "Library: CoinPoker_wooloxy_2026-02-01_to_2026-09-28_Tournament.txt; SHA-256 4b6c561f72b2e917fcf73aad059b08675697b4b894a51836cff6efedb11b4a05",
+      "redacted_summary": "샘플 원본 29,336핸드, 고유 Tournament ID 455개; 6~9월 월별 행동 재계산.",
+      "access_mode": "raw_file_parsed",
+      "limitation": "로컬에서 원본 텍스트의 헤더·프리플랍 행동을 재집계. 업로드 전체를 Git에 보관하지 않음."
+    },
+    {
+      "id": "SRC-021",
+      "type": "document",
+      "title": "2026-10-01~26 CoinPoker 토너먼트 원본",
+      "stated_at": "2026-10-26",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "Library: CoinPoker_wooloxy_2026-10-01_to_2026-10-27_Tournament.txt; SHA-256 27f9f95a91daeae7ad4461960fd4f4c21cab66b1fbcac4dbd079ab98da3c295d",
+      "redacted_summary": "총 12,100핸드 = NLH 12,097 + PLO 4 3; 고유 Tournament ID 233개.",
+      "access_mode": "raw_file_parsed",
+      "limitation": "로컬에서 원본 텍스트의 헤더·프리플랍 행동을 재집계. 업로드 전체를 Git에 보관하지 않음."
+    },
+    {
+      "id": "SRC-022",
+      "type": "user_statement",
+      "title": "2026-08-27 CoinPoker Career 화면",
+      "stated_at": "2026-08-27",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-08-27; pokerhistory c1",
+      "redacted_summary": "236 played, 47 cashes, 16 FT, 0 wins, winnings ₮2,157, best ₮541.71 (과거 검색 요약).",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-023",
+      "type": "user_statement",
+      "title": "2026-09-21 CoinPoker Career 화면",
+      "stated_at": "2026-09-21",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-09-21; pokerhistory c9",
+      "redacted_summary": "337 played, 66 cashes, 19 FT, 1 win, winnings ₮3,041 (과거 검색 요약).",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-024",
+      "type": "user_statement",
+      "title": "2026-09-28 CoinPoker Career 화면",
+      "stated_at": "2026-09-28",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-09-28; pokerhistory c5",
+      "redacted_summary": "436 played, 79 cashes, 23 FT, 1 win, gross winnings ₮4,107 (과거 검색 요약).",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-025",
+      "type": "document",
+      "title": "2026-09-28 입출금 집계 과거 분석",
+      "stated_at": "2026-09-28",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-09-28; pokerhistory c5",
+      "redacted_summary": "누적 입금 2,204.270510 USDT/출금 700.500000 USDT. 계정 내부 잔액·리워드·수수료 미확인.",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-026",
+      "type": "user_statement",
+      "title": "2026-09 GTO Gecko 학습 화면",
+      "stated_at": "2026-09-14",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-09-02, 09-04, 09-07, 09-14; geckohistory c0,c1,c2",
+      "redacted_summary": "9/2, 9/4, 9/7, 9/14 훈련 표본·정확도·EV loss·ELO 보고.",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-027",
+      "type": "user_statement",
+      "title": "2026-10 포커 플레이 시간·바이인 진술",
+      "stated_at": "2026-10-23",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-10-23 인생 시뮬레이션 3.0 사용자 진술; 현재 재확인 전",
+      "redacted_summary": "최근 하루 약4~5시간 플레이, 주간 바이인 지출 약20~40만원(순손실과 다름).",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-028",
+      "type": "user_statement",
+      "title": "2026-10 포커 공부 방식",
+      "stated_at": "2026-10-19",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-10-19",
+      "redacted_summary": "매일 영상, GTO 공부, 핸드리뷰, 실전 수익 개선 부진을 직접 보고.",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
+    },
+    {
+      "id": "SRC-029",
+      "type": "document",
+      "title": "2026-10-19 GTO Gecko 화면의 이전 분석",
+      "stated_at": "2026-10-19",
+      "checked_at": "2026-10-28T10:30:00+09:00",
+      "locator": "과거 GPT 대화 2026-10-19; geckohistory c4",
+      "redacted_summary": "ELO 5161, 최고 5171, 최근7일 +379, 6331명 중70위 보고(화면 재검증 전).",
+      "access_mode": "retrieved_summary",
+      "limitation": "과거 GPT 대화 검색 결과 또는 이전 해석의 요약. 원본 화면·원장 전수 검증 전이며 중복·시점 오류 가능."
     }
   ]
 }
