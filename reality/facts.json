@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "q001_q005_confirmed_remainder_pending_review",
+  "status": "q001_q017_confirmed_food_and_poker_ledger_pending",
   "facts": [
     {
       "id": "FACT-0001",
@@ -1224,10 +1224,10 @@
         "max": 9.0
       },
       "sensitivity": "restricted",
-      "review_status": "confirmed",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "사용자가 적은 날짜 표기를 그대로 보존했다. 모두 '쯤' 진술이라 ±30분으로 본다. 날짜 표기가 취침일 기준인지 기상일 기준인지 불명확하고, 2행(10/26 23:00 취침 → 08:00 기상)과 3행(10/27 01:00 취침)이 그대로 읽으면 시간대가 겹친다. 확정된 것은 세 밤의 길이 5.5h·9h·7h 이고 날짜 대응은 Q-014 로 되묻는다. 낮 기능과 과거 급성 증상(두통·어지럼·두근거림) 지속 여부는 이번 응답에 없어 미확인이며 Q-013 에 남긴다.",
-      "current_validity": "current"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0060",
@@ -1360,10 +1360,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "'월세 + 보증금은 95만 원 정도' 를 글자 그대로 옮겼다. 월세는 월 단위이고 보증금은 일시금이라 단위가 섞여 있어 단일 해석을 고르지 않았다. 가장 가능성 높은 읽기는 '월 주거비 합계 95만원'이지만 확정하지 않는다. 참고: 8/10 월세 90만원(FACT-0018), 5/4 보증금 2,000만원(FACT-0024). Q-013 으로 되묻는다.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0067",
@@ -1423,9 +1423,442 @@
         "max": null
       },
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "이번 응답으로 확인된 월 고정 유출만 합한 부분합이다: 채무 상환 80만(FACT-0064) + 어머니 지원 30만(FACT-0065) + 주거비 진술 95만(FACT-0066) = 205만원. 청약·보험·통신 약 30만(FACT-0020, 8/10 기준)과 식비·교통·통신 등 생활비는 아직 확인하지 않았으므로 이 값은 **하한**이다. 월 잉여현금이나 퇴사 가능 시점으로 환산하지 않는다. FACT-0066 의 단위 해석이 바뀌면 이 값도 다시 계산해야 한다.",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0070",
+      "domain": "재정",
+      "key": "current_monthly_housing_cost",
+      "value": 950000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0066",
+      "note": "'한 달에 나가는 주거비는 그게 전부' — 월 단위 주거비 합계로 확정했다. 1차 응답의 '월세 + 보증금 95만원' 단위 혼선이 해소됐다. 보증금은 별도(FACT-0071). 관리비·공과금이 이 안에 들어 있는지는 따로 묻지 않았다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0071",
+      "domain": "재정",
+      "key": "current_housing_deposit",
+      "value": 20000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "장한평 보증금 2,000만원. 5/4 진술(FACT-0024)과 같은 금액이다. 퇴거 시 돌려받는 자산이므로 **즉시 가용 현금(FACT-0062, 600만원)과 합치지 않는다.** 순자산에는 들어가고 생활비 재원에는 들어가지 않는다. ('지금도 묶여 있나'는 이 뜻으로 물은 것이고, 사용자가 되물어 여기 적어 둔다.)",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0072",
+      "domain": "생활",
+      "key": "current_residence_move_in",
+      "value": "2026-04",
+      "unit": "date",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "장한평 2026년 4월 입주, 현재도 거주 중. 2월 일산 진술(FACT-0028)과 이 사이에 이사했다. 일 단위 날짜와 이사 사유는 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0073",
+      "domain": "건강",
+      "key": "recent_sleep_log",
+      "value": {
+        "night_of_2026-10-25": {
+          "sleep_at": "2026-10-25T20:00+09:00",
+          "wake_at": "2026-10-26T01:30+09:00",
+          "hours": 5.5
+        },
+        "night_of_2026-10-26": {
+          "sleep_at": "2026-10-26T23:00+09:00",
+          "wake_at": "2026-10-27T08:00+09:00",
+          "hours": 9.0
+        },
+        "night_of_2026-10-27": {
+          "sleep_at": "2026-10-28T01:00+09:00",
+          "wake_at": "2026-10-28T08:00+09:00",
+          "hours": 7.0
+        }
+      },
+      "unit": "hour/night",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": {
+        "min": 5.5,
+        "max": 9.0
+      },
+      "sensitivity": "restricted",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0059",
+      "note": "**길이 5.5/9/7h 는 본인 진술이고, 달력 날짜 대응은 추정이다.** 사용자가 적은 날짜는 '그 날 밤' 기준이며, 취침 시각이 새벽이면 달력상 다음 날에 해당한다. 세 줄을 시간대가 겹치지 않게 읽는 방법이 이것뿐이라 이렇게 대응시켰다. 평균 7.2h. 3일은 표본이 짧아 추세로 쓰지 않는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0074",
+      "domain": "건강",
+      "key": "current_daytime_function",
+      "value": "낮 졸림 지속, 본인 체감 호전",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'요즘도 졸려. 근데 많이 좋아지고 있어.' 호전은 본인 체감이며 측정값이 아니다. 10/8 의 집중 어려움·반복 실수(FACT-0010)가 지금 어느 정도인지는 따로 묻지 않았다. 최근 수면 길이(FACT-0073)와의 인과는 확정하지 않는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0075",
+      "domain": "건강",
+      "key": "current_symptoms",
+      "value": "두통·어지럼 간헐적",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'두통이나 어지럼은 가끔씩 있고'. 빈도·강도는 미측정. 10/8 에 함께 보고됐던 **두근거림은 이번 응답에 언급이 없어 미확인**이다. 원인 판단은 하지 않는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0076",
+      "domain": "건강",
+      "key": "current_medication",
+      "value": "처방약 복용 중",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "10/8 의 '1년 이상 매일 복용'(FACT-0011)이 현재도 이어진다. 약명·용량·진단명은 인생 설계에 불필요해 기록하지 않는다. 복약 변경은 설계의 결론이 될 수 없다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0077",
+      "domain": "재정",
+      "key": "current_monthly_savings_insurance_telecom",
+      "value": {
+        "청약": 100000,
+        "보험": 100000,
+        "통신": 70000
+      },
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "합 27만원. 8/10 '합 약 30만원'(FACT-0020)과 비슷하다. **청약 10만원은 저축성이라 소비 지출과 분리해 센다** — 나가는 돈이지만 사라지는 돈이 아니다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0078",
+      "domain": "재정",
+      "key": "current_monthly_transport",
+      "value": 70000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'7만 원 정도'. 통근 왕복 1시간 미만(FACT-0068)과 정합적이다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0079",
+      "domain": "재정",
+      "key": "current_monthly_food",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "unknown",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "'식비는 모르겠어. 월마다 달라.' **0 으로 채우지 않는다.** 월별 편차가 크면 기억으로 묻는 것이 맞지 않다 — 카드 명세 한 달치를 보는 편이 빠르고 정확하다(Q-018).",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0080",
+      "domain": "재정",
+      "key": "current_monthly_other_living",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "unknown",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "'기타 한 달 생활비도 잘 모르겠어. 월마다 달라.' 식비와 같은 이유로 Q-018 로 넘긴다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0081",
+      "domain": "포커",
+      "key": "current_daily_play_hours",
+      "value": null,
+      "unit": "hour/day",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": {
+        "min": 4,
+        "max": 5
+      },
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'하루에 거의 4~5시간 정도'. 월 120~150시간에 해당한다. 10/23 진술(FACT-0056)과 같은 수준이 유지된다. 멀티테이블 동시 진행이면 실경과 시간과 다를 수 있다(POKER_LEDGER_SPEC 세션 규칙).",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0082",
+      "domain": "포커",
+      "key": "current_buyin_range",
+      "value": {
+        "현재": {
+          "min": 5,
+          "max": 8
+        },
+        "이전": {
+          "min": 5,
+          "max": 15
+        }
+      },
+      "unit": "USD",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "바이인 구간을 $5~15 에서 $5~8 로 낮췄다. 낮춘 시점·이유와 수수료 포함 여부는 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0083",
+      "domain": "포커",
+      "key": "lifetime_prizes_self_report",
+      "value": null,
+      "unit": "USD",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": {
+        "min": 6000,
+        "max": null
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "'총 6k 좀 넘게 받았는데' — 하한 6,000 USD 의 어림값. 집계 기간·플랫폼 범위 미확인. Career 화면의 ₮ 표기(FACT-0048·0049)와 같은 단위인지 확인 전이라 합치지 않는다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0084",
+      "domain": "포커",
+      "key": "lifetime_net_result_self_report",
+      "value": -3000,
+      "unit": "USD",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "'아직 마이너스일거야. 3k정도' — **추정이고 원장 대조 전이다.** 9/28 기준 플랫폼 순입금 1,503.77 USDT(FACT-0050)와 규모가 약 2배 다르다. 9/28 이후 추가 입금이 있었거나 어느 한쪽이 틀렸다. POKER_LEDGER_SPEC 2번대로 **계정 간 이전과 실제 손익은 다른 수치**이므로 같은 것으로 보지 않는다. 확정은 원장 재구성 후.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0085",
+      "domain": "포커",
+      "key": "oct2026_buyin_cost_estimate",
+      "value": null,
+      "unit": "USD/month",
+      "kind": "estimate",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": {
+        "min": 1160,
+        "max": 1856
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "10/1~26 고유 토너먼트 ID 232개(FACT-0043) × 현재 바이인 $5~8(FACT-0082) = **$1,160~1,856**. 재참가·리바이·애드온·수수료를 포함하지 않아 **하한**이다(POKER_LEDGER_SPEC 6번: ID 개수와 공식 Played·re-entry 는 각각 세야 한다). 상금 차감 전 총 원가이지 순손실이 아니다. 10월 바이인 구간이 내내 $5~8 이었는지는 미확인. KRW 환산은 적용일·환율 출처가 없어 하지 않는다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0086",
+      "domain": "직장",
+      "key": "current_exit_intention",
+      "value": "2027년 1~3월 퇴사 의향, 회사 공식 통보 전, 오퍼 없음",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'유효해. 1월~3월 정도. 회사 친한 직원들한테는 말했고 오퍼는 없어.' 연도는 응답에 없으나 기준일이 2026-10-28 이므로 2027년으로 읽는다. 동료 언급은 공식 통보가 아니다. 확정 퇴사일이 아니며 다음 직장 조건도 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0087",
+      "domain": "재정",
+      "key": "current_known_monthly_outflow",
+      "value": 2390000,
+      "unit": "KRW/month",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": "FACT-0069",
+      "note": "확인된 월 유출 합계: 주거 95(FACT-0070) + 채무 80(FACT-0064) + 어머니 30(FACT-0065) + 보험 10 + 통신 7(FACT-0077) + 교통 7(FACT-0078) + 청약 10(FACT-0077) = 239만원. 이 중 청약 10만원은 저축성이므로 **소비는 229만원**이다. 식비·기타 생활비(FACT-0079·0080)와 포커 순유출(FACT-0084·0085)이 빠져 있어 **여전히 하한**이다. 월 수입 280~290만원(FACT-0060·0061)과 비교하면 여기까지는 월 41~51만원이 남는다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0088",
+      "domain": "재정",
+      "key": "networth_change_reconciliation",
+      "value": {
+        "cash_20260730": 14000000,
+        "cash_20261028": 6000000,
+        "cash_delta": -8000000,
+        "debt_20260810": 50000000,
+        "debt_20261028": 46000000,
+        "debt_delta": -4000000,
+        "networth_delta_approx": -4000000,
+        "period_months_approx": 3
+      },
+      "unit": "KRW",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현금은 약 3개월에 800만원 줄었고 채무는 400만원 줄었다 → **순자산 약 400만원 감소, 월 약 133만원.** 같은 기간 수입에서 확인된 유출(FACT-0087)을 빼면 월 +41~51 이 남았어야 하므로 **설명되지 않는 유출이 있다.** 후보는 식비·기타 생활비와 포커다. 전제의 한계: 8/10 채무는 '약 5,000만원'이고 7/30 현금도 어림값이며, 두 항목의 관측 기간도 다르다(현금 90일·채무 79일). 정기 상환 80만원 중 원금 비중도 모른다 — 일시 상환이 섞였다면 설명되지 않는 금액이 더 커진다. **적자 확정이 아니라 다음에 확인할 곳을 가리키는 수치다.**",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0089",
+      "domain": "재정",
+      "key": "post_exit_runway_estimate",
+      "value": null,
+      "unit": "month",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:40:00+09:00",
+      "source_ids": [
+        "SRC-031"
+      ],
+      "range": {
+        "min": 1.3,
+        "max": 2.5
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "퇴사 후 수입 0 을 가정했을 때 현금 600만원(FACT-0062)으로 버티는 기간. 확인된 유출 239만원만 쓰면 약 2.5개월, 포커 지출(FACT-0085 하한 $1,160~1,856)이 지금 수준으로 이어지면 약 1.3~1.5개월이다. 보증금 2,000만원(FACT-0071)은 퇴거해야 회수되므로 이 계산에 넣지 않았다. **이것은 예측이 아니라 현재 값을 그대로 연장했을 때의 산술이다.** 퇴사 시점(2027년 1~3월, FACT-0086)까지 현금·지출·포커가 달라지면 전부 바뀐다. 실업급여·퇴직금·이직 소득은 확인 전이라 넣지 않았다.",
       "current_validity": "unconfirmed"
     }
   ]
