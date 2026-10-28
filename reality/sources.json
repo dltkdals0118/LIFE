@@ -306,7 +306,7 @@
       "stated_at": "2026-10-26",
       "checked_at": "2026-10-28T10:30:00+09:00",
       "locator": "Library: CoinPoker_wooloxy_2026-10-01_to_2026-10-27_Tournament.txt; SHA-256 27f9f95a91daeae7ad4461960fd4f4c21cab66b1fbcac4dbd079ab98da3c295d",
-      "redacted_summary": "총 12,100핸드 = NLH 12,097 + PLO 4 3; 고유 Tournament ID 233개.",
+      "redacted_summary": "총 12,100핸드 = NLH 12,097 + PLO4 3; 고유 Tournament ID 232개 (서로 다른 추출법으로 재검산).",
       "access_mode": "raw_file_parsed",
       "limitation": "로컬에서 원본 텍스트의 헤더·프리플랍 행동을 재집계. 업로드 전체를 Git에 보관하지 않음."
     },

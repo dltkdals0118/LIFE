@@ -19,7 +19,7 @@ Q-001~005를 먼저 묻고 답변을 반영한다. 기존 자료를 처음부터
 
 ## 2026-10-28 포커 근거 반영
 - reality/poker/README.md: 실제 원본 핸드와 역사적 Career·Gecko 요약.
-- reality/poker/RECONCILIATION_20261028.md: 233 ID/232 요약 충돌·기간 공백·입출금 정의.
+- reality/poker/RECONCILIATION_20261028.md: 232 ID 재검산·기간 공백·입출금 정의.
 - docs/POKER_LEDGER_SPEC.md: 이벤트/출입금/수면 분리 계약(미구현).
 - 원본 2개에서 총 41,436핸드를 재계산. 범위는 2026-06-26~09-27 및 10-01~10-26 (9/28~30 공백).
 - poker 관련 21개 fact는 모두 **draft**; BASE v0는 사용자 확인 없이 변경·확정하지 않는다.

@@ -827,7 +827,7 @@
       "id": "FACT-0043",
       "domain": "포커",
       "key": "hh_20261001_20261026_unique_tournament_ids",
-      "value": 233,
+      "value": 232,
       "unit": "unique_id",
       "kind": "verified",
       "as_of": "2026-10-26",
@@ -839,7 +839,7 @@
       "sensitivity": "personal",
       "review_status": "draft",
       "supersedes": null,
-      "note": "2026-10-27 과거 GPT 분석의 232라는 수치와 1개 차이; 원본 고유 ID 재집계값 사용.",
+      "note": "원본 직접 재검산된 고유 Tournament ID 232개. 공식 Played 또는 결제 엔트리와 다름.",
       "current_validity": "historical_only"
     },
     {
