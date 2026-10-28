@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "spend_measured_transfers_and_poker_ledger_pending",
+  "status": "baseline_v1_ready_poker_ledger_pending",
   "facts": [
     {
       "id": "FACT-0001",
@@ -1856,10 +1856,10 @@
         "max": 2.5
       },
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "퇴사 후 수입 0 을 가정했을 때 현금 600만원(FACT-0062)으로 버티는 기간. 확인된 유출 239만원만 쓰면 약 2.5개월, 포커 지출(FACT-0085 하한 $1,160~1,856)이 지금 수준으로 이어지면 약 1.3~1.5개월이다. 보증금 2,000만원(FACT-0071)은 퇴거해야 회수되므로 이 계산에 넣지 않았다. **이것은 예측이 아니라 현재 값을 그대로 연장했을 때의 산술이다.** 퇴사 시점(2027년 1~3월, FACT-0086)까지 현금·지출·포커가 달라지면 전부 바뀐다. 실업급여·퇴직금·이직 소득은 확인 전이라 넣지 않았다.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0090",
@@ -2029,10 +2029,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "'이체'(월 147~222만)와 '그 외 9~11개'(월 190~269만)가 분해되지 않았다. 이 안에 월세·어머니 지원·대출 상환·보험·통신이 들어 있을 수 있고, **자기 계좌 간 이동과 포커 입금도 섞여 있을 수 있다.** 분해 전에는 FACT-0087(확인된 유출 239만)과 합산하면 **이중 계상**이 된다. Q-023.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0096",
@@ -2167,9 +2167,163 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": "FACT-0088",
       "note": "**FACT-0088 을 정정한다.** 두 가지가 바뀌었다. (1) 채무 400만원 감소는 일시 상환이 없었다는 확인(FACT-0100)과 맞지 않아 반올림 오차로 본다 — 순자산 변화를 −400만원으로 계산했던 것을 철회한다. 믿을 수 있는 것은 **현금 800만원 감소(월 약 267만원)**다. (2) 가계부 실측 월 총유출 586~696만원은 수입 280~290만원의 **2배가 넘는다.** 현금이 월 267만원만 줄었으므로 **급여 외 유입이 상당히 있다** — 포커 출금과 자기 계좌 간 이체가 후보다. 즉 앞선 '설명되지 않는 월 170만원'은 과소평가였고, 실제로는 **유출과 유입이 둘 다 큰 구조**다. '이체'·'그 외'가 분해되고(Q-023) 포커 입출금이 나오기(Q-019) 전에는 순지출을 확정할 수 없다. **적자 금액을 확정한 것이 아니다.**",
+      "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0102",
+      "domain": "재정",
+      "key": "large_single_day_outflows_identified",
+      "value": {
+        "2026-09-28": {
+          "amount": -1244610,
+          "정체": "본인 계좌 간 이동"
+        },
+        "2026-10-26": {
+          "amount": -1360459,
+          "정체": "본인 계좌 간 이동"
+        }
+      },
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "**두 건 모두 지출이 아니다.** 기존 계좌에서 본인의 다른 계좌로 옮긴 금액이다. 포커 입금이 아니냐는 물음에 아니라고 답했다. 10월 '이체' 총액 1,466,120원 중 이 한 건이 136만원이므로 **10월 이체의 대부분이 자기 계좌 이동**이고, 9월도 이체 2,215,770원 중 124만원이 그렇다. 나머지 이체분의 내역은 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0103",
+      "domain": "재정",
+      "key": "non_salary_income",
+      "value": "없음 — 가끔 포커 출금만",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'급여 말고 들어오는 돈은 없어. 가끔 포커 출금.' **이것이 순지출 역산의 핵심 전제다** — 유입이 급여뿐이면 현금 감소분이 곧 초과 지출이다. 포커 출금은 빈도·금액이 '가끔'으로만 진술돼 수치화되지 않았고, 있다면 실제 순지출은 역산값보다 **더 크다**(유입이 더 있었는데도 현금이 그만큼 줄었다는 뜻이므로).",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0104",
+      "domain": "직장",
+      "key": "severance_estimate",
+      "value": 3000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": {
+        "min": 3000000,
+        "max": 3000000
+      },
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'대략 300만 원? 그정도' — 본인 어림이고 산정 근거는 대조하지 않았다. 2026-01-22 입사(FACT-0027) 기준 퇴사 시점(2027년 1~3월)의 근속은 1년~1년 2개월이다. 실업급여는 신청하지 않으므로(FACT-0098) 퇴사 후 무수입 구간의 재원은 **현금 600만원 + 퇴직금 300만원 = 900만원**이 전부다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0105",
+      "domain": "재정",
+      "key": "spend_breakdown_declined",
+      "value": "사용자 거절",
+      "unit": "text",
+      "kind": "verified",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "2026-10-28 가계부 '이체'·'그 외' 카테고리 상세 요청에 '이 이상은 안돼'로 답했다. **다시 묻지 않는다.** 그 결과 순지출을 카테고리 합산으로 확정할 수 없고, 현금 잔액 변화로 역산한다(FACT-0106). 역산은 오차가 더 크지만 유입이 급여뿐이라는 확인(FACT-0103)이 있어 성립한다. FACT-0095(미분해 항목)는 이 사유로 닫는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0106",
+      "domain": "재정",
+      "key": "net_monthly_deficit_estimate",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": {
+        "min": 1100000,
+        "max": 2670000
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "**두 방법으로 구했고 둘 다 적자다.**\n(가) 현금 역산 — 유입이 급여뿐이고(FACT-0103) 현금이 1,400만→600만, 약 3개월에 800만원 줄었다(FACT-0062·0025). 월 감소 약 267만원이 곧 수입 초과 지출이므로 **월 총지출 ≈ 수입 280~290 + 267 = 547~557만원, 적자 월 약 267만원.**\n(나) 가계부 차감 — 월 합계에서 '이체'를 빼면 8월 406만·9월 394만·10월(28일) 549만원이다(FACT-0090~0092, 0102). 수입과 비교하면 **적자 월 약 110~260만원.**\n두 값이 벌어지는 이유는 ① 7/30 현금 1,400만원이 어림값이고 ② 가계부가 모든 계좌를 보지 못할 수 있으며 ③ '이체'에 실제 지출이 일부 섞여 있을 수 있어서다. **적자 폭은 월 110~267만원 구간으로 두고 단일 값으로 확정하지 않는다.** 포커 출금이 있었다면 실제 적자는 이 구간의 위쪽이다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0107",
+      "domain": "재정",
+      "key": "cash_runway_current_job",
+      "value": null,
+      "unit": "month",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": {
+        "min": 2.2,
+        "max": 5.5
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "**직장을 유지한 채** 현금 600만원(FACT-0062)으로 버티는 기간. 적자 월 110~267만원(FACT-0106)으로 나누면 **약 2.2~5.5개월**이다. 보증금 2,000만원(FACT-0071)은 퇴거해야 회수되므로 넣지 않았다. 지출을 줄이거나 포커 순유출이 달라지면 전부 바뀐다. **예측이 아니라 현재 속도의 산술이다.**",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0108",
+      "domain": "재정",
+      "key": "cash_runway_after_exit",
+      "value": null,
+      "unit": "month",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T13:40:00+09:00",
+      "source_ids": [
+        "SRC-033"
+      ],
+      "range": {
+        "min": 1.6,
+        "max": 3.9
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "**퇴사 후** 수입 0(실업급여 미신청, FACT-0098)에서 현금 600만 + 퇴직금 300만 = 900만원으로 버티는 기간.\n· 지금 생활 수준(월 547~557만원) 유지 시 **약 1.6개월**\n· 확인된 고정비(월 229만원 — 주거95·대출80·어머니30·보험10·통신7·교통7)만 쓰면 **약 3.9개월**\n퇴사 의향 시점은 2027년 1~3월이고 지금부터 2~5개월 뒤다(FACT-0086). **즉 퇴사 시점의 현금은 600만원이 아니라 그때까지 더 줄어든 값**이며, FACT-0107 대로면 퇴사 전에 바닥날 수도 있다. 이 계산은 그 감소를 반영하지 않은 상한이다. 재취업 시점·소득은 미확인이라 넣지 않았다. **예측이 아니라 산술이고, 어떻게 할지는 사용자가 정한다.**",
       "current_validity": "unconfirmed"
     }
   ]
