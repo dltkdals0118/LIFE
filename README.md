@@ -24,6 +24,8 @@
 | AGENTS.md | 저장소 작업 규칙 |
 | prompts/ | 세션을 재개하는 운영 프롬프트 |
 | docs/ | 구조·데이터·재무·시뮬레이션·검수·개인정보·화면 설계 |
+| docs/SESSION_PROVENANCE.md | 이 저장소가 나온 GPT 세션과 커밋 대조 기록 |
+| tools/ | 보조 스크립트 (세션 원문 복원기) |
 | intake/ | 9개 영역의 정밀 조사 질문 |
 | templates/ | 사실·기준점·TURN·실행·결정 기록 양식 |
 | reality/ | 출처를 갖춘 현실 기록과 확정 기준점 |
