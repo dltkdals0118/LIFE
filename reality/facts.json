@@ -1,5 +1,710 @@
 {
   "schema_version": "0.1",
-  "status": "empty",
-  "facts": []
+  "status": "historical_candidates_pending_review",
+  "facts": [
+    {
+      "id": "FACT-0001",
+      "domain": "직장",
+      "key": "role_history",
+      "value": "에이전시 SEO 단독 담당, 마케팅 약4년차",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-09-22",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-001"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0002",
+      "domain": "역량",
+      "key": "education_history",
+      "value": "대학 미졸업",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-09-22",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-001"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0003",
+      "domain": "역량",
+      "key": "analytics_usage",
+      "value": "Ahrefs·CWV·GA4·Clarity 기본 사용 및 UI 개선/전환측정 협업",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-06",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-002"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0004",
+      "domain": "역량",
+      "key": "agent_system_build",
+      "value": "업무용 멀티에이전트와 Pipeline Factory UI 구축·로컬 실행 진술",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-09-18",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-003"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0005",
+      "domain": "역량",
+      "key": "tool_assisted_work",
+      "value": "Claude/Codex/GPT 혼용 및 공용 사용량 과다 소진 경험",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-09-17",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-004"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0006",
+      "domain": "역량",
+      "key": "prototype_history",
+      "value": "Figma·HTML 프로토타입과 작동 화면 제공",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-09-30",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-005"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0007",
+      "domain": "재정",
+      "key": "monthly_net_salary",
+      "value": 2600000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-12",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-006"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "인센티브 중단 후 진술. 원문 UTC 날짜는10/11, 한국시간10/12. 현재 급여명세 미확인.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0008",
+      "domain": "직장",
+      "key": "work_sentiment",
+      "value": "스트레스·업무 자신감 저하·회사 애착 감소",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-12",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-006"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0009",
+      "domain": "직장",
+      "key": "exit_intention",
+      "value": "1월 퇴사 의향",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-08",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-007"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "의향이며 확정 퇴사/오퍼가 아님. 2027년1월로 해석 가능하나 확정일 미정.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0010",
+      "domain": "건강",
+      "key": "work_function",
+      "value": "집중 어려움·반복 실수·컨디션 저하",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-08",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-007"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0011",
+      "domain": "건강",
+      "key": "treatment_history",
+      "value": "1년 이상 매일 처방약 복용했다고 진술",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-08",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-008"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "진단명·현재 처방은 확정하지 않음. 약명/용량은 최소 기록 원칙상 이번 초안에서 제외.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0012",
+      "domain": "건강",
+      "key": "acute_sleep_episode",
+      "value": "이틀 복용 중단과 거의48시간 불면·두근거림·두통·어지러움 보고",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-08",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-008"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 사건. 원인 단정 및 현재 증상으로의 승격 금지.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0013",
+      "domain": "건강",
+      "key": "sleep_difficulty",
+      "value": "복용에도 입면·수면 유지·이른 기상 어려움",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-22",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-009"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0014",
+      "domain": "건강",
+      "key": "recent_sleep_interference",
+      "value": "새벽 각성 후 재입면 실패, 포커 딥런으로 수면 회복 기회 상실 진술",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-26",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-010"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0015",
+      "domain": "건강",
+      "key": "post_drinking_episode",
+      "value": "과음 뒤 두통·어지럼·피로·멍함·힘빠짐",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-14",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-011"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0016",
+      "domain": "건강",
+      "key": "post_episode_followup",
+      "value": "심한 두통은 수면 뒤 사라졌으나 몸무거움·멍함 잔존",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-15",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-012"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0017",
+      "domain": "재정",
+      "key": "total_debt_history",
+      "value": 50000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-013"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "약값. 대출4개, 3개 합약3500만원/월55만원·1개 약1500만원/월25만원. 현재 조건으로 사용하지 않음.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0018",
+      "domain": "재정",
+      "key": "monthly_rent_history",
+      "value": 900000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-013"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0019",
+      "domain": "재정",
+      "key": "monthly_debt_payment_history",
+      "value": 800000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-013"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "원금/이자 세부구분 미확인. 전액 원금 처리 금지.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0020",
+      "domain": "재정",
+      "key": "savings_insurance_telecom_history",
+      "value": 300000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-013"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "청약·보험·통신 합계. 저축과 비용이 섞여 있어 재분류 필요.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0021",
+      "domain": "가족",
+      "key": "mother_support_history",
+      "value": 300000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-013"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0022",
+      "domain": "재정",
+      "key": "monthly_net_salary_history",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-013"
+      ],
+      "range": {
+        "min": 2900000,
+        "max": 3000000
+      },
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "범위 진술. 최신 진술과 평균내지 않음.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0023",
+      "domain": "재정",
+      "key": "total_debt_older",
+      "value": 38036716,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-05-04",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-014"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "당시3개·각7.8%. 8월4개 채무와 합산 금지.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0024",
+      "domain": "재정",
+      "key": "housing_deposit_history",
+      "value": 20000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-05-04",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-014"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 보증금 진술. 현재 보유/반환 여부 미확인.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0025",
+      "domain": "재정",
+      "key": "cash_history",
+      "value": 14000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-07-30",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-015"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 가용현금 아님. 게임 대화 내500만원 정정은 재확인 전 분리.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0026",
+      "domain": "직장",
+      "key": "promotion_history",
+      "value": "입사6개월여 만에 대리 승진 진술",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-07-30",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-015"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0027",
+      "domain": "직장",
+      "key": "employment_start",
+      "value": "2026-01-22",
+      "unit": "date",
+      "kind": "self_report",
+      "as_of": "2026-05-06",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-016"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0028",
+      "domain": "생활",
+      "key": "residence_commute_history",
+      "value": "일산 거주·잠실/석촌 근무·이동 약2시간",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-02-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-017"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "왕복4시간은 편도2시간으로부터의 추정이므로 확정하지 않음. 이후 주거 변화 미확인.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0029",
+      "domain": "가족",
+      "key": "relationship_history",
+      "value": "당시 연애 종료 진술",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-08-10",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-018"
+      ],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 관계 상태는 미확인. 상대 식별정보와 상세 사유는 제외.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0030",
+      "domain": "역량",
+      "key": "repository_inventory",
+      "value": {
+        "files": 178,
+        "agent_definitions": 30,
+        "command_definitions": 21,
+        "work_python_files": 54
+      },
+      "unit": "count",
+      "kind": "verified",
+      "as_of": "2026-10-02",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-106"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "2026-10-28에 저장소 트리 직접 집계. 개인 능력점수가 아닌 저장소 구성.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0031",
+      "domain": "역량",
+      "key": "repository_quality_observation",
+      "value": "테스트·동기화·SEO 수집·상태관리 구현 존재. 일부 검증 코드와 설명의 불일치 발견.",
+      "unit": "text",
+      "kind": "verified",
+      "as_of": "2026-10-02",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-101",
+        "SRC-102",
+        "SRC-103",
+        "SRC-104"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "정적 코드 확인만 수행. 실행테스트·저작 기여도·프로덕션 품질 전수 검증 아님.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0032",
+      "domain": "목표",
+      "key": "planning_process",
+      "value": "기존 기록으로 초안→점진적 정밀조사→수정",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [
+        "SRC-019"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "과거 진술 후보. 현재 재확인 전.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0033",
+      "domain": "재정",
+      "key": "current_cash",
+      "value": null,
+      "unit": "KRW",
+      "kind": "unknown",
+      "as_of": null,
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0034",
+      "domain": "재정",
+      "key": "current_total_debt",
+      "value": null,
+      "unit": "KRW",
+      "kind": "unknown",
+      "as_of": null,
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0035",
+      "domain": "건강",
+      "key": "current_height_weight",
+      "value": null,
+      "unit": "text",
+      "kind": "unknown",
+      "as_of": null,
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [],
+      "range": null,
+      "sensitivity": "restricted",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0036",
+      "domain": "생활",
+      "key": "current_age",
+      "value": null,
+      "unit": "year",
+      "kind": "unknown",
+      "as_of": null,
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0037",
+      "domain": "목표",
+      "key": "long_term_target_cost",
+      "value": null,
+      "unit": "KRW",
+      "kind": "unknown",
+      "as_of": null,
+      "recorded_at": "2026-10-28T10:21:10+09:00",
+      "source_ids": [],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
+      "current_validity": "unconfirmed"
+    }
+  ]
 }

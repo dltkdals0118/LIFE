@@ -1,5 +1,7 @@
 # 현실 기록
-현재 사용자 조사 답변은 입력하지 않았다. 대화 기억의 수치·가상 게임 수치를 자동 수입하지 않았다.
-facts.json과 sources.json은 빈 저장 용기이며 검증 완료 자료가 아니다.
-기준점이 확정되면 baselines/BASE-YYYYMMDD-vN.md를 templates/BASELINE.md로 생성한다.
-금액은 원, 날짜는 기준일을 명시한다. 구조 규칙은 docs/DATA_CONTRACT.md를 따른다.
+2026-10-28 사용자 요청에 따라 과거 대화 검색 요약과 WACUS 저장소 관측을 먼저 정리했다.
+[프로필 초안](PROFILE_DRAFT.md) → [열린 질문](../state/OPEN_QUESTIONS.md) 순서로 읽는다.
+facts.json은37개 draft 레코드, sources.json은26개 출처를 담는다.
+verified는 저장소 관측이며 사용자 현재 상태 확인을 뜻하지 않는다.
+[BASE-20261028-v0](baselines/BASE-20261028-v0.md)는 검토용 draft다. 확정 기준점은 없다.
+정정은 기준일·출처와 함께 반영하고 확정 스냅샷은 새 버전으로 만든다.

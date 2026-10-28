@@ -1,5 +1,292 @@
 {
   "schema_version": "0.1",
-  "status": "empty",
-  "sources": []
+  "status": "sources_recorded_with_access_limits",
+  "sources": [
+    {
+      "id": "SRC-001",
+      "type": "user_statement",
+      "title": "직무·경력 진술",
+      "stated_at": "2026-09-22",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-09-22T01:55:27Z, 02:09:33Z; 검색 묶음 history c6",
+      "redacted_summary": "30~40명 규모 에이전시에서 SEO 단독 담당, 마케팅 약 4년차, 대학 미졸업.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-002",
+      "type": "user_statement",
+      "title": "분석 도구와 개선 제안",
+      "stated_at": "2026-10-06",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-06T06:43:49Z, 06:52:26Z; history c8",
+      "redacted_summary": "Ahrefs·CWV·GA4·Clarity 기본 사용, 스크롤/이탈 분석에 따른 UI 변경 제안, Looker Studio 분석·전환 측정 협업.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-003",
+      "type": "user_statement",
+      "title": "에이전트 시스템 구축 진술",
+      "stated_at": "2026-09-18",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-09-18T05:47:23Z; history c5",
+      "redacted_summary": "업무용 멀티에이전트·Pipeline Factory UI를 구축해 localhost에서 실행했다고 진술. 직접 구현 범위 미분리.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-004",
+      "type": "user_statement",
+      "title": "개발 도구·운영 비용",
+      "stated_at": "2026-09-17",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-09-17T07:27:16Z; history c1",
+      "redacted_summary": "Claude/Codex/GPT 혼용, 개발·테스트·관제 순찰로 공용 사용량 과다 소진.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-005",
+      "type": "user_statement",
+      "title": "프로토타입과 포트폴리오",
+      "stated_at": "2026-09-30",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-09-30T06:02:57Z, 07:39:26Z; history c2",
+      "redacted_summary": "VS Code 작동 화면·결과물과 Figma/HTML 프로토타입 제공. 고객 식별정보 익명화 선호.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-006",
+      "type": "user_statement",
+      "title": "최근 보상·직장 심정",
+      "stated_at": "2026-10-12",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-11T15:57:48Z = KST 2026-10-12 00:57:48; morehistory c3",
+      "redacted_summary": "인센티브 없어짐, 세후 260만원, 직장 스트레스·자신감 및 애착 저하 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-007",
+      "type": "user_statement",
+      "title": "퇴사 의향과 업무 기능",
+      "stated_at": "2026-10-08",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-08T01:47:35Z, 01:49:16Z; healthhistory c0",
+      "redacted_summary": "1월 퇴사 의향, 컨디션 저하, 집중 어려움, 반복 실수 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-008",
+      "type": "user_statement",
+      "title": "수면·처방 치료 과거 진술",
+      "stated_at": "2026-10-08",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-08T00:03:35Z, 00:14:06Z; healthhistory c1",
+      "redacted_summary": "처방약을 1년 이상 매일 복용했다고 진술. 이틀 복용 중단과 거의 48시간 불면, 두근거림·두통·어지러움 보고.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-009",
+      "type": "user_statement",
+      "title": "수면 지속 문제",
+      "stated_at": "2026-10-22",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-22T05:36:05Z; healthhistory c2",
+      "redacted_summary": "약 복용에도 입면 어려움, 중간 각성·이른 기상 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-010",
+      "type": "user_statement",
+      "title": "최근 수면·포커",
+      "stated_at": "2026-10-26",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-26T01:49:08Z; healthhistory c2",
+      "redacted_summary": "주말 수면과 이후 새벽 각성·재입면 실패, 약 복용 후 포커 딥런으로 회복 기회를 놓쳤다는 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-011",
+      "type": "user_statement",
+      "title": "과음 뒤 신체 증상",
+      "stated_at": "2026-10-14",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-14T02:44:48Z,02:55:50Z,07:54:34Z; healthhistory c3",
+      "redacted_summary": "전날 소주1병·와인1병, 두통·어지럼·피로, 당시 두통8/10·멍함·힘 빠짐. 술과 수면제 동시복용은 하지 않았다고 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-012",
+      "type": "user_statement",
+      "title": "다음 날 경과",
+      "stated_at": "2026-10-15",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-10-15T02:23:54Z; healthhistory c3 (검색 요약 후반 일부 잘림)",
+      "redacted_summary": "자고 난 뒤 심한 두통은 사라졌으나 몸 무거움·멍함6/10 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-013",
+      "type": "user_statement",
+      "title": "재정·가족 지원",
+      "stated_at": "2026-08-10",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-08-10T00:34:35Z,00:35:59Z,00:37:32Z; lifehistory c5",
+      "redacted_summary": "빚 약5000만원, 월세90만원, 상환80만원, 청약·보험·통신 약30만원, 어머니지원30만원, 세후290~300만원.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-014",
+      "type": "user_statement",
+      "title": "과거 대출·보증금",
+      "stated_at": "2026-05-04",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-05-04T13:15:22Z,13:16:29Z; lifehistory c1",
+      "redacted_summary": "대출3개 원금합계38,036,716원 각 금리7.8%, 오피스텔 보증금2000만원 월세 거주 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-015",
+      "type": "user_statement",
+      "title": "현금·승진 과거 진술",
+      "stated_at": "2026-07-30",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-07-30T03:12:49Z; morehistory c4",
+      "redacted_summary": "현금 약1400만원, 입사6개월여 대리승진 및 급여상승 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-016",
+      "type": "user_statement",
+      "title": "현 직장 입사일",
+      "stated_at": "2026-05-06",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-05-06T07:31:42Z; lifehistory c1",
+      "redacted_summary": "2026-01-22 입사했다고 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-017",
+      "type": "user_statement",
+      "title": "과거 주거·통근",
+      "stated_at": "2026-02-10",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-02-09T16:09:14Z,16:15:15Z = KST 2026-02-10; morehistory c2",
+      "redacted_summary": "일산 거주, 잠실/석촌 직장, 통근 이동 약2시간 진술.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-018",
+      "type": "user_statement",
+      "title": "관계 변화",
+      "stated_at": "2026-08-10",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "과거 대화 2026-08-10T00:34:35Z; lifehistory c5",
+      "redacted_summary": "당시 연애 종료 및 재정·자기관리 상황에 대한 본인 고민.",
+      "access_mode": "retrieved_summary",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-019",
+      "type": "user_statement",
+      "title": "LIFE 조사 방향",
+      "stated_at": "2026-10-28",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "현재 LIFE 대화 사용자 요청",
+      "redacted_summary": "과거 에이전트·GPT 기록으로 초안을 먼저 반영하고 이후 정밀조사로 수정 요청.",
+      "access_mode": "current_conversation",
+      "limitation": "Personal Context가 반환한 과거 발언 요약. 전체 원문 대화 전수 열람이 아니며 현재 재확인 전."
+    },
+    {
+      "id": "SRC-100",
+      "type": "document",
+      "title": "WACUS 정적 자료: README.md",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/blob/8e46a9f592e3c300321371e5b6297450d4754990/README.md",
+      "redacted_summary": "파일 blob 6ab7b801433e191e3aaa15d940a81afab89990f3",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-101",
+      "type": "document",
+      "title": "WACUS 정적 자료: work/_engine_sync.py",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/blob/8e46a9f592e3c300321371e5b6297450d4754990/work/_engine_sync.py",
+      "redacted_summary": "파일 blob a94bca123463865f6d7ef77bb45a6d0a1baf6165",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-102",
+      "type": "document",
+      "title": "WACUS 정적 자료: work/_selftest.py",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/blob/8e46a9f592e3c300321371e5b6297450d4754990/work/_selftest.py",
+      "redacted_summary": "파일 blob 0c7aea431e649dc98c6c88d8d1162cc88323f9a2",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-103",
+      "type": "document",
+      "title": "WACUS 정적 자료: work/_site_seo_crawl.py",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/blob/8e46a9f592e3c300321371e5b6297450d4754990/work/_site_seo_crawl.py",
+      "redacted_summary": "파일 blob 635eaebcc3df5b426b71cf03724e2c506d66e07e",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-104",
+      "type": "document",
+      "title": "WACUS 정적 자료: work/_state_set.py",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/blob/8e46a9f592e3c300321371e5b6297450d4754990/work/_state_set.py",
+      "redacted_summary": "파일 blob 8761fd63db3ea8ed5b66fddc47cace36efa368ed",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-105",
+      "type": "document",
+      "title": "WACUS 정적 자료: app/README.md",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/blob/8e46a9f592e3c300321371e5b6297450d4754990/app/README.md",
+      "redacted_summary": "파일 blob ee3338179d82d7a60ed5368e3450e74201cd4f55",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    },
+    {
+      "id": "SRC-106",
+      "type": "document",
+      "title": "WACUS 트리·최근 동기화",
+      "stated_at": "2026-10-02",
+      "checked_at": "2026-10-28T10:21:10+09:00",
+      "locator": "https://github.com/dltkdals0118/WACUS_Agents/commit/8e46a9f592e3c300321371e5b6297450d4754990",
+      "redacted_summary": "178개 파일, 에이전트 md30, 명령 md21, work/ 하위 Python54. 최신 동기화 2026-10-02.",
+      "access_mode": "repository",
+      "limitation": "정적 파일 열람. 실행·개인 저작 기여·실적은 검증하지 않음."
+    }
+  ]
 }
