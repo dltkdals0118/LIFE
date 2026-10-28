@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "historical_candidates_pending_review",
+  "status": "q001_q005_confirmed_remainder_pending_review",
   "facts": [
     {
       "id": "FACT-0001",
@@ -633,10 +633,10 @@
       "source_ids": [],
       "range": null,
       "sensitivity": "restricted",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
-      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
-      "current_validity": "unconfirmed"
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함. 2026-10-28 FACT-0062 가 값을 채워 대체했다.",
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0034",
@@ -650,10 +650,10 @@
       "source_ids": [],
       "range": null,
       "sensitivity": "restricted",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
-      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
-      "current_validity": "unconfirmed"
+      "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함. 2026-10-28 FACT-0063 이 값을 채워 대체했다.",
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0035",
@@ -1190,6 +1190,243 @@
       "supersedes": null,
       "note": "학습량이 실전 ROI 상승으로 자동 연결된다고 해석하지 않음.",
       "current_validity": "historical_only"
+    },
+    {
+      "id": "FACT-0059",
+      "domain": "건강",
+      "key": "recent_sleep_log",
+      "value": {
+        "10/25": {
+          "sleep_at": "20:00",
+          "wake_at": "01:30",
+          "duration_hours": 5.5
+        },
+        "10/26": {
+          "sleep_at": "23:00",
+          "wake_at": "08:00",
+          "duration_hours": 9.0
+        },
+        "10/27": {
+          "sleep_at": "01:00",
+          "wake_at": "08:00",
+          "duration_hours": 7.0
+        }
+      },
+      "unit": "hour/night",
+      "kind": "self_report",
+      "as_of": "2026-10-27",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": {
+        "min": 5.5,
+        "max": 9.0
+      },
+      "sensitivity": "restricted",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "사용자가 적은 날짜 표기를 그대로 보존했다. 모두 '쯤' 진술이라 ±30분으로 본다. 날짜 표기가 취침일 기준인지 기상일 기준인지 불명확하고, 2행(10/26 23:00 취침 → 08:00 기상)과 3행(10/27 01:00 취침)이 그대로 읽으면 시간대가 겹친다. 확정된 것은 세 밤의 길이 5.5h·9h·7h 이고 날짜 대응은 Q-014 로 되묻는다. 낮 기능과 과거 급성 증상(두통·어지럼·두근거림) 지속 여부는 이번 응답에 없어 미확인이며 Q-013 에 남긴다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0060",
+      "domain": "재정",
+      "key": "current_monthly_net_salary",
+      "value": 2600000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "10/12 진술(FACT-0007)과 같은 값이며 현재도 유효함을 사용자가 확인했다. 급여명세 원본 미대조.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0061",
+      "domain": "재정",
+      "key": "current_monthly_incentive",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": {
+        "min": 200000,
+        "max": 300000
+      },
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'인센티브: 20~30만 원'. 초안의 '인센티브 중단'(SRC-006, 10/12)과 달라진 항목이다. 단일 값이 아니라 범위로 진술해 value 는 null 로 두고 range 에 담았다. 매월 지급인지·지급 조건·변동 폭은 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0062",
+      "domain": "재정",
+      "key": "current_cash",
+      "value": 6000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0033",
+      "note": "보증금·대출한도를 제외한 즉시 가용 현금으로 묻고 답했다. 7/30 진술 1,400만원(FACT-0025) 대비 감소했고 감소 사유는 미확인. '게임 대화 500만원' 보류 항목은 이 직접 진술로 대체돼 더 추적하지 않는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0063",
+      "domain": "재정",
+      "key": "current_total_debt",
+      "value": 46000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0034",
+      "note": "'약 4,600만 원'. 8/10 약 5,000만원(FACT-0017) 대비 감소. 대출 건수·건별 잔액·금리는 이번 응답에 없어 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0064",
+      "domain": "재정",
+      "key": "current_monthly_debt_payment",
+      "value": 800000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'80만 원 정도'. 8/10 값(FACT-0019)과 같다. 원금·이자 분해는 미확인이라 상환 속도와 완제 시점을 아직 계산할 수 없다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0065",
+      "domain": "가족",
+      "key": "current_mother_support",
+      "value": 300000,
+      "unit": "KRW/month",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'매월 엄마한테 30만 원씩 보내야 해' — 현재도 지속되는 의무로 진술했다. 8/10 값(FACT-0021)과 같다. 종료 시점이나 조건은 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0066",
+      "domain": "재정",
+      "key": "current_housing_cost_statement",
+      "value": 950000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "'월세 + 보증금은 95만 원 정도' 를 글자 그대로 옮겼다. 월세는 월 단위이고 보증금은 일시금이라 단위가 섞여 있어 단일 해석을 고르지 않았다. 가장 가능성 높은 읽기는 '월 주거비 합계 95만원'이지만 확정하지 않는다. 참고: 8/10 월세 90만원(FACT-0018), 5/4 보증금 2,000만원(FACT-0024). Q-013 으로 되묻는다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0067",
+      "domain": "생활",
+      "key": "current_residence_commute",
+      "value": "장한평 거주 · 잠실 근무 · 왕복 1시간 미만",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "2월 일산 거주·잠실/석촌 근무·이동 약 2시간(FACT-0028)에서 바뀌었다. FACT-0028 은 그 기준일에는 참이므로 superseded 로 닫지 않고 이력으로 둔다. 이사 시점과 그에 따른 보증금·월세 변화는 Q-013 에서 함께 확인한다. 상세 주소는 옮기지 않았다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0068",
+      "domain": "시간",
+      "key": "current_commute_round_trip_minutes",
+      "value": null,
+      "unit": "minute/day",
+      "kind": "self_report",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": {
+        "min": null,
+        "max": 60
+      },
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'왕복 1시간 좀 안 됨' — 상한 60분만 확정이고 하한은 진술에 없다. 2월 진술의 약 120분과 비교하면 하루 60분 이상이 통근에서 빠졌다는 뜻이지만, 그 시간이 실제로 어디로 갔는지는 별도 관측 대상이다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0069",
+      "domain": "재정",
+      "key": "current_known_fixed_outflow",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "estimate",
+      "as_of": "2026-10-28",
+      "recorded_at": "2026-10-28T12:10:00+09:00",
+      "source_ids": [
+        "SRC-030"
+      ],
+      "range": {
+        "min": 2050000,
+        "max": null
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "이번 응답으로 확인된 월 고정 유출만 합한 부분합이다: 채무 상환 80만(FACT-0064) + 어머니 지원 30만(FACT-0065) + 주거비 진술 95만(FACT-0066) = 205만원. 청약·보험·통신 약 30만(FACT-0020, 8/10 기준)과 식비·교통·통신 등 생활비는 아직 확인하지 않았으므로 이 값은 **하한**이다. 월 잉여현금이나 퇴사 가능 시점으로 환산하지 않는다. FACT-0066 의 단위 해석이 바뀌면 이 값도 다시 계산해야 한다.",
+      "current_validity": "unconfirmed"
     }
   ]
 }
