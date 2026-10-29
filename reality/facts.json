@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "goals_recorded_pathways_not_yet_designed",
+  "status": "target_redefined_as_housing_plus_cash",
   "facts": [
     {
       "id": "FACT-0001",
@@ -2644,10 +2644,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": "FACT-0037",
       "note": "'32억 정도라고 생각하는데 사실 잘 모르겠습니다.' **본인도 확신하지 않는 값이다.** 산출 근거가 제시되지 않았으므로 이 숫자를 목표로 고정하지 않고 **검토 대상**으로 둔다. FACT-0037(long_term_target_cost=null)을 대체한다. 이 값이 무엇을 뜻하는지는 인출률 가정이 있어야 말할 수 있다(ASM-0001, docs/GOALS.md).",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0122",
@@ -2691,10 +2691,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "현재 순자산 약 −2,000만원(현금 600 + 보증금 2,000 − 채무 4,600)에서 32억까지 **격차 약 32.2억**이다. 그리고 지금은 쌓이는 중이 아니라 **월 261만원씩 줄고 있다**(FACT-0117).\n**즉 현재 방향은 목표의 반대 방향이다.** 이것은 평가가 아니라 두 숫자의 부호다.\n규모 감각: 월 100만원을 30년 모으면 3.6억, 월 500만원을 30년 모으면 18억이다(이자 제외). **근로소득 저축만으로 32억에 닿는 경로는 현실적으로 없다.** 따라서 선택지는 ① 목표 금액 재검토 ② 소득 구조 변경(사업·지분·고소득 전문성) ③ 둘 다다. **어느 쪽인지는 사용자가 정한다.** 설계는 선택지를 만들 뿐 고르지 않는다.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0124",
@@ -2834,10 +2834,10 @@
       ],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "confirmed",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "선택지 B(기한 연장 10년 → 20·30년)에 '이건 안돼'로 답했다. **기한 10년은 고정 제약이다**(FACT-0126 확인). 그 결과 남는 레버는 **목표 금액(A)** 과 **소득 구조(C)** 둘뿐이다.",
-      "current_validity": "current"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0131",
@@ -2890,6 +2890,136 @@
       "review_status": "draft",
       "supersedes": null,
       "note": "Q-038 에 'ABC 전부'라고 답했지만, 같은 턴에서 **B(기한 연장)는 '이건 안돼'로 명시 거부**했다. **더 구체적인 답을 따라 B 를 제외하고 A+C 로 적는다.** 이 불일치를 숨기지 않고 남기니 사용자가 뒤집을 수 있다(Q-043).\nA+C 는 서로 보완한다 — 목표를 낮추면 필요 소득이 내려가고, 소득을 올리면 목표를 덜 낮춰도 된다. 둘 다 쓰면 어느 한쪽을 극단으로 밀지 않아도 된다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0133",
+      "domain": "목표",
+      "key": "target_housing_spec",
+      "value": {
+        "형태": "신축 아파트",
+        "지역": "서울 선호, 수도권 가능",
+        "가격대_현재시세": [
+          700000000,
+          1100000000
+        ]
+      },
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T11:20:00+09:00",
+      "source_ids": [
+        "SRC-039"
+      ],
+      "range": {
+        "min": 700000000,
+        "max": 1100000000
+      },
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'아파트인데 신축, 지역은 서울이면 좋은데 뭐 수도권 상관 없어. 가격대는 7~11억정도?'\n**이 값이 목표 금액을 정한다**(FACT-0131). 7~11억이면 32억이 전제했던 21~26억과 크게 다르다.\n한계: 구체적 지역·평형·'신축'의 기준(준공 연도)은 미확인이고, **7~11억은 지금 시세 감각이다 — 10~15년 뒤 가격은 알 수 없다.**",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0134",
+      "domain": "목표",
+      "key": "light_work_trigger",
+      "value": "집을 사고 현금 1억 정도 있을 때",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T11:20:00+09:00",
+      "source_ids": [
+        "SRC-039"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'집을 사고 현금이 1억 정도 있을 때.' **FACT-0129 가 비워 둔 전환 시점이 채워졌다.**\n이로써 10~15년 목표가 자산 총액이 아니라 **두 조건의 달성**으로 정의된다 — 주택 보유 + 현금 1억. 기존 채무 4,600만 청산은 그 전제로 포함한다.\n미확인: '현금 1억'이 매입 **직후** 기준인지 그 뒤 **유지** 기준인지. 유지 기준이면 매입 후 상환을 감당하고도 1억이 남아 있어야 하므로 요구치가 올라간다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0135",
+      "domain": "재정",
+      "key": "mortgage_intent",
+      "value": "필요하면 쓸 생각",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T11:20:00+09:00",
+      "source_ids": [
+        "SRC-039"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'필요하면 쓸 생각이야.' ASM-0005(주거 전액 현금 매입)가 풀렸다 — 자기자본 비율이 **선택 변수**가 된다.\n**그런데 이것이 새 트레이드오프를 만든다**: 자기자본을 적게 넣으면 모으기 쉽지만 매입 뒤 월 상환이 커져 '라이트하게 일한다'(FACT-0134)를 막는다. 두 목표가 같은 변수를 반대 방향으로 당긴다.\nLTV·DSR 규제와 금리는 **공식 근거로 확인하지 않았다**. 계산에는 금리 4%·30년을 가정으로 썼다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0136",
+      "domain": "목표",
+      "key": "deadline_preferred_and_max",
+      "value": {
+        "선호": 10,
+        "최대": 15
+      },
+      "unit": "year",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T11:20:00+09:00",
+      "source_ids": [
+        "SRC-039"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": "FACT-0130",
+      "note": "'기한은 10년이 제일 좋고 안되면 15년 까지.' **FACT-0130(연장 불가)을 대체한다** — 직전 회차에 B(기한 연장)를 '안돼'로 거부했으나 이번에 15년까지 열었다. 같은 턴의 'ABC 전부'와도 이제 일관된다(FACT-0132 의 불일치 해소).\n**10년과 15년의 차이가 크다**: 같은 목표에서 필요 월 적립이 약 1.7배 차이 난다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0137",
+      "domain": "목표",
+      "key": "target_redefined_own_funds",
+      "value": null,
+      "unit": "KRW",
+      "kind": "estimate",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T11:20:00+09:00",
+      "source_ids": [
+        "SRC-039"
+      ],
+      "range": {
+        "min": 384000000,
+        "max": 740000000
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": "FACT-0121",
+      "note": "**목표가 '순자산 32억'에서 '매입 시점에 손에 있어야 하는 자기자금'으로 바뀌었다.**\n필요 자기자금 = 자기자본(주택가×비율) + 부대비용 + 현금 1억 + 채무청산 4,600만\n주택 7~11억·자기자본 30~50% 범위에서 **3.84억 ~ 7.40억**이다(simulation/HOUSING_PATH_20261029.md).\n**32억의 약 1/4 ~ 1/8 이다.** FACT-0121(32억)은 본인이 '큰 계산 없이' 정한 값이었고(FACT-0128), 아래에서 위로 쌓으니 이 범위가 나왔다. FACT-0121 을 대체한다.\n필요 월수입은 **444~783만**(현재의 1.6~2.7배)으로, 32억 경로의 2,974만(10.4배)과 자릿수가 다르다.\n**주의**: 7~11억은 현재 시세 감각이고(FACT-0133) 금리·취득세율·LTV 는 미확인 가정이다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0138",
+      "domain": "재정",
+      "key": "savings_require_income_growth",
+      "value": "지출 절감만으로는 적립이 시작되지 않는다",
+      "unit": "text",
+      "kind": "estimate",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T11:20:00+09:00",
+      "source_ids": [
+        "SRC-039"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 월 적자 261만(FACT-0117)을 **전액 없애도 저축은 0**이다 — 지출 = 수입 = 285만이 될 뿐이다.\n필요 월 적립은 159~498만이므로 **적립의 재원은 소득 증가뿐이다.**\n→ 순서가 정해진다: ① 지출 조정으로 적자 0 (현금 2.3개월 시한) ② 소득 증가로 적립 시작. ①은 ②의 선행 조건이지 대체재가 아니다.\n포커는 건드리지 않는다(FACT-0122). 식음료가 재량 덩어리다(FACT-0124).",
       "current_validity": "unconfirmed"
     }
   ]
