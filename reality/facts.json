@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1",
-  "status": "deficit_converged_poker_outflow_unresolvable_this_round",
+  "status": "goals_recorded_pathways_not_yet_designed",
   "facts": [
     {
       "id": "FACT-0001",
@@ -701,10 +701,10 @@
       "source_ids": [],
       "range": null,
       "sensitivity": "personal",
-      "review_status": "draft",
+      "review_status": "superseded",
       "supersedes": null,
       "note": "현재 값의 신뢰할 수 있는 근거 또는 사용자 재확인이 부족함.",
-      "current_validity": "unconfirmed"
+      "current_validity": "historical_only"
     },
     {
       "id": "FACT-0038",
@@ -2573,6 +2573,149 @@
       "review_status": "draft",
       "supersedes": "FACT-0107",
       "note": "**FACT-0107·0108 을 개정한다.** 적자 구간이 좁아져 기간도 좁아졌다.\n· **직장 유지 시**: 현금 600만원 ÷ 월 206~301만원 = **약 2.0~2.9개월** (앞서 2.2~5.5개월이라 적었던 상한은 과소계상된 적자에서 나온 것이라 철회한다).\n· **퇴사 후**: 현금 600 + 퇴직금 300 = 900만원, 수입 0(실업급여 미신청). 지금 생활 수준(월 실지출 394~549만 + 이체 잔여)이면 **약 1.6~2.0개월**, 확인된 고정비 229만원만 쓰면 약 3.9개월.\n**퇴사 의향 시점은 2027년 1~3월 — 지금부터 2~5개월 뒤다.** 위 첫 줄(2.0~2.9개월)대로면 **퇴사 전에 현금이 바닥난다.** 보증금 2,000만원은 퇴거해야 회수된다.\n**예측이 아니라 오늘 값을 그대로 늘렸을 때의 산술이다.** 지출을 줄이면 전부 바뀐다. 무엇을 바꿀지는 사용자가 정한다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0119",
+      "domain": "목표",
+      "key": "desired_life_qualitative",
+      "value": {
+        "자율성": "하고 싶은 것을 하고, 하기 싫은 것을 안 할 수 있는 상태",
+        "인격": "인간적으로 성품이 좋은 사람",
+        "관계": "많지 않아도 좋은 것을 함께 나눌 수 있는 사람들, 그리고 파트너",
+        "경제": "이미 안정돼 걱정이 없는 상태"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:10:00+09:00",
+      "source_ids": [
+        "SRC-036"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "본인 표현을 그대로 옮겼다. **네 가지가 모두 '상태'이지 '수단'이 아니다** — 직업·거주지·소득 형태를 특정하지 않았으므로 설계가 그것을 대신 정하지 않는다. '자율성'이 첫 문장에 나왔고 나머지 셋이 뒤따른 순서지만, **우선순위를 묻지 않았으므로 순서를 우선순위로 읽지 않는다.**",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0120",
+      "domain": "목표",
+      "key": "desired_activities",
+      "value": {
+        "관심": [
+          "음악",
+          "미술",
+          "포커"
+        ],
+        "하고_싶은_것": [
+          "앨범 발매",
+          "책 출간",
+          "포커 대회 출전"
+        ],
+        "전제": "돈이 있다면"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:10:00+09:00",
+      "source_ids": [
+        "SRC-036"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'좋아하는 게 많아서'라고 했다. 세 가지 모두 **소비가 아니라 산출**이다 — 듣고 보고 치는 것이 아니라 내고 쓰고 나가는 것이다. 규모·비용·기한은 미확인. 앨범 1장과 대회 1회의 비용이 다르고, 직업으로 삼을지도 묻지 않았다. **포커가 '비용'이 아니라 '하고 싶은 것' 안에 들어 있다**는 점이 재정 항목과 다른 축이다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0121",
+      "domain": "목표",
+      "key": "target_net_worth",
+      "value": 3200000000,
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:10:00+09:00",
+      "source_ids": [
+        "SRC-036"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": "FACT-0037",
+      "note": "'32억 정도라고 생각하는데 사실 잘 모르겠습니다.' **본인도 확신하지 않는 값이다.** 산출 근거가 제시되지 않았으므로 이 숫자를 목표로 고정하지 않고 **검토 대상**으로 둔다. FACT-0037(long_term_target_cost=null)을 대체한다. 이 값이 무엇을 뜻하는지는 인출률 가정이 있어야 말할 수 있다(ASM-0001, docs/GOALS.md).",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0122",
+      "domain": "목표",
+      "key": "non_negotiables",
+      "value": [
+        "돈",
+        "포커"
+      ],
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:10:00+09:00",
+      "source_ids": [
+        "SRC-036"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'포기 못 할 건 돈과 포커입니다.' **이것은 설계 제약이고 협상 대상이 아니다.** 앞으로 어떤 계획에서도 포커를 줄이거나 끊는 것을 조치로 제안하지 않는다. `AGENTS.md`('사용자의 선택·감정·보류를 존중한다')와 `docs/POKER_LEDGER_SPEC.md`('수익 증대를 전제하거나 손실 회복을 유도하지 않는다')를 함께 따른다.\n**두 제약이 현재 구조에서 서로를 밀어낸다**: 포커는 지금 비용 항목이고(월 바이인 원가 하한 ₮2,561), 돈은 월 261만원씩 줄고 있다(FACT-0117). 이것은 모순이 아니라 **설계가 풀어야 할 조건**이다 — 포커를 건드리지 않고 적자를 닫을 방법이 있는지가 다음 질문이 된다. '돈'이 뜻하는 것(지금의 현금인지, 장기 안정인지, 둘 다인지)은 미확인이다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0123",
+      "domain": "목표",
+      "key": "goal_gap_current_position",
+      "value": {
+        "현재_순자산": -20000000,
+        "목표": 3200000000,
+        "격차": 3220000000,
+        "현재_월_변화": -2610000,
+        "방향": "목표의 반대"
+      },
+      "unit": "KRW",
+      "kind": "estimate",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:10:00+09:00",
+      "source_ids": [
+        "SRC-036"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "현재 순자산 약 −2,000만원(현금 600 + 보증금 2,000 − 채무 4,600)에서 32억까지 **격차 약 32.2억**이다. 그리고 지금은 쌓이는 중이 아니라 **월 261만원씩 줄고 있다**(FACT-0117).\n**즉 현재 방향은 목표의 반대 방향이다.** 이것은 평가가 아니라 두 숫자의 부호다.\n규모 감각: 월 100만원을 30년 모으면 3.6억, 월 500만원을 30년 모으면 18억이다(이자 제외). **근로소득 저축만으로 32억에 닿는 경로는 현실적으로 없다.** 따라서 선택지는 ① 목표 금액 재검토 ② 소득 구조 변경(사업·지분·고소득 전문성) ③ 둘 다다. **어느 쪽인지는 사용자가 정한다.** 설계는 선택지를 만들 뿐 고르지 않는다.",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0124",
+      "domain": "재정",
+      "key": "discretionary_headroom_excluding_poker",
+      "value": null,
+      "unit": "KRW/month",
+      "kind": "estimate",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:10:00+09:00",
+      "source_ids": [
+        "SRC-036"
+      ],
+      "range": {
+        "min": 820000,
+        "max": 1810000
+      },
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "포커를 건드리지 않고 적자 261만원(FACT-0117)을 줄일 수 있는 자리를 크기순으로 본다.\n· **카페·간식 + 식비 월 182~281만원**(FACT-0093) — 재량 덩어리 중 압도적으로 크다. 10월 281만원을 월 100만원 수준으로 낮추면 **약 181만원**이 생긴다.\n· 주거 95만원(FACT-0070) — 이사 비용과 보증금이 묶여 바로 움직이기 어렵다.\n· 채무 상환 80만원(FACT-0064) — 줄이면 이자가 늘어 장기적으로 손해다.\n· 어머니 지원 30만·보험 10만·통신 7만·교통 7만 — 합쳐도 54만이고 성격상 조정 폭이 작다.\n**식음료 한 항목이 적자의 70% 안팎을 덮는다.** 이것은 관측이지 지시가 아니다 — 실제로 줄일지, 얼마나 줄일지, 그것이 삶의 질에 어떤 뜻인지는 사용자가 정한다.",
       "current_validity": "unconfirmed"
     }
   ]
