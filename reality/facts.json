@@ -2717,6 +2717,86 @@
       "supersedes": null,
       "note": "포커를 건드리지 않고 적자 261만원(FACT-0117)을 줄일 수 있는 자리를 크기순으로 본다.\n· **카페·간식 + 식비 월 182~281만원**(FACT-0093) — 재량 덩어리 중 압도적으로 크다. 10월 281만원을 월 100만원 수준으로 낮추면 **약 181만원**이 생긴다.\n· 주거 95만원(FACT-0070) — 이사 비용과 보증금이 묶여 바로 움직이기 어렵다.\n· 채무 상환 80만원(FACT-0064) — 줄이면 이자가 늘어 장기적으로 손해다.\n· 어머니 지원 30만·보험 10만·통신 7만·교통 7만 — 합쳐도 54만이고 성격상 조정 폭이 작다.\n**식음료 한 항목이 적자의 70% 안팎을 덮는다.** 이것은 관측이지 지시가 아니다 — 실제로 줄일지, 얼마나 줄일지, 그것이 삶의 질에 어떤 뜻인지는 사용자가 정한다.",
       "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0125",
+      "domain": "직장",
+      "key": "employment_intent_clarified",
+      "value": {
+        "직장": "계속 다닌다",
+        "방식": "라이트한 마음으로, 워라밸 챙기며",
+        "근거": "마케팅 쪽 재능이 있다고 봄"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:45:00+09:00",
+      "source_ids": [
+        "SRC-037"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'내가 마케팅 쪽에 재능이 좀 있으니까 직장을 그만 두진 않을 거야. 근데 직장을 좀 라이트한 마음으로 다니고 싶은거지. 워라벨 챙기면서.'\n**이것이 FACT-0086(2027년 1~3월 퇴사 의향)의 뜻을 바꾼다 — 퇴사는 은퇴가 아니라 이직이다.** 그래서 FACT-0118 의 '퇴사 후 수입 0' 구간은 영구 무수입이 아니라 **이직 공백기**다. 실업급여를 신청하지 않는 이유('다시 일할거야', FACT-0098)와도 일관된다.\n**다만 적자 문제는 이 해석으로 줄어들지 않는다** — 적자는 퇴사 때문이 아니라 재직 중에 나고 있다. '라이트하게·워라밸'의 구체적 기준(주당 근무시간·수용 연봉)은 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0126",
+      "domain": "목표",
+      "key": "goal_deadline_years",
+      "value": 10,
+      "unit": "year",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:45:00+09:00",
+      "source_ids": [
+        "SRC-037"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'10년' — 2036년까지다. 저장소 설계의 시뮬레이션 범위(2036)와 우연히 일치하지만 그것 때문에 정한 값은 아니다. 중간 목표나 단계별 기한은 묻지 않았다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0127",
+      "domain": "포커",
+      "key": "poker_role_in_life",
+      "value": "헤비한 취미 (직업 후보 아님)",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:45:00+09:00",
+      "source_ids": [
+        "SRC-037"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'취미에 가까워. 헤비한 취미이지.' **수입 축이 아니라 지출·여가 축에 둔다.** 따라서 설계에서 포커 수익을 자금 계획의 재원으로 잡지 않는다(`docs/POKER_LEDGER_SPEC.md`: 수익 증대를 전제하지 않는다). 동시에 포기 불가 항목이므로(FACT-0122) 줄이는 것도 조치로 제안하지 않는다. '대회 출전'(FACT-0120)은 직업 전환이 아니라 **하고 싶은 일 목록의 한 항목**으로 읽는다. 취미 예산의 적정 규모는 미확인.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0128",
+      "domain": "목표",
+      "key": "target_basis_delegated",
+      "value": "본인이 큰 계산 없이 정한 값이며 산출을 WACUS 에 위임",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T09:45:00+09:00",
+      "source_ids": [
+        "SRC-037"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'사실 큰 계산은 안했어. 너가 해줘도 좋을 것 같아.' → 32억(FACT-0121)은 **검토 대상이지 확정 목표가 아님**이 본인 확인으로 굳어졌다. 산술 검토 결과는 `simulation/GOAL_FEASIBILITY_20261029.md` 에 있고, **그 문서의 숫자는 전부 simulated 이므로 이 파일(reality)에 값으로 올리지 않는다** (docs/DATA_CONTRACT.md: simulated 는 simulation 에만 저장한다). 요약만 적는다: 10년 32억은 월 1,872~2,683만원 적립이 필요해 현재 수입의 6.6~9.4배이고, 일을 완전히 그만두는 데 필요한 자산조차 6.9~16.5억으로 32억의 21~51% 다. **결론을 내리지 않았다 — 목표 재설정·기한 연장·소득 구조 변경의 선택지만 만들었다.**",
+      "current_validity": "current"
     }
   ]
 }
