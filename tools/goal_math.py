@@ -12,6 +12,14 @@
   목표 32억(FACT-0121) · 기한 10년(SRC-037)
 """
 import argparse
+import sys
+
+# 윈도우 콘솔은 기본이 cp949 라 em-dash 하나에 스크립트가 죽는다.
+# 호출하는 쪽에 인코딩 환경변수를 붙이게 하지 않고 여기서 해결한다.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 MAN = 10_000           # 만원
 EOK = 100_000_000      # 억원
@@ -96,7 +104,71 @@ def main():
     print(f"    월 {won(DEFICIT_NOW)}. 식음료(월 182~281만)가 가장 큰 재량 자리다(FACT-0124).")
     print(f"    10월 281만 → 100만으로 낮추면 월 181만이 생기고, 적자의 "
           f"{1_810_000 / DEFICIT_NOW * 100:.0f}%가 덮인다.")
+    print()
+    report_bottom_up(args.swr)
+    report_food_leverage(args.swr)
+    report_income_needed()
     print("\n이 출력은 산술이고 조언이 아니다. 수익률·인출률은 검증된 값이 아닌 가정이다.")
+
+
+# ---------------------------------------------------------------------------
+# 아래에서 위로 — 목표 금액을 쌓아 올린다 (2026-10-29 추가)
+#
+# 사용자 확인(SRC-038): 32억에 **주거 매입은 포함**, 결혼·자녀·부모 부양·노후는 미포함.
+# '라이트하게·워라밸'은 **제약이 아니라 결과**다 — 경제적으로 좋아진 뒤의 상태이고
+# 그 전까지는 라이트하게 살 생각이 없다. 기한 10년은 **연장 불가**.
+# ---------------------------------------------------------------------------
+
+FIXED_AFTER = 540_000   # 부채0·주거매입 후 월 고정비: 어머니30+보험10+통신7+교통7
+DEBT_PAYOFF = 46_000_000
+EMERGENCY_MONTHS = 12
+
+
+def bottom_up(housing, food, light_income, swr=0.04):
+    """주거 매입가·식음료·라이트 근로소득을 넣으면 필요 총자산이 나온다."""
+    living = FIXED_AFTER + food
+    financial = max(0, living - light_income) * 12 / swr
+    return housing + DEBT_PAYOFF + living * EMERGENCY_MONTHS + financial
+
+
+def report_bottom_up(swr):
+    print("=== 6. 아래에서 위로 — 목표 금액을 쌓는다 ===")
+    print("    부채청산 4,600만 + 비상금(12개월) + 금융자산(4% 인출) + 주거 매입가")
+    print("    [주의] 주거를 전액 현금으로 산다고 가정했다. 주택담보대출을 쓰면 필요 자기자본은")
+    print("           크게 준다 — LTV/DSR 규제와 금리는 미확인이라 넣지 않았다.")
+    print()
+    print("     주거 | 식음료 월100만            | 식음료 월280만(현 수준)")
+    print("          | 라이트근로150만    근로0  | 라이트근로150만    근로0")
+    for H in (5, 8, 10, 12, 15, 20, 25):
+        c = [won(bottom_up(H * EOK, food, inc, swr))
+             for food in (1_000_000, 2_800_000) for inc in (1_500_000, 0)]
+        print(f"    {H:>3}억 | {c[0]:>13} {c[1]:>9} | {c[2]:>13} {c[3]:>9}")
+    print()
+    print("    -> 주거 매입가가 목표 금액의 대부분을 정한다.")
+    print("    -> 32억이 되려면 주거가 21~26억이어야 한다.")
+
+
+def report_food_leverage(swr):
+    print()
+    print("=== 7. 식음료비가 목표 금액을 얼마나 움직이나 (라이트 근로 월150만 가정) ===")
+    base = None
+    for food in (1_000_000, 1_500_000, 2_000_000, 2_800_000):
+        need = max(0, FIXED_AFTER + food - 1_500_000) * 12 / swr
+        base = need if base is None else base
+        print(f"    식음료 월 {won(food):>6} -> 필요 금융자산 {won(need):>8}"
+              f"   (월100만 대비 +{won(need - base)})")
+    print("    -> 월 180만의 식음료 차이가 필요 자산 5.4억을 만든다. 인출률 4%의 25배 효과다.")
+    print("    -> 지출을 줄이는 것은 적자만 메우는 게 아니라 목표 금액 자체를 낮춘다.")
+
+
+def report_income_needed():
+    print()
+    print("=== 8. 목표액별로 월수입이 얼마여야 하나 (C: 소득 구조 변경, 연5% 가정) ===")
+    print("      목표   필요 월적립   저축률50%면   저축률70%면")
+    for t in (5, 8, 10, 12, 15, 20, 32):
+        need = pmt_for_target(t * EOK, 0.05, 10, NET_WORTH_NOW)
+        print(f"    {t:>4}억 {won(need):>12} {won(need * 2):>13} {won(need / 0.7):>13}")
+    print("    [주의] 현재 월수입 285만. 저축률 70%는 생활비를 수입의 30%로 누른다는 뜻이다.")
 
 
 if __name__ == "__main__":

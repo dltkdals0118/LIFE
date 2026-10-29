@@ -2797,6 +2797,100 @@
       "supersedes": null,
       "note": "'사실 큰 계산은 안했어. 너가 해줘도 좋을 것 같아.' → 32억(FACT-0121)은 **검토 대상이지 확정 목표가 아님**이 본인 확인으로 굳어졌다. 산술 검토 결과는 `simulation/GOAL_FEASIBILITY_20261029.md` 에 있고, **그 문서의 숫자는 전부 simulated 이므로 이 파일(reality)에 값으로 올리지 않는다** (docs/DATA_CONTRACT.md: simulated 는 simulation 에만 저장한다). 요약만 적는다: 10년 32억은 월 1,872~2,683만원 적립이 필요해 현재 수입의 6.6~9.4배이고, 일을 완전히 그만두는 데 필요한 자산조차 6.9~16.5억으로 32억의 21~51% 다. **결론을 내리지 않았다 — 목표 재설정·기한 연장·소득 구조 변경의 선택지만 만들었다.**",
       "current_validity": "current"
+    },
+    {
+      "id": "FACT-0129",
+      "domain": "목표",
+      "key": "light_work_is_outcome_not_constraint",
+      "value": "'라이트하게·워라밸'은 경제적 안정 **이후**의 상태이며 그 전까지는 적용되지 않는다",
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T10:30:00+09:00",
+      "source_ids": [
+        "SRC-038"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'라이트하게 워라벨은 경제적으로 좋아졌을 때 얘기인거야. 그 전까지는 당연히 라이트하게 생활 못하지.'\n**이것이 앞 회차에서 '정면 충돌'이라고 적었던 것을 해소한다.** FACT-0125 를 제약으로 읽은 것이 오독이었다 — 워라밸은 **목표 상태의 일부**이지 경로에 걸린 조건이 아니다. 따라서 소득 구조 변경(선택지 C)과 양립한다.\n**다만 전환 시점의 기준과 그때의 근로소득 수준은 미확인이다** — 언제부터 '좋아진' 것으로 볼지가 정해지지 않으면 설계가 그 시점을 임의로 잡게 된다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0130",
+      "domain": "목표",
+      "key": "deadline_fixed_no_extension",
+      "value": {
+        "기한": "10년",
+        "연장": "불가"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T10:30:00+09:00",
+      "source_ids": [
+        "SRC-038"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "선택지 B(기한 연장 10년 → 20·30년)에 '이건 안돼'로 답했다. **기한 10년은 고정 제약이다**(FACT-0126 확인). 그 결과 남는 레버는 **목표 금액(A)** 과 **소득 구조(C)** 둘뿐이다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0131",
+      "domain": "목표",
+      "key": "target_composition",
+      "value": {
+        "포함": [
+          "주거 매입"
+        ],
+        "미포함": [
+          "결혼",
+          "자녀",
+          "부모 부양",
+          "노후"
+        ]
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T10:30:00+09:00",
+      "source_ids": [
+        "SRC-038"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "32억(FACT-0121)에 **주거 매입은 들어 있고 나머지 넷은 들어 있지 않다.**\n**이것이 목표 금액의 대부분을 설명한다** — 산술 결과 주거 매입가를 변수로 두면 총 필요액이 그만큼 따라 움직이고, 32억이 되려면 주거가 21~26억이어야 한다(simulation/GOAL_FEASIBILITY_20261029.md §6).\n**원하는 주거의 지역·형태·가격대는 아직 받지 못했다(Q-042).** 그 값이 목표 금액을 정한다.\n노후가 미포함이라는 점은 따로 기억해 둔다 — 10년 뒤 시점에서 노후 자금이 0 이면 그 뒤에 같은 문제가 다시 생긴다. 지금 단계에서 지적만 하고 목표에 끼워 넣지 않는다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0132",
+      "domain": "목표",
+      "key": "chosen_levers",
+      "value": {
+        "선택": "A(목표 재설정) + C(소득 구조 변경)",
+        "제외": "B(기한 연장)",
+        "사용자_원문": "ABC 전부",
+        "불일치": "같은 턴에서 B 를 '안돼'라고 거부했다"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T10:30:00+09:00",
+      "source_ids": [
+        "SRC-038"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "Q-038 에 'ABC 전부'라고 답했지만, 같은 턴에서 **B(기한 연장)는 '이건 안돼'로 명시 거부**했다. **더 구체적인 답을 따라 B 를 제외하고 A+C 로 적는다.** 이 불일치를 숨기지 않고 남기니 사용자가 뒤집을 수 있다(Q-043).\nA+C 는 서로 보완한다 — 목표를 낮추면 필요 소득이 내려가고, 소득을 올리면 목표를 덜 낮춰도 된다. 둘 다 쓰면 어느 한쪽을 극단으로 밀지 않아도 된다.",
+      "current_validity": "unconfirmed"
     }
   ]
 }
