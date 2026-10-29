@@ -3021,6 +3021,90 @@
       "supersedes": null,
       "note": "현재 월 적자 261만(FACT-0117)을 **전액 없애도 저축은 0**이다 — 지출 = 수입 = 285만이 될 뿐이다.\n필요 월 적립은 159~498만이므로 **적립의 재원은 소득 증가뿐이다.**\n→ 순서가 정해진다: ① 지출 조정으로 적자 0 (현금 2.3개월 시한) ② 소득 증가로 적립 시작. ①은 ②의 선행 조건이지 대체재가 아니다.\n포커는 건드리지 않는다(FACT-0122). 식음료가 재량 덩어리다(FACT-0124).",
       "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0139",
+      "domain": "재정",
+      "key": "deficit_closing_preference",
+      "value": {
+        "식음료_180만_절감": "현실적이지 않음",
+        "선호": "포커 또는 부업으로 만든다",
+        "병행": "식음료와 기타 지출도 일부 절감"
+      },
+      "unit": "text",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T12:10:00+09:00",
+      "source_ids": [
+        "SRC-040"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'식음료 월 180 절감은 현실적이지 않아. 261만을 포커나 부업으로 만드는 게 좀 더 현실적인데 식음료나 다른 지출도 좀 줄이긴 할거야.'\n**지출 절감 중심의 1단계 가정(FACT-0138)이 수정됐다** — 본인은 수입 쪽을 주된 수단으로 본다.\n이 선택을 평가하지 않는다. 다만 **성립하려면 무엇이 참이어야 하는지**를 산술로 적어 두었다(simulation/INCOME_PATHS_20261029.md): 포커로 월 261만이면 현재 바이인 규모 기준 ROI +73% 가 필요하고, 실측 5개월은 월 평균 -$737 이었다. 부업으로면 시급 2만원 기준 월 130시간인데 현재 하루 가용은 1.3~2.3시간이다(FACT-0097).\n**포커를 줄이라고 제안하지 않는다**(FACT-0122). 다만 포커를 **수입 재원으로 계획에 넣는 것**은 '헤비한 취미'라는 본인 규정(FACT-0127)과 `docs/POKER_LEDGER_SPEC.md`('수익 증대를 전제하지 않는다')에 걸리므로, 넣을지 말지는 **사용자가 명시적으로 정해야 한다**(Q-051).",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0140",
+      "domain": "직장",
+      "key": "salary_negotiation_outlook",
+      "value": {
+        "시점": "2027-01",
+        "예상_연봉_세전": 40000000,
+        "본인_표현": "그래봤자 연봉 4000정도"
+      },
+      "unit": "KRW",
+      "kind": "self_report",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T12:10:00+09:00",
+      "source_ids": [
+        "SRC-040"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'내년 1월에 연봉협상을 할수는 있는데 그래봤자 연봉 4000정도 일거야.'\n**현재 세후 연 환산 약 3,420만**(세후 260×12 + 인센티브 25×12, FACT-0060·0061)과 비교하면 연봉 4,000만의 세후는 대략 그 수준이다 — **실수령이 거의 안 움직인다.** (정확한 세후는 세율·공제에 달려 있어 **미확인**이다.)\n목표가 요구하는 월수입은 444~783만이고 세전 연봉으로는 대략 6,300만~1.1억이다(FACT-0137, 세율 미확인 환산). **현 직장 경로로는 닿지 않는다** — 이직이나 다른 소득축이 필요하다는 뜻이고, 이는 평가가 아니라 두 숫자의 차이다.",
+      "current_validity": "current"
+    },
+    {
+      "id": "FACT-0141",
+      "domain": "목표",
+      "key": "albums_books_tournaments_cost",
+      "value": null,
+      "unit": "KRW",
+      "kind": "unknown",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T12:10:00+09:00",
+      "source_ids": [
+        "SRC-040"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "draft",
+      "supersedes": null,
+      "note": "앨범·책·포커 대회 출전(FACT-0120)의 비용이 **아직 어느 계획에도 들어 있지 않다.** 목표 금액(FACT-0137)은 주거·현금·채무청산만 담고 있다. 이것들은 '돈이 있다면' 하고 싶은 것이므로 목표 달성 **이후**의 지출로 볼 수도 있고 그 전에 시작할 수도 있다. 어느 쪽인지 묻지 않았다(Q-041).",
+      "current_validity": "unconfirmed"
+    },
+    {
+      "id": "FACT-0142",
+      "domain": "역량",
+      "key": "capability_question_unanswered",
+      "value": "Q-007 미응답 — 질문이 불명확했다",
+      "unit": "text",
+      "kind": "verified",
+      "as_of": "2026-10-29",
+      "recorded_at": "2026-10-29T12:10:00+09:00",
+      "source_ids": [
+        "SRC-040"
+      ],
+      "range": null,
+      "sensitivity": "personal",
+      "review_status": "confirmed",
+      "supersedes": null,
+      "note": "'이건 무슨말인지 모르겠어.' **질문을 잘못 쓴 쪽이 우리다.** '직접 기획/작성/수정/검증 범위'라는 표현이 추상적이었다. 소득을 1.6~2.7배로 올리려면 **무엇을 팔 수 있는지**를 알아야 하는데 그 물음이 전달되지 않았다. 구체적인 사례를 묻는 형태로 다시 낸다(Q-052). `reality/CAPABILITY_REVIEW.md` 의 '독립 코딩·운영 안정성 미확인' 항목도 여전히 비어 있다.",
+      "current_validity": "current"
     }
   ]
 }
