@@ -31,8 +31,12 @@ export function useWorkspace(){
  function startPersonal(){localStorage.setItem('life:mode','personal');setDemo(false);}
  function viewDemo(){localStorage.setItem('life:mode','demo');setDemo(true);}
  function configure(c:Config){validConfig(c);if(current.current.dirty&&user)throw Error('전송 대기 기록을 먼저 동기화하거나 백업해 주세요.');localStorage.setItem('life:config',JSON.stringify(c));setConfig(c);}
- async function login(email:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');const {error}=await client.current.auth.signInWithOtp({email,options:{emailRedirectTo:`${location.origin}${import.meta.env.BASE_URL}`}});if(error)throw error;startPersonal();}
+ // 비밀번호 로그인. 매직링크는 기기를 추가할 때마다 메일을 기다려야 하고 무료 플랜은 시간당 2통이라
+ // 두 기기를 묶는 데 쓸 수 없었다(2026-11-02 사용자 요청).
+ async function login(email:string,password:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');const {error}=await client.current.auth.signInWithPassword({email,password});if(error)throw error;startPersonal();}
+ // 반환값 true = 메일 확인이 필요하다(Supabase 의 Confirm email 이 켜져 있을 때). false = 바로 로그인됐다.
+ async function signup(email:string,password:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');if(password.length<8)throw Error('비밀번호는 8자 이상으로 정해 주세요.');const {data,error}=await client.current.auth.signUp({email,password});if(error)throw error;startPersonal();return !data.session;}
  async function logout(){if(current.current.dirty)throw Error('전송 대기 기록이 있습니다. 동기화 후 로그아웃해 주세요.');const key=scope.current;const {error}=await client.current!.auth.signOut();if(error)throw error;await del(key);}
  async function resolveConflict(choice:'local'|'remote'){const remote=conflictRef.current;if(!remote)return;if(choice==='remote'){show(remote);await persist(scope.current,remote);}else{const next={...current.current,revision:remote.revision,dirty:true,requestId:uid()};show(next);await persist(scope.current,next);}conflictSet(null);setTimeout(()=>void syncRef.current(),0);}
- return {data,demo,ready,user,status,error,setError,conflict,update,startPersonal,viewDemo,config,configure,login,logout,resolveConflict,sync:()=>syncRef.current()};
+ return {data,demo,ready,user,status,error,setError,conflict,update,startPersonal,viewDemo,config,configure,login,signup,logout,resolveConflict,sync:()=>syncRef.current()};
 }

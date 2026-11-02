@@ -21,7 +21,7 @@ The app uses `/LIFE/` as its base path. The Pages workflow publishes **only `app
 
 - Demo: synthetic data, in-memory interactions, no private uploads.
 - Device workspace: IndexedDB persistence, JSON export/import. This is **not cross-device sync**.
-- Signed-in workspace: private Supabase database, email magic-link auth, revision-based sync, offline queue and explicit conflict resolution. Same account on both devices is required.
+- Signed-in workspace: private Supabase database, **email + password auth**, revision-based sync, offline queue and explicit conflict resolution. Same account on both devices is required.
 
 Cloud connection is optional for the deployed UI but **required for automatic phone/PC sync**. Until it is configured, the UI says the data is saved only on this device. A browser reset can delete unsynced local records; export backups.
 
@@ -61,4 +61,4 @@ New login/account switch selects a distinct cache key. Pending records are not t
 
 `npm test`: domain behavior plus local PostgreSQL (PGlite) tests for revision conflicts, retry idempotency and owner isolation. These do not substitute for testing a configured Supabase deployment. Playwright checks desktop/mobile use, persistence, rewards and overflow. Screenshots and test output are ignored by Git.
 
-Official integration references: [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys), [email sign-in](https://supabase.com/docs/reference/javascript/auth-signinwithotp), [Vite Pages deployment](https://vite.dev/guide/static-deploy.html).
+Official integration references: [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys), [password sign-in](https://supabase.com/docs/reference/javascript/auth-signinwithpassword), [Vite Pages deployment](https://vite.dev/guide/static-deploy.html).

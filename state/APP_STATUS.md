@@ -1,6 +1,16 @@
 # 웹 앱 진행
 
-**2026-11-02: 구현이 저장소에 들어왔고 테스트가 통과했다.**
+**2026-11-02: 배포됐다. https://dltkdals0118.github.io/LIFE/ 에서 동작한다.**
+
+| 배포 검증 (직접확인 2026-11-02) | |
+|---|---|
+| 사이트 루트 | **200** — 앱 HTML |
+| `/state/STATUS.md` · `/reality/facts.json` · `/AGENTS.md` | **404** — **개인 기록이 사이트에서 사라졌다** |
+| 번들 | 200 · 586KB. Supabase URL·publishable key **주입 확인**, 비밀값 없음 |
+| Supabase | 테이블 2개·함수 1개 생성됨. anon 접근은 `42501`로 **차단**(없는 테이블의 `PGRST205`와 대조해 확인) |
+| CI | Actions `Deploy LIFE app` **success** — 테스트 8/8, 빌드 379ms |
+
+**Pages 가 저장소 전체 대신 `app/dist` 만 서브한다.** 저장소 파일은 GitHub 에서 여전히 공개다(FACT-0177).
 
 | | |
 |---|---|
@@ -38,7 +48,33 @@ git push origin public-app:main
 저장소는 **PUBLIC 이고 본인이 그 상태를 유지하기로 했다**(FACT-0177).
 다만 Pages 가 워크플로 배포로 바뀌면 **사이트에서는 앱만 보인다** — 저장소 파일은 GitHub 에서 여전히 공개다.
 
+## 로그인을 비밀번호 방식으로 바꿨다 (2026-11-02, 사용자 요청)
+매직링크(메일 링크 클릭 = 로그인)는 **기기를 추가할 때마다 메일을 기다려야 하고**
+무료 플랜 기본 메일은 **시간당 2통**이라 두 기기를 묶는 데 쓸 수 없었다.
+사용자가 *"로그인이 일반적이지가 않아서 이해가 안 된다"* 고 했고 **이메일 + 비밀번호**를 택했다.
+
+| | |
+|---|---|
+| 바뀐 것 | `signInWithOtp` → **`signInWithPassword`**, 가입용 `signUp` 추가(비밀번호 8자 이상) |
+| 화면 | `설정과 동기화` 에 이메일·비밀번호 입력 + `로그인` / `계정 만들고 시작하기` 전환 |
+| 시험 | **`e2e/auth.spec.ts` 신규** — 로그인 폼을 실제로 통과시킨다. 기존 `sync.spec` 은 세션을 심어 폼을 건너뛰어서 **'로그인이 안 된다'를 잡지 못했다** |
+
+**Supabase 쪽에서 할 것 하나**: Authentication → Sign In / Providers → Email 의 **`Confirm email` 을 끄면**
+가입 즉시 로그인되어 **메일이 아예 필요 없어진다.** 켜 두면 가입 때 확인 메일 1통이 필요하다.
+개인용 앱이고 본인만 쓰므로 끄는 쪽이 실용적이다 — **판단은 본인 몫**이다.
+
+## 코드 분할 — 시도했고 보류했다 (2026-11-02)
+`manualChunks` 로 react·supabase 를 가르려다 **빌드가 네이티브 크래시**했다(rolldown Go runtime panic).
+Vite 8 은 rolldown 기반이라 rollup 의 `manualChunks` 가 그대로 듣지 않는다.
+**되돌렸고 다시 시도하지 않는다** — 단일 페이지라 첫 화면에 전부 필요해 분할 이득이 작고,
+gzip 172KB 는 동작에 문제가 없다. 다시 한다면 `build.rolldownOptions.output.advancedChunks` 쪽이다.
+
+## 로컬 테스트가 가끔 죽는다 — 코드 문제가 아니다
+`src/database.test.ts`(PGlite = WASM Postgres)가 메모리 압박에서 **exit 134**로 죽는다.
+**같은 커밋이 CI 에서는 8/8 통과한다**(Actions 로그 직접확인). 브라우저를 많이 띄운 상태에서 재현된다.
+로컬에서 막히면 `npx vitest run --no-file-parallelism` 또는 다른 앱을 닫고 다시 돌린다.
+
 ## 다음
-1. Supabase 연결 → 두 기기 검증
-2. 코드 분할(594KB 단일 청크)
-3. `private_raw/life-app-import.json` 으로 실제 기록 가져오기 — **로컬에서만**, 공개 빌드에 넣지 않는다
+1. **두 기기 실연동 검증** — PC·휴대폰에서 같은 이메일·비밀번호로 로그인해 퀘스트가 건너가는지
+2. `private_raw/life-app-import.json` 으로 실제 기록 가져오기 — **로컬에서만**, 공개 빌드에 넣지 않는다
+3. 워크플로의 Node 20 deprecation 경고(actions/checkout@v4 등) 정리
