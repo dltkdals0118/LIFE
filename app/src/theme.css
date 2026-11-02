@@ -277,3 +277,24 @@ input:-webkit-autofill:focus{box-shadow:0 0 0 1000px #101a15 inset,0 0 0 3px #5e
 input::-ms-reveal,input::-ms-clear{filter:invert(1) opacity(.6)}
 input[type=date]::-webkit-calendar-picker-indicator,
 input[type=number]::-webkit-inner-spin-button{filter:invert(.75)}
+
+/* 7차 — 자동완성의 근본 해법.
+   color-scheme:dark 를 선언하면 브라우저가 폼 컨트롤·자동완성·스크롤바·드롭다운을
+   다크 기준으로 칠한다. -webkit-autofill 덮어쓰기보다 이쪽이 먼저다.
+   표준 :autofill 도 함께 건다 — 최신 Chrome 은 이 선택자를 쓴다. */
+:root{color-scheme:dark}
+input:autofill,
+input:autofill:hover,
+input:autofill:focus,
+textarea:autofill,
+select:autofill{
+  -webkit-text-fill-color:var(--text) !important;
+  -webkit-box-shadow:0 0 0 1000px #0e1713 inset !important;
+  box-shadow:0 0 0 1000px #0e1713 inset !important;
+  background-color:#0e1713 !important;
+  caret-color:var(--neon) !important;
+  transition:background-color 9999s ease-out 0s !important;
+}
+input:autofill:focus{box-shadow:0 0 0 1000px #101a15 inset,0 0 0 3px #5ee89a1f !important}
+/* 자동완성 드롭다운 목록 자체도 다크로 (지원 브라우저에서) */
+::-webkit-autofill-strong-password,::-webkit-credentials-auto-fill-button{filter:invert(.85)}
