@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Wallet, X } from 'lucide-react';
-import { assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
+import { OUTCOME, nextSuggestion, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
 import { AuthGate, NewPassword } from './Auth';
 import { useWorkspace } from './store';
 
 type View='today'|'map'|'plans'|'quests'|'records'|'review'|'rewards'|'settings';
-type Dialog={type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
+type Dialog={type:'outcome';item:Quest}|{type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
 const nav=[{id:'today',label:'오늘',icon:Home},{id:'map',label:'성장 지도',icon:Map},{id:'plans',label:'목표와 플랜',icon:Flag},{id:'quests',label:'퀘스트',icon:ListChecks},{id:'records',label:'나의 기록',icon:BookOpen},{id:'review',label:'주간 회고',icon:RefreshCw},{id:'rewards',label:'보상함',icon:Gift}] as const;
 const icons={wallet:Wallet,sprout:Sprout,briefcase:BriefcaseBusiness,book:BookOpen,heart:Heart,sparkles:Sparkles};
 const kindNames={'cash':'가용 현금','hours':'주간 가용시간','sleep':'수면 시간','poker-out':'포커 송금','poker-in':'포커 회수'};
@@ -22,7 +22,7 @@ function Landscape(){return <svg className="landscape" viewBox="0 0 400 230" fil
 
 export default function App(){
  const store=useWorkspace();const {data:s,demo,ready}=store;
- const [view,setView]=useState<View>('today'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false);
+ const [view,setView]=useState<View>('today'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false);
  const importRef=useRef<HTMLInputElement>(null);
  const xp=xpOf(s),done=s.quests.filter(q=>q.status==='done'),open=s.quests.filter(q=>q.status==='ready').sort((a,b)=>a.due.localeCompare(b.due)),todayQs=open.filter(q=>q.due<=today()).slice(0,3),actualToday=done.filter(q=>q.completedAt?.slice(0,10)===today()).length;
  const activeDomain=s.domains.find(d=>d.id===selectedDomain)??s.domains[0];const currentLevel=level(xpOf(s,activeDomain.id));
@@ -30,11 +30,21 @@ export default function App(){
  useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(''),5000);return()=>clearTimeout(timer);},[toast]);
  const go=(v:View)=>{setView(v);setMenu(false);setFilter('all');setQuery('');window.scrollTo({top:0,behavior:'instant'});};
  const change=(fn:(s:Workspace)=>Workspace,msg?:string)=>{try{store.update(fn);if(msg)notify(msg);}catch(e){notify((e as Error).message);}};
- const toggle=(q:Quest)=>change(s=>completeQuest(s,q.id),q.status==='done'?'완료를 취소했어요.':`작은 한 걸음이 쌓였어요. +${q.xp} XP`);
+ const toggle=(q:Quest)=>{
+  if(q.status==='done'){change(s=>completeQuest(s,q.id),'완료를 취소했어요.');return;}
+  setDialog({type:'outcome',item:q});   // 끝까지 / 절반 / 못 함 — 결과를 받고 나서 기록한다
+ };
+ function finishQuest(q:Quest,outcome:Outcome){
+  const gained=Math.round(q.xp*OUTCOME[outcome].ratio);
+  change(s=>completeQuest(s,q.id,outcome),`${OUTCOME[outcome].label} · +${gained} XP`);
+  setDialog(null);
+  // 결과를 반영한 다음 상태에서 제안을 고른다
+  setTimeout(()=>{const next=nextSuggestion(store.data,q.id);if(next)setSuggestion(next);},0);
+ }
  const exportBackup=()=>{const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`life-${demo?'demo-':''}${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);notify('백업 파일을 내려받았어요. 개인 기록이 포함될 수 있습니다.');};
  async function importFile(file?:File){if(!file)return;try{if(file.size>4000000)throw Error('4MB 이하의 LIFE 앱 백업 파일을 선택해 주세요.');setDialog({type:'import',data:parseBackup(JSON.parse(await file.text()))});}catch{notify('올바른 LIFE 앱 백업 형식이 아닙니다. 기존 데이터는 유지됩니다.');}if(importRef.current)importRef.current.value='';}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget);try{if(!dialog)return;
- if(dialog.type==='quest'){const q:Quest={id:dialog.item?.id??uid(),title:text(f,'title'),domainId:text(f,'domain'),minutes:num(f,'minutes'),xp:num(f,'xp'),due:text(f,'due'),criterion:text(f,'criterion'),planId:text(f,'plan'),status:dialog.item?.status??'ready',completedAt:dialog.item?.completedAt??null};store.update(s=>log({...s,quests:dialog.item?s.quests.map(x=>x.id===q.id?q:x):[q,...s.quests]},`${q.title} · ${dialog.item?'수정':'추가'}`));}
+ if(dialog.type==='quest'){const q:Quest={id:dialog.item?.id??uid(),title:text(f,'title'),domainId:text(f,'domain'),minutes:num(f,'minutes'),xp:num(f,'xp'),due:text(f,'due'),criterion:text(f,'criterion'),planId:text(f,'plan'),status:dialog.item?.status??'ready',completedAt:dialog.item?.completedAt??null,outcome:dialog.item?.outcome??null};store.update(s=>log({...s,quests:dialog.item?s.quests.map(x=>x.id===q.id?q:x):[q,...s.quests]},`${q.title} · ${dialog.item?'수정':'추가'}`));}
  if(dialog.type==='plan'){const p:Plan={id:dialog.item?.id??uid(),title:text(f,'title'),goal:text(f,'goal'),domainId:text(f,'domain'),active:dialog.item?.active??'A',branches:(['A','B','C'] as const).map(key=>({key,title:text(f,`title${key}`),cost:num(f,`cost${key}`),hours:num(f,`hours${key}`),duration:num(f,`duration${key}`),result:text(f,`result${key}`),trigger:text(f,`trigger${key}`),switchCost:num(f,`switch${key}`)}))};store.update(s=>log({...s,plans:dialog.item?s.plans.map(x=>x.id===p.id?p:x):[p,...s.plans]},`${p.title} · 플랜 저장`));}
  if(dialog.type==='observation'){const o={id:uid(),kind:text(f,'kind') as keyof typeof kindNames,value:num(f,'value'),date:text(f,'date'),note:text(f,'note')};if(o.kind==='sleep'&&o.value>24)throw Error('수면 시간은 24시간 이내로 입력해 주세요.');if(o.kind==='hours'&&o.value>168)throw Error('주간 시간은 168시간 이내로 입력해 주세요.');store.update(s=>log({...s,observations:[o,...s.observations]},`${kindNames[o.kind]} 기록 추가`));}
  if(dialog.type==='reward')store.update(s=>({...s,rewards:[{id:uid(),title:text(f,'title'),type:text(f,'type') as 'real'|'digital',cost:num(f,'cost'),requiredXp:num(f,'requiredXp'),status:'wish',spent:null,usedAt:null},...s.rewards]}));
@@ -42,7 +52,7 @@ export default function App(){
  if(dialog.type==='review')store.update(s=>log({...s,reviews:[{id:uid(),date:today(),win:text(f,'win'),obstacle:text(f,'obstacle'),next:text(f,'next')},...s.reviews]},'주간 회고를 남겼어요'));
  setDialog(null);notify('저장했어요. 다음 한 걸음도 나의 속도로.');}catch(e){notify((e as Error).message);}}
  const domainSelect=(value?:string)=><select name="domain" defaultValue={value??s.domains[0].id}>{s.domains.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select>;
- function questRow(q:Quest){const d=s.domains.find(x=>x.id===q.domainId)!;return <div key={q.id} className={`quest-row ${q.status==='done'?'is-done':''}`}><button className="check-button" aria-label={`${q.title} ${q.status==='done'?'완료 취소':'완료'}`} onClick={()=>toggle(q)} disabled={!ready}>{q.status==='done'?<Check size={16}/>:null}</button><button className="quest-content" onClick={()=>setDialog({type:'quest',item:q})}><strong>{q.title}</strong><span><i className={`dot ${d.color}`}/>{d.name}<b>·</b>{q.minutes}분{q.due<today()&&q.status==='ready'&&<em>일정 다시 보기</em>}</span></button><span className="xp-pill">+{q.xp} <small>XP</small></span><button className="icon-button" aria-label={`${q.title} 편집`} onClick={()=>setDialog({type:'quest',item:q})}><MoreHorizontal size={18}/></button></div>;}
+ function questRow(q:Quest){const d=s.domains.find(x=>x.id===q.domainId)!;return <div key={q.id} className={`quest-row ${q.status==='done'?'is-done':''}`}><button className="check-button" aria-label={`${q.title} ${q.status==='done'?'완료 취소':'완료'}`} onClick={()=>toggle(q)} disabled={!ready}>{q.status==='done'?<Check size={16}/>:null}</button><button className="quest-content" onClick={()=>setDialog({type:'quest',item:q})}><strong>{q.title}</strong><span><i className={`dot ${d.color}`}/>{d.name}<b>·</b>{q.minutes}분{q.due<today()&&q.status==='ready'&&<em>일정 다시 보기</em>}</span></button>{q.status==='done'&&q.outcome&&q.outcome!=='full'&&<span className={`outcome-chip ${q.outcome}`}>{q.outcome==='partial'?'절반':'못 함'}</span>}<span className="xp-pill">{q.status==='done'&&q.outcome?`+${Math.round(q.xp*OUTCOME[q.outcome].ratio)}`:`+${q.xp}`} <small>XP</small></span><button className="icon-button" aria-label={`${q.title} 편집`} onClick={()=>setDialog({type:'quest',item:q})}><MoreHorizontal size={18}/></button></div>;}
  const sectionHead=(eyebrow:string,title:string,desc:string,action?:ReactNode)=><div className="page-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{desc}</p></div>{action}</div>;
  function domainCards(compact=false){return <div className={`domain-grid ${compact?'compact':''}`}>{s.domains.map(d=>{const dxp=xpOf(s,d.id),lv=level(dxp);return <button key={d.id} className={`domain-card ${d.color}`} onClick={()=>{setSelectedDomain(d.id);go('map');}}><div className="domain-card-top"><DomainIcon domain={d}/><span>Lv. {lv.level}</span></div><h3>{d.name}</h3><p>{s.quests.filter(q=>q.domainId===d.id&&q.status==='done').length}개의 작은 성취</p><div className="progress-track"><i style={{width:`${Math.max(2,lv.progress*100)}%`}}/></div><div className="progress-label"><span>{dxp} XP</span><span>{lv.next} XP</span></div></button>;})}</div>;}
  const headAction=<button className="primary" onClick={()=>setDialog({type:'observation'})}><Plus size={17}/>빠른 기록</button>;
@@ -86,8 +96,32 @@ export default function App(){
  </main></div>
  <nav className="mobile-nav">{[nav[0],nav[1],nav[3],nav[6]].map(n=><button key={n.id} className={view===n.id?'active':''} onClick={()=>go(n.id)}><n.icon size={20}/><span>{n.label}</span></button>)}</nav>
  {toast&&<div className="toast" role="status"><Check size={17}/>{toast}</div>}
+ {suggestion&&<div className="suggestion" role="status">
+   <span className="suggestion-icon"><Compass size={17}/></span>
+   <p>{suggestion.text}</p>
+   <div className="suggestion-actions">
+    {suggestion.switchTo&&suggestion.planId&&<button className="primary" onClick={()=>{
+      const to=suggestion.switchTo!,pid=suggestion.planId!;
+      change(s=>log({...s,plans:s.plans.map(p=>p.id===pid?{...p,active:to}:p)},`경로 전환 · ${to}`),`${to} 경로로 바꿨어요.`);
+      setSuggestion(null);}}>{suggestion.switchTo} 경로로 바꾸기</button>}
+    <button className="secondary" onClick={()=>setSuggestion(null)}>닫기</button>
+   </div>
+  </div>}
  {store.conflict&&<Modal title="다른 기기에서도 기록이 바뀌었어요" onClose={()=>notify('기록을 선택할 때까지 동기화가 잠시 멈춥니다.')}><p>한 공간의 전체 기록이 서로 다릅니다. 먼저 현재 기기 기록을 백업한 뒤, 유지할 버전을 선택해 주세요. 선택하지 않은 변경은 덮어써집니다.</p><div className="conflict-grid"><div><h3>이 기기</h3><p>퀘스트 {s.quests.length}개 · 기록 {s.observations.length}개</p></div><div><h3>서버</h3><p>퀘스트 {store.conflict.data.quests.length}개 · 기록 {store.conflict.data.observations.length}개</p></div></div><button className="secondary" onClick={exportBackup}>이 기기 기록 백업</button><div className="modal-actions"><button className="secondary" onClick={()=>void store.resolveConflict('remote')}>서버 기록 사용</button><button className="primary" onClick={()=>{if(confirm('서버 기록 전체를 이 기기의 기록으로 바꿀까요?'))void store.resolveConflict('local');}}>이 기기 기록 사용</button></div></Modal>}
- {dialog&&<Modal title={{quest:dialog.type==='quest'&&dialog.item?'퀘스트 다듬기':'새로운 작은 한 걸음',plan:'나의 플랜 ABC',observation:'지금의 나 기록하기',reward:'기다려지는 작은 보상',domain:'새로운 성장 분야',review:'이번 주의 나에게',import:'백업 가져오기'}[dialog.type]} onClose={()=>setDialog(null)}>{dialog.type==='import'?<><p>가져올 공간: <b>{dialog.data.name}</b></p><p>퀘스트 {dialog.data.quests.length}개 · 기록 {dialog.data.observations.length}개</p><div className="notice">현재 공간 전체를 이 백업으로 바꿉니다. 로그인 상태에서는 연결된 클라우드에도 반영됩니다.</div><div className="modal-actions"><button className="secondary" onClick={exportBackup}>현재 기록 백업</button><button className="primary" onClick={()=>{change(()=>dialog.data,'백업 기록을 가져왔어요.');setDialog(null);}}>이 기록으로 교체</button></div></>:<form onSubmit={submit}>
+ {dialog?.type==='outcome'&&<Modal title="오늘은 어디까지 갔나요?" onClose={()=>setDialog(null)}>
+  <p className="outcome-intro"><strong>{dialog.item.title}</strong><span>{dialog.item.criterion||'완료 기준이 적혀 있지 않아요.'}</span></p>
+  <div className="outcome-grid">
+   {(['full','partial','missed'] as Outcome[]).map(k=>{
+    const gained=Math.round(dialog.item.xp*OUTCOME[k].ratio);
+    return <button key={k} type="button" className={`outcome-card ${k}`} onClick={()=>finishQuest(dialog.item,k)}>
+      <span className="outcome-mark">{k==='full'?<CheckCheck size={20}/>:k==='partial'?<Circle size={19}/>:<MoreHorizontal size={20}/>}</span>
+      <strong>{OUTCOME[k].label}</strong>
+      <small>+{gained} XP</small>
+    </button>;})}
+  </div>
+  <p className="small-note">못 했어도 0 이 아니에요. 시도하고 기록한 것이 다음 판단의 근거가 됩니다.</p>
+ </Modal>}
+ {dialog&&dialog.type!=='outcome'&&<Modal title={{quest:dialog.type==='quest'&&dialog.item?'퀘스트 다듬기':'새로운 작은 한 걸음',plan:'나의 플랜 ABC',observation:'지금의 나 기록하기',reward:'기다려지는 작은 보상',domain:'새로운 성장 분야',review:'이번 주의 나에게',import:'백업 가져오기',outcome:'오늘은 어디까지 갔나요?'}[dialog.type]} onClose={()=>setDialog(null)}>{dialog.type==='import'?<><p>가져올 공간: <b>{dialog.data.name}</b></p><p>퀘스트 {dialog.data.quests.length}개 · 기록 {dialog.data.observations.length}개</p><div className="notice">현재 공간 전체를 이 백업으로 바꿉니다. 로그인 상태에서는 연결된 클라우드에도 반영됩니다.</div><div className="modal-actions"><button className="secondary" onClick={exportBackup}>현재 기록 백업</button><button className="primary" onClick={()=>{change(()=>dialog.data,'백업 기록을 가져왔어요.');setDialog(null);}}>이 기록으로 교체</button></div></>:<form onSubmit={submit}>
  {dialog.type==='quest'&&<><Field label="어떤 한 걸음을 내딛을까요?"><input name="title" required maxLength={200} placeholder="예: 이번 달 정기결제 목록 확인하기" defaultValue={dialog.item?.title}/></Field><div className="form-grid"><Field label="분야">{domainSelect(dialog.item?.domainId)}</Field><Field label="예정일"><input type="date" name="due" required defaultValue={dialog.item?.due??today()}/></Field><Field label="예상 시간 (분)"><input name="minutes" type="number" min="0" max="10000" required defaultValue={dialog.item?.minutes??10}/></Field><Field label="경험치"><select name="xp" defaultValue={dialog.item?.xp??15}><option value="5">관측 · 5 XP</option><option value="15">실행 · 15 XP</option><option value="30">결과물 · 30 XP</option><option value="10">회고 · 10 XP</option></select></Field></div><Field label="완료했다고 말할 수 있는 기준"><textarea name="criterion" required maxLength={2000} placeholder="목록과 다음 결제일을 기록했어요." defaultValue={dialog.item?.criterion}/></Field><Field label="연결할 플랜"><select name="plan" defaultValue={dialog.item?.planId??''}><option value="">연결하지 않음</option>{s.plans.map(p=><option key={p.id} value={p.id}>{p.title}</option>)}</select></Field>{dialog.item&&<div className="button-row"><button type="button" className="secondary" onClick={()=>{change(s=>({...s,quests:s.quests.map(q=>q.id===dialog.item!.id?{...q,status:q.status==='paused'?'ready':'paused',completedAt:null}:q)}),'퀘스트 상태를 바꿨어요.');setDialog(null);}}>{dialog.item.status==='paused'?'다시 시작':'잠시 보류'}</button><button type="button" className="text-button danger" onClick={()=>{if(confirm('퀘스트를 삭제할까요? 완료 경험치도 제거됩니다.')){change(s=>log({...s,quests:s.quests.filter(q=>q.id!==dialog.item!.id)},'퀘스트 삭제'));setDialog(null);}}}>삭제</button></div>}</>}
  {dialog.type==='plan'&&<><Field label="플랜 이름"><input name="title" required maxLength={200} defaultValue={dialog.item?.title} placeholder="생활의 여유 만들기"/></Field><Field label="성공했다고 판단할 구체적인 목표"><input name="goal" required maxLength={200} defaultValue={dialog.item?.goal} placeholder="이번 달 정기 지출 3개 확인하기"/></Field><Field label="분야">{domainSelect(dialog.item?.domainId)}</Field>{(['A','B','C'] as const).map((k,i)=>{const b=dialog.item?.branches.find(x=>x.key===k);return <fieldset key={k}><legend>PLAN {k} · {['기본 경로','대체 경로','최소 목표'][i]}</legend><Field label="경로 이름"><input name={`title${k}`} required maxLength={200} defaultValue={b?.title??['차근차근 실행하기','핵심 한 가지에 집중','최소 행동 이어가기'][i]}/></Field><div className="form-grid"><Field label="필요 자금 (원)"><input name={`cost${k}`} type="number" min="0" max="1000000000000" required defaultValue={b?.cost??0}/></Field><Field label="주간 필요 시간"><input name={`hours${k}`} type="number" min="0" max="168" step="0.25" required defaultValue={b?.hours??[2,1,0.25][i]}/></Field><Field label="기간 (일)"><input name={`duration${k}`} type="number" min="1" max="3650" required defaultValue={b?.duration??30}/></Field><Field label="경로 전환 비용 (원)"><input name={`switch${k}`} type="number" min="0" max="1000000000000" required defaultValue={b?.switchCost??0}/></Field></div><Field label="이 경로의 완료 기준"><input name={`result${k}`} required maxLength={200} defaultValue={b?.result}/></Field><Field label="막히면 언제 다음 길을 검토할까요?"><input name={`trigger${k}`} maxLength={2000} defaultValue={b?.trigger} placeholder="예: 2주 동안 진행이 없으면 B 검토"/></Field></fieldset>;})}</>}
  {dialog.type==='observation'&&<><Field label="기록할 항목"><select name="kind">{Object.entries(kindNames).map(([k,v])=><option key={k} value={k}>{v}{k==='sleep'||k==='hours'?' (시간)':' (원)'}</option>)}</select></Field><div className="form-grid"><Field label="값"><input name="value" type="number" min="0" max="1000000000000" step="any" required placeholder="직접 확인한 값"/></Field><Field label="기준일"><input name="date" type="date" max={today()} required defaultValue={today()}/></Field></div><Field label="포함 범위 또는 메모"><textarea name="note" maxLength={2000} placeholder="예: 생활비 계좌와 비상금 계좌의 합계"/></Field><p className="small-note">모르는 값은 입력하지 않아도 돼요. 포커 송금·회수는 게임 손익과 구분해 기록합니다.</p></>}
@@ -100,4 +134,41 @@ export default function App(){
 }
 
 function WeekDots({quests}:{quests:Quest[]}){const now=new Date();const day=(now.getDay()+6)%7;return <div className="week-dots">{['월','화','수','목','금','토','일'].map((label,i)=>{const d=new Date(now);d.setDate(now.getDate()-day+i);const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,count=quests.filter(q=>q.status==='done'&&q.completedAt?.slice(0,10)===date).length;return <div key={label} className={i===day?'current':''}><small>{label}</small><span className={count?'filled':''}>{count?<Check size={15}/>:d.getDate()}</span><i/></div>;})}</div>;}
-function CashChart({observations}:{observations:Workspace['observations']}){const seen=new Set<string>();const rows=observations.filter(o=>{if(o.kind!=='cash'||seen.has(o.date))return false;seen.add(o.date);return true;}).sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);if(!rows.length)return <Empty title="첫 현금 기록을 남겨보세요" body="기록이 쌓이면 변화가 한눈에 보여요."/>;const max=Math.max(...rows.map(r=>r.value),1);return <div className="cash-bars">{rows.map(r=><div key={r.id}><span>{won(r.value)}</span><div className="bar-space"><i style={{height:`${Math.max(2,r.value/max*100)}%`}}/></div><small>{r.date.slice(5)}</small></div>)}</div>;}
+// 현금 흐름 — 날짜 간격을 실제로 반영한 영역 그래프. 선이 그려지며 점이 차례로 올라온다.
+function CashChart({observations}:{observations:Workspace['observations']}){
+ const seen=new Set<string>();
+ const rows=observations.filter(o=>{if(o.kind!=='cash'||seen.has(o.date))return false;seen.add(o.date);return true;})
+   .sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);
+ if(!rows.length)return <Empty title="첫 현금 기록을 남겨보세요" body="기록이 쌓이면 변화가 한눈에 보여요."/>;
+ const W=760,H=190,PAD={l:14,r:14,t:26,b:30};
+ const day=(d:string)=>Date.parse(d+'T00:00:00Z')/86400000;
+ const xs=rows.map(r=>day(r.date)),ys=rows.map(r=>r.value);
+ const x0=Math.min(...xs),x1=Math.max(...xs),span=Math.max(1,x1-x0);
+ // 한 점뿐이면 가운데에 둔다. 값이 모두 같아도 바닥에 붙지 않게 여유를 준다.
+ const yMax=Math.max(...ys),yMin=Math.min(...ys),range=Math.max(1,yMax-yMin||yMax*0.25);
+ const px=(d:number)=>rows.length===1?W/2:PAD.l+(d-x0)/span*(W-PAD.l-PAD.r);
+ const py=(v:number)=>PAD.t+(1-(v-(yMin-range*0.15))/(range*1.3))*(H-PAD.t-PAD.b);
+ const pts=rows.map((r,i)=>({x:px(xs[i]),y:py(r.value),r}));
+ const line=pts.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+ const area=`${line} L${pts[pts.length-1].x.toFixed(1)},${H-PAD.b} L${pts[0].x.toFixed(1)},${H-PAD.b} Z`;
+ const last=pts[pts.length-1];
+ return <div className="cash-chart">
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`현금 기록 ${rows.length}건, 최근 ${won(last.r.value)}`} preserveAspectRatio="none">
+   <defs>
+    <linearGradient id="cashFill" x1="0" y1="0" x2="0" y2="1">
+     <stop offset="0%" stopColor="var(--neon)" stopOpacity="0.30"/>
+     <stop offset="100%" stopColor="var(--neon)" stopOpacity="0"/>
+    </linearGradient>
+   </defs>
+   {[0,.5,1].map(f=><line key={f} className="cash-grid" x1={PAD.l} x2={W-PAD.r}
+     y1={PAD.t+f*(H-PAD.t-PAD.b)} y2={PAD.t+f*(H-PAD.t-PAD.b)}/>)}
+   {rows.length>1&&<path className="cash-area" d={area} fill="url(#cashFill)"/>}
+   {rows.length>1&&<path className="cash-line" d={line}/>}
+   {pts.map((p,i)=><g key={p.r.id} className="cash-point" style={{animationDelay:`${260+i*110}ms`}}>
+     <circle cx={p.x} cy={p.y} r={i===pts.length-1?5.5:3.8}/>
+     <text x={Math.min(Math.max(p.x,52),W-52)} y={p.y-13}>{won(p.r.value)}</text>
+     <text className="cash-date" x={Math.min(Math.max(p.x,22),W-22)} y={H-10}>{p.r.date.slice(5)}</text>
+    </g>)}
+  </svg>
+ </div>;
+}
