@@ -200,41 +200,52 @@ export default function App(){
 }
 
 function WeekDots({quests}:{quests:Quest[]}){const now=new Date();const day=(now.getDay()+6)%7;return <div className="week-dots">{['월','화','수','목','금','토','일'].map((label,i)=>{const d=new Date(now);d.setDate(now.getDate()-day+i);const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,count=quests.filter(q=>q.status==='done'&&q.completedAt?.slice(0,10)===date).length;return <div key={label} className={i===day?'current':''}><small>{label}</small><span className={count?'filled':''}>{count?<Check size={15}/>:d.getDate()}</span><i/></div>;})}</div>;}
-// 현금 흐름 — 날짜 간격을 실제로 반영한 영역 그래프. 선이 그려지며 점이 차례로 올라온다.
+// 현금 흐름 — 날짜 간격을 실제로 반영한 영역 그래프.
+// viewBox 를 실제 픽셀 폭에 맞춘다. preserveAspectRatio="none" 으로 늘이면 글자가 가로로 찌그러진다.
 function CashChart({observations}:{observations:Workspace['observations']}){
+ const box=useRef<HTMLDivElement>(null);
+ const [W,setW]=useState(760);
+ useEffect(()=>{const el=box.current;if(!el)return;
+  const ro=new ResizeObserver(([e])=>setW(Math.max(320,Math.round(e.contentRect.width))));
+  ro.observe(el);return()=>ro.disconnect();},[]);
  const seen=new Set<string>();
  const rows=observations.filter(o=>{if(o.kind!=='cash'||seen.has(o.date))return false;seen.add(o.date);return true;})
    .sort((a,b)=>a.date.localeCompare(b.date)).slice(-12);
  if(!rows.length)return <Empty title="첫 현금 기록을 남겨보세요" body="기록이 쌓이면 변화가 한눈에 보여요."/>;
- const W=760,H=190,PAD={l:14,r:14,t:26,b:30};
+ const H=200,PAD={l:16,r:16,t:30,b:32};
  const day=(d:string)=>Date.parse(d+'T00:00:00Z')/86400000;
  const xs=rows.map(r=>day(r.date)),ys=rows.map(r=>r.value);
  const x0=Math.min(...xs),x1=Math.max(...xs),span=Math.max(1,x1-x0);
- // 한 점뿐이면 가운데에 둔다. 값이 모두 같아도 바닥에 붙지 않게 여유를 준다.
  const yMax=Math.max(...ys),yMin=Math.min(...ys),range=Math.max(1,yMax-yMin||yMax*0.25);
  const px=(d:number)=>rows.length===1?W/2:PAD.l+(d-x0)/span*(W-PAD.l-PAD.r);
  const py=(v:number)=>PAD.t+(1-(v-(yMin-range*0.15))/(range*1.3))*(H-PAD.t-PAD.b);
  const pts=rows.map((r,i)=>({x:px(xs[i]),y:py(r.value),r}));
  const line=pts.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
  const area=`${line} L${pts[pts.length-1].x.toFixed(1)},${H-PAD.b} L${pts[0].x.toFixed(1)},${H-PAD.b} Z`;
- const last=pts[pts.length-1];
- return <div className="cash-chart">
-  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`현금 기록 ${rows.length}건, 최근 ${won(last.r.value)}`} preserveAspectRatio="none">
-   <defs>
-    <linearGradient id="cashFill" x1="0" y1="0" x2="0" y2="1">
-     <stop offset="0%" stopColor="var(--neon)" stopOpacity="0.30"/>
+ // 날짜 간격을 그대로 쓰면 가까운 점의 글자가 겹친다. 뒤에서부터 간격을 확보하며 솎아낸다 —
+ // 마지막(가장 최근) 값은 언제나 보인다.
+ const pick=(gap:number)=>{const on=new Array(pts.length).fill(false);let last=Infinity;
+  for(let i=pts.length-1;i>=0;i--)if(last-pts[i].x>=gap){on[i]=true;last=pts[i].x;}
+  return on;};
+ const showValue=pick(96),showDate=pick(64);
+ return <div className="cash-chart" ref={box}>
+  <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img"
+    aria-label={`현금 기록 ${rows.length}건, 최근 ${won(pts[pts.length-1].r.value)}`}>
+   <defs><linearGradient id="cashFill" x1="0" y1="0" x2="0" y2="1">
+     <stop offset="0%" stopColor="var(--neon)" stopOpacity="0.28"/>
      <stop offset="100%" stopColor="var(--neon)" stopOpacity="0"/>
-    </linearGradient>
-   </defs>
+    </linearGradient></defs>
    {[0,.5,1].map(f=><line key={f} className="cash-grid" x1={PAD.l} x2={W-PAD.r}
      y1={PAD.t+f*(H-PAD.t-PAD.b)} y2={PAD.t+f*(H-PAD.t-PAD.b)}/>)}
    {rows.length>1&&<path className="cash-area" d={area} fill="url(#cashFill)"/>}
    {rows.length>1&&<path className="cash-line" d={line}/>}
-   {pts.map((p,i)=><g key={p.r.id} className="cash-point" style={{animationDelay:`${260+i*110}ms`}}>
-     <circle cx={p.x} cy={p.y} r={i===pts.length-1?5.5:3.8}/>
-     <text x={Math.min(Math.max(p.x,52),W-52)} y={p.y-13}>{won(p.r.value)}</text>
-     <text className="cash-date" x={Math.min(Math.max(p.x,22),W-22)} y={H-10}>{p.r.date.slice(5)}</text>
-    </g>)}
+   {pts.map((p,i)=>{const last=i===pts.length-1;
+    return <g key={p.r.id} className="cash-point" style={{animationDelay:`${260+i*110}ms`}}>
+     <circle cx={p.x} cy={p.y} r={last?5.5:3.8}><title>{`${p.r.date} · ${won(p.r.value)}${p.r.note?` · ${p.r.note}`:''}`}</title></circle>
+     {showValue[i]&&<text x={Math.min(Math.max(p.x,58),W-58)} y={p.y-14}>{won(p.r.value)}</text>}
+     {showDate[i]&&<text className="cash-date" x={Math.min(Math.max(p.x,24),W-24)} y={H-10}>{p.r.date.slice(5)}</text>}
+    </g>;})}
   </svg>
  </div>;
 }
+

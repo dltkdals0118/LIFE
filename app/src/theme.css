@@ -317,7 +317,7 @@ input,textarea,select{background-color:#0e1713}
    거기에 색을 칠해 차트가 깨져 있었다. 그 규칙은 더 쓰지 않는다. */
 .cash-bars .bar-space{background:none}
 .cash-chart{padding:14px 12px 4px}
-.cash-chart svg{width:100%;height:190px;display:block;overflow:visible}
+.cash-chart svg{display:block;max-width:100%;height:auto;overflow:visible}
 .cash-grid{stroke:#1b2a22;stroke-width:1;stroke-dasharray:3 6}
 .cash-area{animation:cash-rise .72s cubic-bezier(.22,.9,.3,1) both}
 .cash-line{fill:none;stroke:var(--neon);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
