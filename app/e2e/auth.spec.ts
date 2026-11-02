@@ -125,3 +125,20 @@ test('이메일 미확인으로 로그인이 막히면 한국어로 알리고 �
  await page.getByRole('button',{name:/확인 메일 다시 보내기/}).click();
  expect(calls.resend).toBeGreaterThan(0);
 });
+
+// 2026-11-02 회귀 방지: 밝은 테마의 `background:#fff` 가 구체성으로 다크 테마를 이겨
+// 입력 중인 글자가 보이지 않았다. 사람이 눈으로 보고 세 번 되돌아왔다 — 이제 기계가 잡는다.
+test('입력칸은 포커스해도 어둡고 글자가 읽힌다',async({page})=>{
+ await mock(page);
+ await page.goto('./');
+ const email=page.getByLabel('이메일');
+ await email.click();
+ await email.fill('dltkdals0118@example.com');
+ const read=(prop:string)=>email.evaluate((el,p)=>getComputedStyle(el).getPropertyValue(p),prop);
+ const sum=(s:string)=>(s.match(/\d+/g)??['255','255','255']).slice(0,3).reduce((a,b)=>a+Number(b),0);
+ const bg=await read('background-color');
+ const fg=await read('color');
+ // 배경은 거의 검정(합 150 미만), 글자는 밝아야(합 450 초과) 읽힌다
+ expect(sum(bg),`포커스된 입력칸 배경이 밝다: ${bg}`).toBeLessThan(150);
+ expect(sum(fg),`입력 글자가 어둡다: ${fg}`).toBeGreaterThan(450);
+});

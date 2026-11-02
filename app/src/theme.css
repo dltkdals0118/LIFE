@@ -298,3 +298,16 @@ select:autofill{
 input:autofill:focus{box-shadow:0 0 0 1000px #101a15 inset,0 0 0 3px #5ee89a1f !important}
 /* 자동완성 드롭다운 목록 자체도 다크로 (지원 브라우저에서) */
 ::-webkit-autofill-strong-password,::-webkit-credentials-auto-fill-button{filter:invert(.85)}
+
+/* 8차 — 진짜 원인. readability.css 의 `.auth-row input:focus{background:#fff}` 가
+   구체성(0,1,2)으로 theme.css 의 `input:focus`(0,1,1)를 이기고 있었다.
+   styles.css 만 감사하고 내가 나중에 쓴 파일을 빠뜨린 탓이다.
+   입력칸 배경은 테마가 정해야 하는 값이라 구체성 싸움을 여기서 끝낸다. */
+input:focus,textarea:focus,select:focus,
+.auth-row input:focus,.auth-card input:focus{
+  background:#101a15 !important;
+  color:var(--text) !important;
+  border-color:var(--neon-dim) !important;
+  box-shadow:0 0 0 3px #5ee89a1f !important;
+}
+input,textarea,select{background-color:#0e1713}
