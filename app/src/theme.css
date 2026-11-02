@@ -224,3 +224,56 @@ dialog,[role=dialog]{background:#101814;color:var(--text);border:1px solid var(-
 .auth-card h1{color:var(--text);font-size:23px;font-weight:800;letter-spacing:-.8px;text-shadow:0 0 30px #5ee89a26}
 .auth-card .auth-sub{color:#93a79b}
 .auth-links .text-button{color:var(--neon)}
+
+/* 4차 — 필터 탭. 컨테이너 배경(#f0f3e9)이 밝은 채 남아 흰 테두리처럼 보였다 */
+.tabs{background:#0e1713;border:1px solid var(--line);border-radius:9px}
+.tabs button{color:var(--text-2);background:transparent}
+.tabs button:hover:not(.active){color:var(--text);background:#16221c}
+.tabs button.active{
+  background:#17281f;color:var(--neon);font-weight:600;
+  box-shadow:inset 0 0 0 1px #27463a, 0 0 16px -7px #5ee89a80;
+}
+.search-input{background:#0e1713;border:1px solid var(--line);color:var(--text)}
+
+/* 5차 — styles.css 를 전수 감사해 남은 밝은 배경을 한 번에 처리했다 (하나씩 지적받지 않도록) */
+th{background:#0f1813;color:var(--text-3);border-bottom:1px solid var(--line)}
+td{border-top:1px solid var(--line-soft);color:var(--text)}
+tbody tr:hover td{background:#141e18}
+.count{background:#17251e;color:var(--neon);border:1px solid #27463a}
+.reflection-icon{background:#15291d;color:var(--neon)}
+.week-dots span{background:#16211b;color:var(--text-3)}
+.next-reward>button{background:#16231c;border:1px solid var(--line);color:var(--text)}
+.next-reward>button:hover{background:#1b2b22;border-color:#2a4034}
+.map-caption{background:#111b16;border:1px solid var(--line);color:var(--text-2)}
+.map-caption svg{color:var(--neon)}
+.map-caption b{color:var(--neon)}
+.branch.selected{background:linear-gradient(180deg,#16271e 0%,#111b16 100%);border-color:#2a4a37;box-shadow:0 0 28px -14px #5ee89a66}
+.review-intro{background:linear-gradient(180deg,#142019 0%,#101814 100%);border:1px solid var(--line);color:var(--text-2)}
+.review-intro svg{color:var(--neon)}
+.review-intro h2{color:var(--text)}
+.reward-card.used{background:#0f1612}
+.conflict-grid>div{background:#121c17}
+
+/* 6차 — 입력 글자가 안 보이던 문제.
+   Chrome 자동완성은 UA 스타일로 흰 배경을 강제한다. !important 와 inset shadow 로만 덮인다. */
+input,textarea,select{color:var(--text);caret-color:var(--neon)}
+.auth-row input{font-size:14px;letter-spacing:.2px}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill{
+  -webkit-text-fill-color:var(--text) !important;
+  -webkit-box-shadow:0 0 0 1000px #0e1713 inset !important;
+  box-shadow:0 0 0 1000px #0e1713 inset !important;
+  caret-color:var(--neon) !important;
+  border-color:var(--line) !important;
+  /* 배경 전환을 사실상 멈춰 자동완성 색이 다시 올라오지 않게 한다 */
+  transition:background-color 9999s ease-out 0s !important;
+}
+input:-webkit-autofill:focus{box-shadow:0 0 0 1000px #101a15 inset,0 0 0 3px #5ee89a1f !important;border-color:var(--neon-dim) !important}
+/* 비밀번호 표시 토글 등 브라우저가 넣는 아이콘도 어둠에 맞춘다 */
+input::-ms-reveal,input::-ms-clear{filter:invert(1) opacity(.6)}
+input[type=date]::-webkit-calendar-picker-indicator,
+input[type=number]::-webkit-inner-spin-button{filter:invert(.75)}
