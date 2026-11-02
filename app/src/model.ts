@@ -6,10 +6,23 @@ const amount = z.number().finite().min(0).max(1e12);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{const d=new Date(v+'T00:00:00Z');return !Number.isNaN(d.valueOf())&&d.toISOString().slice(0,10)===v;},'유효한 날짜를 입력해 주세요.');
 export const domainSchema = z.object({id, name:label, color:z.enum(['sage','blue','amber','rose','violet','teal']), icon:z.enum(['wallet','sprout','briefcase','book','heart','sparkles'])});
 export const questSchema = z.object({id,title:label,domainId:id,minutes:amount.max(10000),xp:amount.max(50),due:date,status:z.enum(['ready','done','paused']),criterion:z.string().max(2000),partialCriterion:z.string().max(2000).default(''),minimumCriterion:z.string().max(2000).default(''),planId:z.string().max(150),completedAt:z.string().nullable(),outcome:z.enum(['full','partial','missed']).nullable().default(null)});
-export const planSchema = z.object({id,title:label,goal:label,domainId:id,active:z.enum(['A','B','C']),branches:z.array(z.object({key:z.enum(['A','B','C']),title:label,cost:amount,hours:amount.max(10000),duration:z.number().int().min(1).max(3650),result:label,trigger:z.string().max(2000),switchCost:amount})).length(3)});
+// 전환 조건. `trigger` 는 사람이 읽는 글이고, `rule` 이 있으면 기계도 같이 읽는다.
+// 규칙이 없어도 플랜은 그대로 동작한다 — 글만 있는 조건을 억지로 숫자로 바꾸지 않는다.
+export const triggerRule = z.discriminatedUnion('when',[
+ // 최근 N건의 결과 중 '끝까지'가 아닌 것이 M건 이상이면
+ z.object({when:z.literal('outcomes'),recent:z.number().int().min(1).max(30),weak:z.number().int().min(1).max(30),to:z.enum(['A','B','C'])}),
+ // 기록한 값이 기준을 밑돌거나 넘으면
+ z.object({when:z.literal('observation'),kind:z.enum(['cash','hours','sleep','poker-out','poker-in']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
+ // 이 플랜에서 N일 동안 완료가 없으면
+ z.object({when:z.literal('idle'),days:z.number().int().min(1).max(365),to:z.enum(['A','B','C'])}),
+ // N건을 연달아 끝까지 해내면 (올라가는 쪽)
+ z.object({when:z.literal('streak'),full:z.number().int().min(1).max(30),to:z.enum(['A','B','C'])}),
+]);
+export type TriggerRule=z.infer<typeof triggerRule>;
+export const planSchema = z.object({id,title:label,goal:label,domainId:id,active:z.enum(['A','B','C']),branches:z.array(z.object({key:z.enum(['A','B','C']),title:label,cost:amount,hours:amount.max(10000),duration:z.number().int().min(1).max(3650),result:label,trigger:z.string().max(2000),rule:triggerRule.nullable().default(null),switchCost:amount})).length(3)});
 export const observationSchema = z.object({id,kind:z.enum(['cash','hours','sleep','poker-out','poker-in']),value:amount,date,note:z.string().max(2000)});
 export const rewardSchema = z.object({id,title:label,type:z.enum(['digital','real']),cost:amount,requiredXp:amount.max(1e7),domainId:z.string().max(150).default(''),note:z.string().max(1000).default(''),status:z.enum(['wish','reserved','used']),spent:amount.nullable(),usedAt:z.string().nullable(),reservedAt:z.string().nullable().default(null)}).refine(r=>r.type!=='digital'||r.cost===0,'성장 배지는 비용을 0원으로 입력해 주세요.');
-export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:z.string().max(4000),next:z.string().max(4000)});
+export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:z.string().max(4000),next:z.string().max(4000),stats:z.object({done:z.number().int(),full:z.number().int(),partial:z.number().int(),missed:z.number().int(),xp:z.number()}).nullable().default(null)});
 export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
  for(const key of ['domains','quests','plans','observations','rewards','reviews','events'] as const) if(new Set(s[key].map(x=>x.id)).size!==s[key].length)ctx.addIssue({code:'custom',message:`${key}: 중복 ID`});
  const domains=new Set(s.domains.map(x=>x.id)),plans=new Set(s.plans.map(x=>x.id));
@@ -45,6 +58,16 @@ export function rewardProgress(s:Workspace,r:Reward){
  return {xp,required:r.requiredXp,remaining:Math.max(0,r.requiredXp-xp),
          ratio:r.requiredXp?Math.min(1,xp/r.requiredXp):1,unlocked:xp>=r.requiredXp,
          scope:r.domainId?s.domains.find(d=>d.id===r.domainId)?.name??'알 수 없는 분야':'전체 성장'};
+}
+/** 그 주의 결과 분포. 회고에 함께 저장해 둔다 — 나중에 퀘스트가 바뀌어도 그때의 기록은 남는다. */
+export function weekStats(s:Workspace,endDate=today()){
+ const end=Date.parse(endDate+'T23:59:59.999Z'),start=end-7*86400000+1;
+ const done=s.quests.filter(q=>q.status==='done'&&q.completedAt&&(()=>{const t=Date.parse(q.completedAt!);return t>=start&&t<=end;})());
+ return {done:done.length,
+   full:done.filter(q=>q.outcome==='full').length,
+   partial:done.filter(q=>q.outcome==='partial').length,
+   missed:done.filter(q=>q.outcome==='missed').length,
+   xp:done.reduce((n,q)=>n+questXp(q),0)};
 }
 export function level(xp:number){let l=1;while(50*l*(l+1)<=xp)l++;const floor=50*(l-1)*l,ceil=50*l*(l+1);return {level:l,progress:(xp-floor)/(ceil-floor),next:ceil,remaining:ceil-xp};}
 /** 포커 통장 순유출 — 나간 돈 − 돌아온 돈. 게임 손익이 아니라 통장에서 오간 돈이다. */
@@ -93,12 +116,58 @@ export function nextSuggestion(s:Workspace,id:string):{text:string;switchTo?:Pla
 }
 export function rewardAvailable(s:Workspace){if(s.rewardBudget===null)return null;return s.rewardBudget-s.rewards.reduce((n,r)=>n+(r.status==='reserved'?r.cost:r.status==='used'?(r.spent??r.cost):0),0);}
 export function reserveReward(s:Workspace,id:string){const r=s.rewards.find(x=>x.id===id);if(!r||r.status!=='wish')throw Error('예약 가능한 보상이 아닙니다.');if(xpOf(s,r.domainId||undefined)<r.requiredXp)throw Error('잠금 해제 조건을 먼저 달성해 주세요.');const available=rewardAvailable(s);if(r.type==='real'&&r.cost>0&&(available===null||available<r.cost))throw Error('보상 예산을 설정하거나 예약 금액을 조정해 주세요.');return log({...s,rewards:s.rewards.map(x=>x.id===id?{...x,status:r.type==='digital'?'used':'reserved',usedAt:r.type==='digital'?new Date().toISOString():null,reservedAt:new Date().toISOString()}:x)},`${r.title} · ${r.type==='digital'?'획득':'예약'}`);}
+/** 전환 조건을 지금 상태로 판정한다. 발동한 것만 돌려준다 — 판정이지 실행이 아니다. */
+export function evaluateTriggers(s:Workspace,p:Plan){
+ const out:{key:Plan['active'];to:Plan['active'];reason:string}[]=[];
+ const done=s.quests.filter(q=>q.planId===p.id&&q.status==='done'&&q.outcome)
+   .sort((a,b)=>(b.completedAt??'').localeCompare(a.completedAt??''));
+ for(const b of p.branches){
+  const r=b.rule;
+  if(!r||r.to===p.active)continue;          // 지금 경로로 가라는 조건은 신호가 아니다
+  if(r.when==='outcomes'){
+   const recent=done.slice(0,r.recent);
+   const weak=recent.filter(q=>q.outcome!=='full').length;
+   if(recent.length>=r.recent&&weak>=r.weak)
+    out.push({key:b.key,to:r.to,reason:`최근 ${r.recent}번 중 ${weak}번이 끝까지 가지 못했어요`});
+  }else if(r.when==='streak'){
+   const run=done.findIndex(q=>q.outcome!=='full');
+   const streak=run===-1?done.length:run;
+   if(streak>=r.full)out.push({key:b.key,to:r.to,reason:`${streak}번을 연달아 끝까지 해냈어요`});
+  }else if(r.when==='idle'){
+   const last=done[0]?.completedAt;
+   const days=last?Math.floor((Date.now()-Date.parse(last))/86400000):null;
+   if(days===null||days>=r.days)
+    out.push({key:b.key,to:r.to,reason:last?`${days}일 동안 완료가 없었어요`:'아직 완료한 퀘스트가 없어요'});
+  }else{
+   const o=latest(s,r.kind);
+   if(o&&((r.op==='lt'&&o.value<r.value)||(r.op==='gt'&&o.value>r.value)))
+    out.push({key:b.key,to:r.to,reason:`${OBS_NAME[r.kind]} ${o.value.toLocaleString('ko-KR')}${OBS_UNIT[r.kind]}은 기준 ${r.value.toLocaleString('ko-KR')}${OBS_UNIT[r.kind]} ${r.op==='lt'?'아래':'위'}예요`});
+  }
+ }
+ return out;
+}
+export const OBS_NAME={cash:'가용 현금',hours:'주간 가용시간',sleep:'수면 시간','poker-out':'포커 송금','poker-in':'포커 회수'} as const;
+export const OBS_UNIT={cash:'원',hours:'시간',sleep:'시간','poker-out':'원','poker-in':'원'} as const;
+/** 조건을 사람 말로. 폼에서 만든 규칙을 카드에 그대로 보여 주기 위해서다. */
+/** 받침에 따라 조사를 고른다. '주간 가용시간가' 같은 말이 나오지 않게. */
+const josa=(word:string,withBatchim:string,without:string)=>{
+ const c=word.charCodeAt(word.length-1);
+ if(c<0xac00||c>0xd7a3)return without;          // 한글이 아니면 기본형
+ return (c-0xac00)%28?withBatchim:without;
+};
+export function ruleText(r:TriggerRule){
+ if(r.when==='outcomes')return `최근 ${r.recent}번 중 ${r.weak}번이 끝까지 못 가면 → ${r.to}`;
+ if(r.when==='streak')return `${r.full}번 연달아 끝까지 하면 → ${r.to}`;
+ if(r.when==='idle')return `${r.days}일 동안 완료가 없으면 → ${r.to}`;
+ const n=OBS_NAME[r.kind];
+ return `${n}${josa(n,'이','가')} ${r.value.toLocaleString('ko-KR')}${OBS_UNIT[r.kind]} ${r.op==='lt'?'아래로 내려가면':'위로 올라가면'} → ${r.to}`;
+}
 export function assessBranch(s:Workspace,p:Plan,key:Plan['active']){const b=p.branches.find(x=>x.key===key)!;const cash=latest(s,'cash'),hours=latest(s,'hours');const cost=b.cost+(key!==p.active?b.switchCost:0);const reasons:string[]=[];if(cash===null)reasons.push('현금 기록 필요');else if(cash.value<cost)reasons.push(`필요 자금 ${won(cost-cash.value)} 부족`);if(hours===null)reasons.push('주간 가용시간 기록 필요');else if(hours.value<b.hours)reasons.push(`주 ${b.hours-hours.value}시간 부족`);const unknown=cash===null||hours===null;return {cost,cash,hours,reasons,state:reasons.length?(unknown&&!reasons.some(x=>x.includes('부족'))?'unknown':'blocked'):'ready'};}
 export function parseBackup(raw:unknown){return workspaceSchema.parse(raw);}
 export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,events:[]};}
 export function createDemo():Workspace{
  const s=createEmpty();s.name='나의 작은 우주';s.chapter='조금 더 단단한 일상 만들기';s.rewardBudget=50000;
- s.plans=[{id:'plan-1',title:'생활의 여유 만들기',goal:'이번 달 정기 지출 3개 점검하기',domainId:'finance',active:'A',branches:[{key:'A',title:'작은 것부터 차근차근',cost:0,hours:2,duration:30,result:'정기 지출 3개 확인',trigger:'2주 동안 진행이 없다면 B 검토',switchCost:0},{key:'B',title:'한 가지에 집중하기',cost:0,hours:1,duration:30,result:'가장 큰 지출 1개 확인',trigger:'주간 여유가 1시간 미만이면 C 검토',switchCost:0},{key:'C',title:'기록만 이어가기',cost:0,hours:0.25,duration:30,result:'월말 잔액 1회 기록',trigger:'다음 주 가용시간을 다시 확인',switchCost:0}]}];
+ s.plans=[{id:'plan-1',title:'생활의 여유 만들기',goal:'이번 달 정기 지출 3개 점검하기',domainId:'finance',active:'A',branches:[{key:'A',title:'작은 것부터 차근차근',cost:0,hours:2,duration:30,result:'정기 지출 3개 확인',trigger:'2주 동안 진행이 없다면 B 검토',rule:{when:'idle',days:14,to:'B'},switchCost:0},{key:'B',title:'한 가지에 집중하기',cost:0,hours:1,duration:30,result:'가장 큰 지출 1개 확인',trigger:'주간 여유가 1시간 미만이면 C 검토',rule:{when:'observation',kind:'hours',op:'lt',value:1,to:'C'},switchCost:0},{key:'C',title:'기록만 이어가기',cost:0,hours:0.25,duration:30,result:'월말 잔액 1회 기록',trigger:'세 번 연달아 해내면 다시 올라간다',rule:{when:'streak',full:3,to:'A'},switchCost:0}]}];
  s.quests=[{id:'q1',title:'이번 달 정기결제 살펴보기',domainId:'finance',minutes:10,xp:15,due:today(),status:'ready',outcome:null,partialCriterion:'',minimumCriterion:'',criterion:'정기결제 목록과 다음 결제일을 기록했어요.',planId:'plan-1',completedAt:null},{id:'q2',title:'잠들기 전, 오늘의 수면 기록',domainId:'recovery',minutes:2,xp:5,due:today(),status:'ready',outcome:null,partialCriterion:'',minimumCriterion:'',criterion:'지난밤의 수면 시간을 기록했어요.',planId:'',completedAt:null},{id:'q3',title:'읽고 싶었던 책, 10쪽',domainId:'learning',minutes:15,xp:15,due:today(),status:'ready',outcome:null,partialCriterion:'',minimumCriterion:'',criterion:'10쪽을 읽고 기억할 문장 하나를 남겼어요.',planId:'',completedAt:null}];
  for(let i=0;i<18;i++){const d=new Date();d.setDate(d.getDate()-(i%7)-1);s.quests.push({id:`history-${i}`,title:['지난주 기록 정리','작은 배움 남기기','한 걸음 산책'][i%3],domainId:s.domains[i%6].id,minutes:10,xp:30,due:d.toISOString().slice(0,10),status:'done',outcome:i%5===0?'partial':'full',criterion:'예시 완료 기록',partialCriterion:'',minimumCriterion:'',planId:'',completedAt:d.toISOString()});}
  const back=(n:number)=>{const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);};

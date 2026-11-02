@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet } from './model';
+import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats } from './model';
 describe('actual execution and rewards',()=>{
  it('undo returns XP without changing observed cash',()=>{const s=createDemo(),xp=xpOf(s),done=completeQuest(s,'q1');expect(xpOf(done)).toBe(xp+15);const undone=completeQuest(done,'q1');expect(xpOf(undone)).toBe(xp);expect(undone.observations).toEqual(s.observations);});
  it('reserving a reward uses budget only once and requires evidence',()=>{let s=createDemo();s.rewards[1].requiredXp=0;const reserved=reserveReward(s,'r2');expect(rewardAvailable(reserved)).toBe(35000);expect(()=>reserveReward(reserved,'r2')).toThrow();expect(reserved.observations).toEqual(s.observations);});
@@ -16,9 +16,9 @@ describe('결과 등급이 성장과 다음 제안에 반영된다',()=>{
  const base=()=>{
   const s=createEmpty();
   s.plans=[{id:'p',title:'지출 줄이기',goal:'월 100만',domainId:'finance',active:'A',branches:[
-   {key:'A',title:'배분대로',cost:0,hours:2,duration:90,result:'',trigger:'',switchCost:0},
-   {key:'B',title:'고정비 먼저',cost:0,hours:3,duration:90,result:'',trigger:'',switchCost:0},
-   {key:'C',title:'기록만',cost:0,hours:.5,duration:90,result:'',trigger:'',switchCost:0}]}];
+   {key:'A',title:'배분대로',cost:0,hours:2,duration:90,result:'',trigger:'',rule:null,switchCost:0},
+   {key:'B',title:'고정비 먼저',cost:0,hours:3,duration:90,result:'',trigger:'',rule:null,switchCost:0},
+   {key:'C',title:'기록만',cost:0,hours:.5,duration:90,result:'',trigger:'',rule:null,switchCost:0}]}];
   s.quests=[1,2,3].map(i=>({id:`q${i}`,title:`퀘스트 ${i}`,domainId:'finance',minutes:10,xp:20,
    due:'2026-11-02',status:'ready' as const,criterion:'',partialCriterion:'',minimumCriterion:'',planId:'p',completedAt:null,outcome:null}));
   return s;
@@ -95,5 +95,78 @@ describe('보상 상세와 분야별 완주율',()=>{
    {id:'p2',kind:'poker-in',value:1_674_593,date:'2026-10-31',note:''}];
   expect(pokerNet(s)?.net).toBe(925_407);
   expect(pokerNet(createEmpty())).toBeNull();        // 기록이 없으면 0 이 아니라 null
+ });
+});
+
+describe('전환 조건을 기계가 판정한다',()=>{
+ const planWith=(rules:Partial<Record<'A'|'B'|'C',unknown>>,active:'A'|'B'|'C'='A')=>{
+  const s=createEmpty();
+  s.plans=[{id:'p',title:'지출',goal:'목표',domainId:'finance',active,branches:(['A','B','C'] as const).map(k=>
+   ({key:k,title:`${k} 경로`,cost:0,hours:1,duration:30,result:'r',trigger:'',rule:(rules[k]??null) as never,switchCost:0}))}];
+  return s;
+ };
+ const q=(id:string,outcome:'full'|'partial'|'missed',at:string)=>
+  ({id,title:id,domainId:'finance',minutes:5,xp:20,due:'2026-11-01',status:'done' as const,
+    criterion:'',partialCriterion:'',minimumCriterion:'',planId:'p',completedAt:at,outcome});
+
+ it('조건이 맞지 않으면 아무 신호도 내지 않는다',()=>{
+  const s=planWith({A:{when:'outcomes',recent:3,weak:2,to:'B'}});
+  s.quests=[q('a','full','2026-11-01T00:00:00Z'),q('b','full','2026-11-01T01:00:00Z'),q('c','full','2026-11-01T02:00:00Z')];
+  expect(evaluateTriggers(s,s.plans[0])).toEqual([]);
+ });
+ it('최근 결과가 약하면 발동한다',()=>{
+  const s=planWith({A:{when:'outcomes',recent:3,weak:2,to:'B'}});
+  s.quests=[q('a','missed','2026-11-01T00:00:00Z'),q('b','partial','2026-11-01T01:00:00Z'),q('c','full','2026-11-01T02:00:00Z')];
+  const fired=evaluateTriggers(s,s.plans[0]);
+  expect(fired).toHaveLength(1);
+  expect(fired[0].to).toBe('B');
+ });
+ it('표본이 모자라면 발동하지 않는다',()=>{
+  const s=planWith({A:{when:'outcomes',recent:3,weak:2,to:'B'}});
+  s.quests=[q('a','missed','2026-11-01T00:00:00Z'),q('b','missed','2026-11-01T01:00:00Z')];
+  expect(evaluateTriggers(s,s.plans[0])).toEqual([]);   // 2건뿐이라 아직 모른다
+ });
+ it('연속 완주는 올라가는 신호를 낸다',()=>{
+  const s=planWith({C:{when:'streak',full:3,to:'A'}},'C');
+  s.quests=[q('a','full','2026-11-01T00:00:00Z'),q('b','full','2026-11-01T01:00:00Z'),q('c','full','2026-11-01T02:00:00Z')];
+  expect(evaluateTriggers(s,s.plans[0])[0]?.to).toBe('A');
+ });
+ it('지금 경로로 가라는 조건은 신호가 아니다',()=>{
+  const s=planWith({A:{when:'streak',full:1,to:'A'}},'A');
+  s.quests=[q('a','full','2026-11-01T00:00:00Z')];
+  expect(evaluateTriggers(s,s.plans[0])).toEqual([]);
+ });
+ it('기록한 값이 기준을 밑돌면 발동한다',()=>{
+  const s=planWith({A:{when:'observation',kind:'hours',op:'lt',value:2,to:'C'}});
+  s.observations=[{id:'o',kind:'hours',value:1,date:'2026-11-01',note:''}];
+  const f=evaluateTriggers(s,s.plans[0]);
+  expect(f[0]?.to).toBe('C');
+  expect(f[0]?.reason).toContain('주간 가용시간');
+ });
+ it('ruleText 는 사람이 읽을 수 있다',()=>{
+  expect(ruleText({when:'idle',days:14,to:'B'})).toContain('14일');
+  expect(ruleText({when:'observation',kind:'cash',op:'lt',value:3000000,to:'C'})).toContain('가용 현금');
+ });
+});
+
+describe('주간 회고 요약',()=>{
+ it('지난 7일만 센다',()=>{
+  const s=createEmpty();
+  const mk=(id:string,outcome:'full'|'partial',daysAgo:number)=>({id,title:id,domainId:'finance',minutes:5,xp:20,
+   due:'2026-11-01',status:'done' as const,criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',
+   completedAt:new Date(Date.now()-daysAgo*86400000).toISOString(),outcome});
+  s.quests=[mk('a','full',1),mk('b','partial',3),mk('c','full',30)];   // 30일 전은 제외
+  const w=weekStats(s);
+  expect(w.done).toBe(2);
+  expect(w.full).toBe(1);
+  expect(w.partial).toBe(1);
+  expect(w.xp).toBe(30);   // 20 + 10
+ });
+});
+
+describe('조사',()=>{
+ it('받침에 따라 이/가를 고른다',()=>{
+  expect(ruleText({when:'observation',kind:'hours',op:'lt',value:1,to:'C'})).toContain('주간 가용시간이');
+  expect(ruleText({when:'observation',kind:'poker-in',op:'gt',value:1,to:'C'})).toContain('포커 회수가');
  });
 });
