@@ -20,7 +20,7 @@ describe('결과 등급이 성장과 다음 제안에 반영된다',()=>{
    {key:'B',title:'고정비 먼저',cost:0,hours:3,duration:90,result:'',trigger:'',rule:null,switchCost:0},
    {key:'C',title:'기록만',cost:0,hours:.5,duration:90,result:'',trigger:'',rule:null,switchCost:0}]}];
   s.quests=[1,2,3].map(i=>({id:`q${i}`,title:`퀘스트 ${i}`,domainId:'finance',minutes:10,xp:20,
-   due:'2026-11-02',status:'ready' as const,criterion:'',partialCriterion:'',minimumCriterion:'',planId:'p',completedAt:null,outcome:null}));
+   due:'2026-11-02',status:'ready' as const,criterion:'',partialCriterion:'',minimumCriterion:'',planId:'p',repeat:'none' as const,completedAt:null,outcome:null}));
   return s;
  };
  it('끝까지 / 절반 / 못 함이 서로 다른 XP 를 남긴다',()=>{
@@ -59,9 +59,9 @@ describe('보상 상세와 분야별 완주율',()=>{
   const s=createEmpty();
   s.rewardBudget=50000;
   s.quests=[
-   {id:'a1',title:'재정 1',domainId:'finance',minutes:5,xp:40,due:'2026-11-01',status:'done',criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',completedAt:'2026-11-01T00:00:00Z',outcome:'full'},
-   {id:'a2',title:'재정 2',domainId:'finance',minutes:5,xp:40,due:'2026-11-01',status:'done',criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',completedAt:'2026-11-01T01:00:00Z',outcome:'partial'},
-   {id:'b1',title:'회복 1',domainId:'recovery',minutes:5,xp:40,due:'2026-11-01',status:'done',criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',completedAt:'2026-11-01T02:00:00Z',outcome:'full'},
+   {id:'a1',title:'재정 1',domainId:'finance',minutes:5,xp:40,due:'2026-11-01',status:'done',criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',repeat:'none' as const,completedAt:'2026-11-01T00:00:00Z',outcome:'full'},
+   {id:'a2',title:'재정 2',domainId:'finance',minutes:5,xp:40,due:'2026-11-01',status:'done',criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',repeat:'none' as const,completedAt:'2026-11-01T01:00:00Z',outcome:'partial'},
+   {id:'b1',title:'회복 1',domainId:'recovery',minutes:5,xp:40,due:'2026-11-01',status:'done',criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',repeat:'none' as const,completedAt:'2026-11-01T02:00:00Z',outcome:'full'},
   ];
   return s;
  };
@@ -107,7 +107,7 @@ describe('전환 조건을 기계가 판정한다',()=>{
  };
  const q=(id:string,outcome:'full'|'partial'|'missed',at:string)=>
   ({id,title:id,domainId:'finance',minutes:5,xp:20,due:'2026-11-01',status:'done' as const,
-    criterion:'',partialCriterion:'',minimumCriterion:'',planId:'p',completedAt:at,outcome});
+    criterion:'',partialCriterion:'',minimumCriterion:'',planId:'p',repeat:'none' as const,completedAt:at,outcome});
 
  it('조건이 맞지 않으면 아무 신호도 내지 않는다',()=>{
   const s=planWith({A:{when:'outcomes',recent:3,weak:2,to:'B'}});
@@ -153,7 +153,7 @@ describe('주간 회고 요약',()=>{
  it('지난 7일만 센다',()=>{
   const s=createEmpty();
   const mk=(id:string,outcome:'full'|'partial',daysAgo:number)=>({id,title:id,domainId:'finance',minutes:5,xp:20,
-   due:'2026-11-01',status:'done' as const,criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',
+   due:'2026-11-01',status:'done' as const,criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',repeat:'none' as const,
    completedAt:new Date(Date.now()-daysAgo*86400000).toISOString(),outcome});
   s.quests=[mk('a','full',1),mk('b','partial',3),mk('c','full',30)];   // 30일 전은 제외
   const w=weekStats(s);
@@ -168,5 +168,46 @@ describe('조사',()=>{
  it('받침에 따라 이/가를 고른다',()=>{
   expect(ruleText({when:'observation',kind:'hours',op:'lt',value:1,to:'C'})).toContain('주간 가용시간이');
   expect(ruleText({when:'observation',kind:'poker-in',op:'gt',value:1,to:'C'})).toContain('포커 회수가');
+ });
+});
+
+describe('반복 퀘스트',()=>{
+ const mk=(repeat:'none'|'daily'|'weekly',due:string)=>{
+  const s=createEmpty();
+  s.quests=[{id:'r1',title:'매일 할 것',domainId:'learning',minutes:15,xp:10,due,status:'ready',
+   criterion:'',partialCriterion:'',minimumCriterion:'',planId:'',repeat,completedAt:null,outcome:null}];
+  return s;
+ };
+ it('반복이 아니면 다음 회차를 만들지 않는다',()=>{
+  const s=completeQuest(mk('none','2026-11-03'),'r1','full');
+  expect(s.quests).toHaveLength(1);
+ });
+ it('매일 반복은 완료 기록을 남기고 다음 회차를 만든다',()=>{
+  const s=completeQuest(mk('daily','2026-11-03'),'r1','partial');
+  expect(s.quests).toHaveLength(2);
+  const done=s.quests.find(q=>q.status==='done')!,next=s.quests.find(q=>q.status==='ready')!;
+  expect(done.outcome).toBe('partial');          // 결과가 남는다 — 완주율을 셀 수 있다
+  expect(next.outcome).toBeNull();
+  expect(next.id).not.toBe(done.id);
+  expect(next.due>done.due).toBe(true);
+ });
+ it('지난 마감이면 과거 회차를 되살리지 않고 오늘 이후로 잡는다',()=>{
+  const s=completeQuest(mk('daily','2020-01-01'),'r1','full');
+  const next=s.quests.find(q=>q.status==='ready')!;
+  const t=new Date().toISOString().slice(0,10);
+  expect(next.due>t).toBe(true);
+ });
+ it('매주는 7일 뒤로 간다',()=>{
+  const base=new Date(Date.now()+86400000).toISOString().slice(0,10);   // 내일
+  const s=completeQuest(mk('weekly',base),'r1','full');
+  const next=s.quests.find(q=>q.status==='ready')!;
+  const gap=(Date.parse(next.due)-Date.parse(base))/86400000;
+  expect(gap).toBe(7);
+ });
+ it('완료를 취소해도 다음 회차가 또 생기지는 않는다',()=>{
+  let s=completeQuest(mk('daily','2026-11-03'),'r1','full');
+  const doneId=s.quests.find(q=>q.status==='done')!.id;
+  s=completeQuest(s,doneId);
+  expect(s.quests.filter(q=>q.status==='ready')).toHaveLength(2);  // 되돌린 것 + 이미 만든 다음 회차
  });
 });
