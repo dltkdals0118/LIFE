@@ -1,0 +1,14 @@
+import {test,expect} from '@playwright/test';
+test('demo can complete a quest, browse map and inspect ABC without changing reality',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('./');await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toBeVisible();
+ await page.getByRole('button',{name:'이번 달 정기결제 살펴보기 완료',exact:true}).click();await expect(page.getByRole('status')).toContainText('+15 XP');
+ await page.getByRole('button',{name:'나의 플랜 살펴보기'}).click();await expect(page.getByRole('heading',{name:'목표와 플랜 ABC'})).toBeVisible();await page.getByRole('button',{name:'상황을 바꿔 비교하기'}).click();await page.getByLabel('주간 가용시간 가정').fill('0');await expect(page.getByRole('dialog')).toContainText('시간 부족');await page.getByRole('button',{name:'닫기',exact:true}).click();expect(errors).toEqual([]);
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);expect(overflow).toBe(false);
+});
+test('personal quest and observation survive reload, review and rewards work',async({page})=>{
+ await page.goto('./');await page.getByRole('button',{name:'내 공간 시작하기'}).click();await page.getByRole('button',{name:'첫 퀘스트 만들기'}).click();await page.getByLabel('어떤 한 걸음을 내딛을까요?').fill('테스트 산책');await page.getByLabel('완료했다고 말할 수 있는 기준').fill('10분 걸었다');await page.getByRole('button',{name:'저장하기',exact:true}).click();await expect(page.getByText('테스트 산책',{exact:true})).toBeVisible();await page.getByRole('button',{name:'테스트 산책 완료',exact:true}).click();
+ await page.getByRole('button',{name:'빠른 기록',exact:true}).click();await page.getByLabel('값',{exact:true}).fill('1250000');await page.getByRole('button',{name:'저장하기',exact:true}).click();await expect(page.getByRole('status')).toContainText('저장');await page.waitForTimeout(300);await page.reload();await expect(page.getByRole('button',{name:'내 공간 시작하기'})).toHaveCount(0);await expect(page.getByText('1개',{exact:true}).first()).toBeVisible();
+ await page.getByRole('button',{name:'회고 남기기',exact:true}).click();await page.getByLabel('작지만 잘해낸 일').fill('걸었다');await page.getByLabel('다음 주의 한 걸음').fill('다시 걷기');await page.getByRole('button',{name:'저장하기',exact:true}).click();
+ await page.getByRole('button',{name:'보상함 열어보기'}).click();await page.getByRole('button',{name:'보상 추가'}).click();await page.getByLabel('어떤 보상이 기다려지나요?').fill('공원 가기');await page.getByLabel('잠금 해제 경험치').fill('0');await page.getByRole('button',{name:'저장하기',exact:true}).click();await page.getByRole('button',{name:'보상 예약하기'}).click();await expect(page.getByText('예약됨',{exact:true})).toBeVisible();
+});
+test('desktop and mobile screenshots',async({page},info)=>{await page.goto('./');await page.getByRole('heading',{name:'오늘도, 나의 속도로'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-home.png`,fullPage:true});});
