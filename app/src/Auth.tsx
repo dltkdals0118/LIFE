@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowRight, Check, Leaf, LockKeyhole, Mail, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Leaf, LockKeyhole, Mail, RefreshCw, Sparkles, TriangleAlert } from 'lucide-react';
 import type { useWorkspace } from './store';
 
 type Store = ReturnType<typeof useWorkspace>;
@@ -24,9 +24,22 @@ export function AuthGate({ store, onGuest, onDemo }: { store: Store; onGuest: ()
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [problem, setProblem] = useState('');
+  // 확인 메일을 기다리는 주소. 무료 플랜 SMTP 가 자주 막혀 재전송 자리가 필요하다.
+  const [awaiting, setAwaiting] = useState('');
   const t = LABEL[mode];
 
   function go(next: Mode) { setMode(next); setProblem(''); setMessage(''); setPassword(''); setConfirm(''); }
+
+  async function resend() {
+    setProblem(''); setMessage(''); setBusy(true);
+    try { await store.resendConfirmation(awaiting); setMessage('확인 메일을 다시 보냈어요. 몇 분 걸릴 수 있고 스팸함도 확인해 주세요.'); }
+    catch (err) {
+      const raw = (err as Error).message;
+      setProblem(/rate limit|too many/i.test(raw)
+        ? '메일 발송 한도에 걸렸습니다. 무료 플랜은 시간당 몇 통만 보낼 수 있어요 — 잠시 뒤 다시 시도하거나, Supabase 설정에서 이메일 확인을 끄면 바로 쓸 수 있습니다.'
+        : raw);
+    } finally { setBusy(false); }
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -38,14 +51,16 @@ export function AuthGate({ store, onGuest, onDemo }: { store: Store; onGuest: ()
       } else if (mode === 'signup') {
         if (password !== confirm) throw Error('두 비밀번호가 서로 다릅니다.');
         const needsConfirm = await store.signup(email, password);
-        if (needsConfirm) setMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 이 화면에서 로그인해 주세요.');
+        if (needsConfirm) { setAwaiting(email); setMessage('확인 메일을 보냈어요. 메일의 링크를 누른 뒤 이 화면에서 로그인해 주세요.'); }
       } else {
         await store.login(email, password);
       }
     } catch (err) {
       const raw = (err as Error).message;
+      if (/email not confirmed|not confirmed/i.test(raw)) setAwaiting(email);
       setProblem(
-        /invalid login credentials/i.test(raw) ? '이메일 또는 비밀번호가 맞지 않습니다. 계정이 없다면 아래에서 먼저 만들어 주세요.'
+        /email not confirmed|not confirmed/i.test(raw) ? '이메일 확인이 아직 끝나지 않았습니다. 받은 메일의 링크를 누르거나 아래에서 다시 보내 주세요.'
+        : /invalid login credentials/i.test(raw) ? '이메일 또는 비밀번호가 맞지 않습니다. 계정이 없다면 아래에서 먼저 만들어 주세요.'
         : /already registered|already been registered/i.test(raw) ? '이미 가입된 이메일입니다. 로그인해 주세요.'
         : /email rate limit|rate limit/i.test(raw) ? '메일 발송 한도에 걸렸습니다. 잠시 뒤 다시 시도해 주세요.'
         : /password/i.test(raw) && /short|least/i.test(raw) ? '비밀번호는 8자 이상으로 정해 주세요.'
@@ -74,6 +89,7 @@ export function AuthGate({ store, onGuest, onDemo }: { store: Store; onGuest: ()
           {mode === 'signup' && <Row label="비밀번호 확인"><input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="한 번 더 입력" /></Row>}
           {problem && <p className="auth-problem" role="alert">{problem}</p>}
           {message && <p className="auth-message"><Check size={15} />{message}</p>}
+          {awaiting && <div className="auth-resend"><p><TriangleAlert size={13} />메일이 오지 않나요? 무료 플랜은 시간당 몇 통만 보낼 수 있어요. <b>스팸함</b>도 확인해 주세요.</p><button type="button" className="secondary full" disabled={busy} onClick={() => void resend()}><RefreshCw size={14} />{awaiting} 로 확인 메일 다시 보내기</button></div>}
           <button className="primary full" disabled={busy || !store.config}>{busy ? '처리 중…' : t.submit}<ArrowRight size={16} /></button>
         </form>
 

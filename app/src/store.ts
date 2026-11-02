@@ -37,11 +37,13 @@ export function useWorkspace(){
  async function login(email:string,password:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');const {error}=await client.current.auth.signInWithPassword({email,password});if(error)throw error;startPersonal();}
  // 반환값 true = 메일 확인이 필요하다(Supabase 의 Confirm email 이 켜져 있을 때). false = 바로 로그인됐다.
  async function signup(email:string,password:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');if(password.length<8)throw Error('비밀번호는 8자 이상으로 정해 주세요.');const {data,error}=await client.current.auth.signUp({email,password});if(error)throw error;startPersonal();return !data.session;}
+ // 가입 확인 메일 재전송. 무료 플랜 기본 SMTP 는 시간당 몇 통으로 막혀 있어 자주 필요해진다.
+ async function resendConfirmation(email:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');const {error}=await client.current.auth.resend({type:'signup',email,options:{emailRedirectTo:`${location.origin}${import.meta.env.BASE_URL}`}});if(error)throw error;}
  // 비밀번호 재설정 메일. 돌아오는 주소는 Supabase 의 Redirect URLs 에 등록돼 있어야 한다.
  async function resetPassword(email:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');const {error}=await client.current.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}${import.meta.env.BASE_URL}`});if(error)throw error;}
  // 재설정 링크로 돌아온 뒤 새 비밀번호를 정한다.
  async function updatePassword(password:string){if(!client.current)throw Error('동기화 서비스를 먼저 연결해 주세요.');if(password.length<8)throw Error('비밀번호는 8자 이상으로 정해 주세요.');const {error}=await client.current.auth.updateUser({password});if(error)throw error;setRecovery(false);}
  async function logout(){if(current.current.dirty)throw Error('전송 대기 기록이 있습니다. 동기화 후 로그아웃해 주세요.');const key=scope.current;const {error}=await client.current!.auth.signOut();if(error)throw error;await del(key);}
  async function resolveConflict(choice:'local'|'remote'){const remote=conflictRef.current;if(!remote)return;if(choice==='remote'){show(remote);await persist(scope.current,remote);}else{const next={...current.current,revision:remote.revision,dirty:true,requestId:uid()};show(next);await persist(scope.current,next);}conflictSet(null);setTimeout(()=>void syncRef.current(),0);}
- return {data,demo,ready,user,status,error,setError,conflict,update,startPersonal,viewDemo,config,configure,login,signup,resetPassword,updatePassword,recovery,logout,resolveConflict,sync:()=>syncRef.current()};
+ return {data,demo,ready,user,status,error,setError,conflict,update,startPersonal,viewDemo,config,configure,login,signup,resendConfirmation,resetPassword,updatePassword,recovery,logout,resolveConflict,sync:()=>syncRef.current()};
 }

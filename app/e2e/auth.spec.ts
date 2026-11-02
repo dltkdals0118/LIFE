@@ -6,23 +6,26 @@ import {createEmpty} from '../src/model';
 const PROJECT='https://test-project.supabase.co';
 const user={id:'22222222-2222-4222-8222-222222222222',email:'me@example.com',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:'2026-11-02T00:00:00Z'};
 
-async function mock(page:Page,opts:{loginFails?:boolean}={}){
+async function mock(page:Page,opts:{loginFails?:boolean;needsConfirm?:boolean;notConfirmed?:boolean}={}){
  const expires=Math.floor(Date.now()/1000)+3600;
  const encode=(o:object)=>Buffer.from(JSON.stringify(o)).toString('base64url');
  const access_token=`${encode({alg:'HS256',typ:'JWT'})}.${encode({sub:user.id,exp:expires,role:'authenticated'})}.test-signature`;
  const session={access_token,refresh_token:'test-refresh',token_type:'bearer',expires_in:3600,expires_at:expires,user};
  const row={data:createEmpty(),revision:1};
- const calls={token:0,signup:0,recover:0};
+ const calls={token:0,signup:0,recover:0,resend:0};
  await page.addInitScript(p=>localStorage.setItem('life:config',JSON.stringify({url:p,key:'sb_publishable_test_key'})),PROJECT);
  await page.route(`${PROJECT}/**`,async route=>{
   const req=route.request(),url=req.url();
   const headers={'access-control-allow-origin':'*','content-type':'application/json'};
   if(req.method()==='OPTIONS'){await route.fulfill({status:200,headers:{...headers,'access-control-allow-headers':'*','access-control-allow-methods':'*'},body:''});return;}
+  if(url.includes('/auth/v1/resend')){calls.resend++;await route.fulfill({status:200,headers,body:'{}'});return;}
   if(url.includes('/auth/v1/token')){
    calls.token++;
+   if(opts.notConfirmed){await route.fulfill({status:400,headers,body:JSON.stringify({error:'invalid_grant',error_description:'Email not confirmed',message:'Email not confirmed'})});return;}
    if(opts.loginFails){await route.fulfill({status:400,headers,body:JSON.stringify({error:'invalid_grant',error_description:'Invalid login credentials',message:'Invalid login credentials'})});return;}
    await route.fulfill({status:200,headers,body:JSON.stringify(session)});return;}
-  if(url.includes('/auth/v1/signup')){calls.signup++;await route.fulfill({status:200,headers,body:JSON.stringify(session)});return;}
+  // 확인 메일이 필요한 가입은 세션 없이 user 만 돌아온다.
+  if(url.includes('/auth/v1/signup')){calls.signup++;await route.fulfill({status:200,headers,body:JSON.stringify(opts.needsConfirm?user:session)});return;}
   if(url.includes('/auth/v1/recover')){calls.recover++;await route.fulfill({status:200,headers,body:'{}'});return;}
   if(url.includes('/auth/v1/')){await route.fulfill({status:200,headers,body:JSON.stringify(user)});return;}
   await route.fulfill({status:200,headers,body:JSON.stringify(row)});
@@ -95,4 +98,30 @@ test('로그인 없이 둘러보기와 기기 저장 경로가 모두 열린다'
  await page.reload();
  await page.getByRole('button',{name:'이 기기에만 저장하고 시작하기'}).click();
  await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toBeVisible();
+});
+
+test('확인 메일이 필요한 가입이면 안내와 재전송 버튼이 나온다',async({page})=>{
+ const calls=await mock(page,{needsConfirm:true});
+ await page.goto('./');
+ await page.getByRole('tab',{name:'회원가입'}).click();
+ await page.getByLabel('이메일').fill(user.email);
+ await page.getByLabel('비밀번호',{exact:true}).fill('test-password-1234');
+ await page.getByLabel('비밀번호 확인').fill('test-password-1234');
+ await page.getByRole('button',{name:'계정 만들기'}).click();
+ await expect(page.getByText('확인 메일을 보냈어요.',{exact:false})).toBeVisible({timeout:15000});
+ await expect(page.getByText('스팸함',{exact:false})).toBeVisible();
+ await page.getByRole('button',{name:/확인 메일 다시 보내기/}).click();
+ await expect(page.getByText('확인 메일을 다시 보냈어요.',{exact:false})).toBeVisible({timeout:15000});
+ expect(calls.resend).toBeGreaterThan(0);
+});
+
+test('이메일 미확인으로 로그인이 막히면 한국어로 알리고 재전송을 띄운다',async({page})=>{
+ const calls=await mock(page,{notConfirmed:true});
+ await page.goto('./');
+ await page.getByLabel('이메일').fill(user.email);
+ await page.getByLabel('비밀번호',{exact:true}).fill('test-password-1234');
+ await page.getByRole('button',{name:'로그인',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('이메일 확인이 아직 끝나지 않았습니다');
+ await page.getByRole('button',{name:/확인 메일 다시 보내기/}).click();
+ expect(calls.resend).toBeGreaterThan(0);
 });
