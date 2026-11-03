@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats } from './model';
+import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest } from './model';
 describe('actual execution and rewards',()=>{
  it('undo returns XP without changing observed cash',()=>{const s=createDemo(),xp=xpOf(s),done=completeQuest(s,'q1');expect(xpOf(done)).toBe(xp+15);const undone=completeQuest(done,'q1');expect(xpOf(undone)).toBe(xp);expect(undone.observations).toEqual(s.observations);});
  it('reserving a reward uses budget only once and requires evidence',()=>{let s=createDemo();s.rewards[1].requiredXp=0;const reserved=reserveReward(s,'r2');expect(rewardAvailable(reserved)).toBe(35000);expect(()=>reserveReward(reserved,'r2')).toThrow();expect(reserved.observations).toEqual(s.observations);});
@@ -209,5 +209,105 @@ describe('반복 퀘스트',()=>{
   const doneId=s.quests.find(q=>q.status==='done')!.id;
   s=completeQuest(s,doneId);
   expect(s.quests.filter(q=>q.status==='ready')).toHaveLength(2);  // 되돌린 것 + 이미 만든 다음 회차
+ });
+});
+
+// ── 게임 층 ──
+describe('스탯과 전투력', () => {
+ const ws = (quests: Partial<Quest>[]): Workspace => ({...createEmpty(), quests: quests.map((q, i) => ({
+  id: `q${i}`, title: `q${i}`, domainId: 'recovery', minutes: 10, xp: 10, due: '2026-11-03',
+  status: 'done', criterion: '', partialCriterion: '', minimumCriterion: '', planId: '',
+  repeat: 'none', completedAt: '2026-11-03T10:00:00Z', outcome: 'full', ...q} as Quest))});
+
+ it('스탯은 레벨에만 의존하고 레벨업 때 정수로 점프한다', () => {
+  // 레벨 1 = 10. 100 XP 에서 레벨 2 (50*l*(l+1) <= xp)
+  expect(statOf(ws([]), 'recovery')).toBe(10);
+  expect(statOf(ws([{xp: 50}]), 'recovery')).toBe(10);        // 아직 레벨 1
+  expect(statOf(ws([{xp: 50}, {xp: 50}]), 'recovery')).toBe(20); // 100 XP → 레벨 2
+ });
+
+ it('전투력은 모든 분야 스탯의 합이다 — 분야 6개면 바닥이 60', () => {
+  expect(combatPower(createEmpty())).toBe(60);
+  expect(combatPower(ws([{xp: 50}, {xp: 50}]))).toBe(70);
+ });
+
+ it('powerDiff 가 올라간 스탯만 집어낸다', () => {
+  const d = powerDiff(ws([{xp: 50}]), ws([{xp: 50}, {xp: 50}]));
+  expect(d.from).toBe(60); expect(d.to).toBe(70);
+  expect(d.ups.map(u => u.name)).toEqual(['체력']);
+  expect(d.ups[0].level).toBe(2);
+ });
+
+ it('아무도 레벨업하지 않으면 ups 가 비어 있다', () => {
+  expect(powerDiff(ws([{xp: 10}]), ws([{xp: 10}, {xp: 10}])).ups).toEqual([]);
+ });
+});
+
+describe('한 번에 하나만 — 퀘스트 큐', () => {
+ const q = (o: Partial<Quest>): Quest => ({id: o.title!, title: o.title!, domainId: 'recovery', minutes: 10,
+  xp: 10, due: '2026-11-03', status: 'ready', criterion: '', partialCriterion: '', minimumCriterion: '',
+  planId: '', repeat: 'none', completedAt: null, outcome: null, ...o});
+
+ it('마감 지난·오늘 것이 먼저, 같은 날이면 짧은 것이 먼저', () => {
+  const s = {...createEmpty(), quests: [
+   q({title: '미래 짧은', due: '2026-12-01', minutes: 1}),
+   q({title: '오늘 긴', due: '2026-11-03', minutes: 90}),
+   q({title: '오늘 짧은', due: '2026-11-03', minutes: 5}),
+   q({title: '지난', due: '2026-10-20', minutes: 60}),
+  ]};
+  expect(questQueue(s, '2026-11-03').map(x => x.title)).toEqual(['지난', '오늘 짧은', '오늘 긴', '미래 짧은']);
+  expect(focusQuest(s, '2026-11-03')?.title).toBe('지난');
+ });
+
+ it('완료된 것은 큐에 없고, 빈 큐면 focusQuest 가 null 이다', () => {
+  expect(focusQuest({...createEmpty(), quests: [q({title: 'a', status: 'done'})]}, '2026-11-03')).toBeNull();
+ });
+});
+
+describe('서브퀘스트는 다 끝냈을 때만 열린다', () => {
+ const q = (o: Partial<Quest>): Quest => ({id: o.title!, title: o.title!, domainId: 'recovery', minutes: 10,
+  xp: 10, due: '2026-11-03', status: 'ready', criterion: '', partialCriterion: '', minimumCriterion: '',
+  planId: '', repeat: 'none', completedAt: null, outcome: null, ...o});
+
+ it('남은 퀘스트가 있으면 열리지 않는다', () => {
+  const s = {...createEmpty(), quests: [q({title: '남음'}), q({title: '됨', status: 'done', completedAt: '2026-11-03T01:00:00Z'})]};
+  expect(subQuestFor(s, '2026-11-03')).toBeNull();
+ });
+
+ it('아무것도 안 했으면 열리지 않는다 — 빈 날은 보상이 아니다', () => {
+  expect(subQuestFor(createEmpty(), '2026-11-03')).toBeNull();
+ });
+
+ it('다 끝내면 열리고, 같은 날에는 같은 것이 나온다', () => {
+  const s = {...createEmpty(), quests: [q({title: '됨', status: 'done', completedAt: '2026-11-03T01:00:00Z'})]};
+  const a = subQuestFor(s, '2026-11-03'), b = subQuestFor(s, '2026-11-03');
+  expect(a).not.toBeNull();
+  expect(a).toBe(b);
+ });
+
+ it('날이 바뀌면 다른 것이 나온다', () => {
+  const mk = (d: string) => ({...createEmpty(), quests: [q({title: '됨', due: d, status: 'done', completedAt: `${d}T01:00:00Z`})]});
+  const seen = new Set(['2026-11-03', '2026-11-04', '2026-11-05'].map(d => subQuestFor(mk(d), d)?.title));
+  expect(seen.size).toBe(3);
+ });
+
+ it('수락하면 실제 퀘스트가 되고 하루에 하나만 열린다', () => {
+  const s = {...createEmpty(), quests: [q({title: '됨', status: 'done', completedAt: '2026-11-03T01:00:00Z'})]};
+  const after = acceptSubQuest(s, '2026-11-03');
+  const sub = after.quests.find(isSubQuest)!;
+  expect(sub.title).toContain('보너스 —');
+  expect(sub.status).toBe('ready');
+  expect(subQuestFor(after, '2026-11-03')).toBeNull();   // 이미 받았다
+  expect(() => acceptSubQuest(after, '2026-11-03')).toThrow();
+ });
+});
+
+describe('보너스 수락은 저장까지 통과해야 한다', () => {
+ it('수락 결과가 스키마를 통과한다 — planId 가 실제 플랜을 가리켜야 한다(조용한 실패 방지)', () => {
+  const base = createEmpty();
+  const s0: Workspace = {...base, quests: [{id: 'a', title: '됨', domainId: 'recovery', minutes: 10, xp: 10,
+   due: '2026-11-03', status: 'done', criterion: '', partialCriterion: '', minimumCriterion: '', planId: '',
+   repeat: 'none', completedAt: '2026-11-03T01:00:00Z', outcome: 'full'}]};
+  expect(() => parseBackup(acceptSubQuest(s0, '2026-11-03'))).not.toThrow();
  });
 });

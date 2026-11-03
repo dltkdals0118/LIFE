@@ -18,5 +18,13 @@ for (const q of ws.quests) (byDue[q.due] ??= []).push(q.title);
 console.log('  마감일별 — 하루에 몰리지 않는지 본다');
 for (const [d, t] of Object.entries(byDue).sort()) console.log(`    ${d}  ${t.length}개  ${t.join(' / ')}`);
 
+console.log(`  플랜 ${ws.plans.length}개`);
+for (const pl of ws.plans) {
+  const act = pl.branches.find(b=>b.key===pl.active);
+  const rules = pl.branches.filter(b=>b.rule).length;
+  console.log(`    ${pl.title.padEnd(18)} 지금 ${pl.active}(${act.title})  규칙 ${rules}개  퀘스트 ${ws.quests.filter(q=>q.planId===pl.id).length}개`);
+}
+console.log(`  보상 ${ws.rewards.length}개 · 예산 ${ws.rewardBudget===null?'미설정':ws.rewardBudget.toLocaleString('ko-KR')+'원'}`);
+for (const r of ws.rewards) console.log(`    ${r.type==='digital'?'배지':'현실'} ${r.title.padEnd(16)} ${String(r.requiredXp).padStart(4)} XP  ${r.domainId||'전체'}  ${r.cost?r.cost.toLocaleString('ko-KR')+'원':'무료'}`);
 console.log('  관측');
 for (const o of ws.observations) console.log(`    ${o.date}  ${o.kind.padEnd(10)} ${String(o.value).padStart(12)}  ${o.note}`);

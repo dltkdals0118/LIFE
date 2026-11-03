@@ -12,7 +12,7 @@ export const triggerRule = z.discriminatedUnion('when',[
  // 최근 N건의 결과 중 '끝까지'가 아닌 것이 M건 이상이면
  z.object({when:z.literal('outcomes'),recent:z.number().int().min(1).max(30),weak:z.number().int().min(1).max(30),to:z.enum(['A','B','C'])}),
  // 기록한 값이 기준을 밑돌거나 넘으면
- z.object({when:z.literal('observation'),kind:z.enum(['cash','hours','sleep','poker-out','poker-in']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
+ z.object({when:z.literal('observation'),kind:z.enum(['cash','hours','sleep','weight','poker-out','poker-in']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
  // 이 플랜에서 N일 동안 완료가 없으면
  z.object({when:z.literal('idle'),days:z.number().int().min(1).max(365),to:z.enum(['A','B','C'])}),
  // N건을 연달아 끝까지 해내면 (올라가는 쪽)
@@ -20,7 +20,7 @@ export const triggerRule = z.discriminatedUnion('when',[
 ]);
 export type TriggerRule=z.infer<typeof triggerRule>;
 export const planSchema = z.object({id,title:label,goal:label,domainId:id,active:z.enum(['A','B','C']),branches:z.array(z.object({key:z.enum(['A','B','C']),title:label,cost:amount,hours:amount.max(10000),duration:z.number().int().min(1).max(3650),result:label,trigger:z.string().max(2000),rule:triggerRule.nullable().default(null),switchCost:amount})).length(3)});
-export const observationSchema = z.object({id,kind:z.enum(['cash','hours','sleep','poker-out','poker-in']),value:amount,date,note:z.string().max(2000)});
+export const observationSchema = z.object({id,kind:z.enum(['cash','hours','sleep','weight','poker-out','poker-in']),value:amount,date,note:z.string().max(2000)});
 export const rewardSchema = z.object({id,title:label,type:z.enum(['digital','real']),cost:amount,requiredXp:amount.max(1e7),domainId:z.string().max(150).default(''),note:z.string().max(1000).default(''),status:z.enum(['wish','reserved','used']),spent:amount.nullable(),usedAt:z.string().nullable(),reservedAt:z.string().nullable().default(null)}).refine(r=>r.type!=='digital'||r.cost===0,'성장 배지는 비용을 0원으로 입력해 주세요.');
 export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:z.string().max(4000),next:z.string().max(4000),stats:z.object({done:z.number().int(),full:z.number().int(),partial:z.number().int(),missed:z.number().int(),xp:z.number()}).nullable().default(null)});
 export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
@@ -71,6 +71,61 @@ export function weekStats(s:Workspace,endDate=today()){
 }
 export function level(xp:number){let l=1;while(50*l*(l+1)<=xp)l++;const floor=50*(l-1)*l,ceil=50*l*(l+1);return {level:l,progress:(xp-floor)/(ceil-floor),next:ceil,remaining:ceil-xp};}
 /** 포커 통장 순유출 — 나간 돈 − 돌아온 돈. 게임 손익이 아니라 통장에서 오간 돈이다. */
+// ── 게임 층 ──────────────────────────────────────────────────────────
+// 분야를 능력치로 읽는다. **스탯은 레벨에만 의존한다** — XP 는 게이지로 차오르고
+// 스탯은 레벨업 순간 +10 으로 점프한다. 조금씩 올라가면 '세졌다'가 느껴지지 않는다.
+export const STAT:Record<string,string>={finance:'재력',recovery:'체력',career:'기술',learning:'지력',relationships:'인맥',creative:'창의'};
+export const statName=(domainId:string)=>STAT[domainId]??'기타';
+export const statOf=(s:Workspace,domainId:string)=>level(xpOf(s,domainId)).level*10;
+export const combatPower=(s:Workspace)=>s.domains.reduce((n,d)=>n+statOf(s,d.id),0);
+export function statList(s:Workspace){return s.domains.map(d=>{const xp=xpOf(s,d.id),lv=level(xp);
+ return {domain:d,name:statName(d.id),value:lv.level*10,level:lv.level,progress:lv.progress,remaining:lv.remaining,xp};});}
+
+// 레벨업으로 전투력이 얼마나 올랐나. 올라간 스탯을 함께 돌려줘서 연출에 쓴다.
+export function powerDiff(before:Workspace,after:Workspace){
+ const ups=after.domains.map(d=>({domain:d,name:statName(d.id),from:statOf(before,d.id),to:statOf(after,d.id),level:level(xpOf(after,d.id)).level}))
+  .filter(x=>x.to>x.from);
+ return {from:combatPower(before),to:combatPower(after),ups};
+}
+
+// **한 번에 하나만 띄운다.** 목록 20개는 고르는 일이 되고, 고르는 일은 미루게 된다.
+// 순서: 마감 지난·오늘 것 먼저, 같은 날이면 **짧은 것 먼저** — 완료 경험을 빨리 준다.
+export function questQueue(s:Workspace,date=today()){
+ const rank=(q:Quest)=>q.due<=date?0:1;
+ return s.quests.filter(q=>q.status==='ready')
+  .sort((a,b)=>rank(a)-rank(b)||a.due.localeCompare(b.due)||a.minutes-b.minutes||a.title.localeCompare(b.title));
+}
+export const focusQuest=(s:Workspace,date=today())=>questQueue(s,date)[0]??null;
+export const clearedToday=(s:Workspace,date=today())=>
+ s.quests.some(q=>q.completedAt?.slice(0,10)===date)&&!s.quests.some(q=>q.status==='ready'&&q.due<=date);
+
+// 서브퀘스트 — **오늘 걸 다 끝냈을 때만** 열린다. 그래서 자연히 '가끔'이 된다.
+// 날짜로 고르므로 하루 안에서는 같은 것이 나오고 날마다 바뀐다(무작위가 아니라 재현된다).
+export const SUBQUESTS=[
+ {title:'푸시업 20개',domainId:'recovery',minutes:5,xp:5,criterion:'한 번에 안 되면 나눠서 해도 20개면 된다.'},
+ {title:'10분 걷기',domainId:'recovery',minutes:10,xp:5,criterion:'밖에 나가 10분 걸었다.'},
+ {title:'스트레칭 5분',domainId:'recovery',minutes:5,xp:4,criterion:'어깨·허리·햄스트링을 펴 줬다.'},
+ {title:'물 1리터 마시기',domainId:'recovery',minutes:1,xp:4,criterion:'오늘 물 1리터를 마셨다.'},
+ {title:'스쿼트 30개',domainId:'recovery',minutes:5,xp:5,criterion:'나눠서 해도 30개면 된다.'},
+ {title:'책 5쪽 더',domainId:'learning',minutes:10,xp:5,criterion:'오늘 몫 외에 5쪽을 더 읽었다.'},
+ {title:'영수증 하나 기록',domainId:'finance',minutes:3,xp:4,criterion:'오늘 쓴 것 하나를 앱에 적었다.'},
+ {title:'포커 핸드 리뷰 1개',domainId:'learning',minutes:15,xp:6,criterion:'아쉬웠던 핸드 하나를 되짚었다.'},
+] as const;
+const dayIndex=(date:string)=>Math.floor(Date.parse(`${date}T00:00:00Z`)/86400000);
+export const SUB_PREFIX='보너스 — ';
+export const isSubQuest=(q:Quest)=>q.title.startsWith(SUB_PREFIX);
+export function subQuestFor(s:Workspace,date=today()){
+ if(!clearedToday(s,date))return null;                                  // 다 끝내야 열린다
+ if(s.quests.some(q=>isSubQuest(q)&&q.due===date))return null;          // 하루에 하나
+ return SUBQUESTS[((dayIndex(date)%SUBQUESTS.length)+SUBQUESTS.length)%SUBQUESTS.length];
+}
+export function acceptSubQuest(s:Workspace,date=today()){
+ const t=subQuestFor(s,date); if(!t)throw Error('지금은 열린 보너스가 없어요.');
+ const q:Quest={id:uid(),title:`${SUB_PREFIX}${t.title}`,domainId:t.domainId,minutes:t.minutes,xp:t.xp,due:date,
+  status:'ready',criterion:t.criterion,partialCriterion:'',minimumCriterion:'',planId:'',repeat:'none',completedAt:null,outcome:null};
+ return log({...s,quests:[q,...s.quests]},`보너스 수락 · ${t.title}`);
+}
+
 export function pokerNet(s:Workspace,fromDate?:string){
  const pick=(k:Observation['kind'])=>s.observations.filter(o=>o.kind===k&&(!fromDate||o.date>=fromDate));
  const out=pick('poker-out'),back=pick('poker-in');
@@ -161,8 +216,8 @@ export function evaluateTriggers(s:Workspace,p:Plan){
  }
  return out;
 }
-export const OBS_NAME={cash:'가용 현금',hours:'주간 가용시간',sleep:'수면 시간','poker-out':'포커 송금','poker-in':'포커 회수'} as const;
-export const OBS_UNIT={cash:'원',hours:'시간',sleep:'시간','poker-out':'원','poker-in':'원'} as const;
+export const OBS_NAME={cash:'가용 현금',hours:'주간 가용시간',sleep:'수면 시간',weight:'체중','poker-out':'포커 송금','poker-in':'포커 회수'} as const;
+export const OBS_UNIT={cash:'원',hours:'시간',sleep:'시간',weight:'kg','poker-out':'원','poker-in':'원'} as const;
 /** 조건을 사람 말로. 폼에서 만든 규칙을 카드에 그대로 보여 주기 위해서다. */
 /** 받침에 따라 조사를 고른다. '주간 가용시간가' 같은 말이 나오지 않게. */
 const josa=(word:string,withBatchim:string,without:string)=>{

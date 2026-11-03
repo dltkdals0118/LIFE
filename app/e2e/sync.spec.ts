@@ -22,7 +22,7 @@ test('two authenticated device caches exchange a quest and completion through th
  const a=await contexts[0].newPage(),b=await contexts[1].newPage();
  await a.goto('http://127.0.0.1:4173/LIFE/');await b.goto('http://127.0.0.1:4173/LIFE/');await expect(a.getByRole('button',{name:'동기화됨',exact:true})).toBeVisible({timeout:15000});
  await a.getByRole('button',{name:'첫 퀘스트 만들기'}).click();await a.getByLabel('어떤 한 걸음을 내딛을까요?').fill('두 기기 연결 확인');await a.getByLabel('완료했다고 말할 수 있는 기준').fill('다른 기기에서 확인');await a.getByRole('button',{name:'저장하기',exact:true}).click();
- await expect(b.getByText('두 기기 연결 확인',{exact:true})).toBeVisible({timeout:15000});await b.getByRole('button',{name:'두 기기 연결 확인 완료',exact:true}).click();await b.getByRole('button',{name:/끝까지 했어요/}).click();
+ await expect(b.getByText('두 기기 연결 확인',{exact:true})).toBeVisible({timeout:15000});await b.getByRole('button',{name:/완료했어요/}).click();await b.getByRole('button',{name:/끝까지 했어요/}).click();
  await expect.poll(()=>row.data.quests.filter(q=>q.status==='done').length,{timeout:15000}).toBe(1);await a.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(a.getByText('1개',{exact:true}).first()).toBeVisible({timeout:15000});
  for(const context of contexts)await context.close();
 });

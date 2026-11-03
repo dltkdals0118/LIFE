@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Wallet, X } from 'lucide-react';
-import { OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
+import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Trophy, Swords, Zap, Wallet, X } from 'lucide-react';
+import { statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
 import { AuthGate, NewPassword } from './Auth';
 import { useWorkspace } from './store';
 
@@ -8,7 +8,7 @@ type View='today'|'map'|'plans'|'quests'|'records'|'review'|'rewards'|'settings'
 type Dialog={type:'outcome';item:Quest}|{type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
 const nav=[{id:'today',label:'오늘',icon:Home},{id:'map',label:'성장 지도',icon:Map},{id:'plans',label:'목표와 플랜',icon:Flag},{id:'quests',label:'퀘스트',icon:ListChecks},{id:'records',label:'나의 기록',icon:BookOpen},{id:'review',label:'주간 회고',icon:RefreshCw},{id:'rewards',label:'보상함',icon:Gift}] as const;
 const icons={wallet:Wallet,sprout:Sprout,briefcase:BriefcaseBusiness,book:BookOpen,heart:Heart,sparkles:Sparkles};
-const kindNames={'cash':'가용 현금','hours':'주간 가용시간','sleep':'수면 시간','poker-out':'포커 송금','poker-in':'포커 회수'};
+const kindNames={'cash':'가용 현금','hours':'주간 가용시간','sleep':'수면 시간','weight':'체중','poker-out':'포커 송금','poker-in':'포커 회수'};
 const text=(f:FormData,k:string)=>String(f.get(k)??'').trim();
 const num=(f:FormData,k:string)=>{const n=Number(f.get(k));if(!Number.isFinite(n)||n<0)throw Error('올바른 숫자를 입력해 주세요.');return n;};
 
@@ -34,9 +34,10 @@ function buildRule(f:FormData,key:string):TriggerRule|null{
 
 export default function App(){
  const store=useWorkspace();const {data:s,demo,ready}=store;
- const [view,setView]=useState<View>('today'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false);
+ const [view,setView]=useState<View>('today'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null);
  const importRef=useRef<HTMLInputElement>(null);
  const xp=xpOf(s),done=s.quests.filter(q=>q.status==='done'),open=s.quests.filter(q=>q.status==='ready').sort((a,b)=>a.due.localeCompare(b.due)),todayQs=open.filter(q=>q.due<=today()).slice(0,3),actualToday=done.filter(q=>q.completedAt?.slice(0,10)===today()).length;
+ const queue=questQueue(s),fq=queue[0]??null,upNext=queue[1]??null,bonus=subQuestFor(s),power=combatPower(s);
  const activeDomain=s.domains.find(d=>d.id===selectedDomain)??s.domains[0];const currentLevel=level(xpOf(s,activeDomain.id));
  const notify=(msg:string)=>setToast(msg);
  useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(''),5000);return()=>clearTimeout(timer);},[toast]);
@@ -48,17 +49,23 @@ export default function App(){
  };
  function finishQuest(q:Quest,outcome:Outcome){
   const gained=Math.round(q.xp*OUTCOME[outcome].ratio);
-  change(s=>completeQuest(s,q.id,outcome),`${OUTCOME[outcome].label} · +${gained} XP`);
+  // 다음 상태를 **여기서 직접 계산**한다. setTimeout 으로 store 를 다시 읽으면
+  // 저장이 늦을 때 레벨업 연출이 조용히 사라진다(실제로 e2e 에서 그렇게 놓쳤다).
+  const before=store.data;
+  let after:Workspace;
+  try{after=completeQuest(before,q.id,outcome);}catch(e){notify((e as Error).message);return;}
+  const diff=powerDiff(before,after);
+  change(()=>after,`${OUTCOME[outcome].label} · +${gained} XP`);
   setDialog(null);
-  // 결과를 반영한 다음 상태에서 제안을 고른다
-  setTimeout(()=>{const next=nextSuggestion(store.data,q.id);if(next)setSuggestion(next);},0);
+  if(diff.ups.length)setLevelUp(diff);         // 세진 순간을 보여준다. 숫자가 점프한다
+  const next=nextSuggestion(after,q.id);if(next)setSuggestion(next);
  }
  const exportBackup=()=>{const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`life-${demo?'demo-':''}${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);notify('백업 파일을 내려받았어요. 개인 기록이 포함될 수 있습니다.');};
  async function importFile(file?:File){if(!file)return;try{if(file.size>4000000)throw Error('4MB 이하의 LIFE 앱 백업 파일을 선택해 주세요.');setDialog({type:'import',data:parseBackup(JSON.parse(await file.text()))});}catch{notify('올바른 LIFE 앱 백업 형식이 아닙니다. 기존 데이터는 유지됩니다.');}if(importRef.current)importRef.current.value='';}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();const f=new FormData(e.currentTarget);try{if(!dialog)return;
  if(dialog.type==='quest'){const q:Quest={id:dialog.item?.id??uid(),title:text(f,'title'),domainId:text(f,'domain'),minutes:num(f,'minutes'),xp:num(f,'xp'),due:text(f,'due'),criterion:text(f,'criterion'),partialCriterion:text(f,'partialCriterion'),minimumCriterion:text(f,'minimumCriterion'),planId:text(f,'plan'),repeat:(text(f,'repeat')||'none') as 'none'|'daily'|'weekly',status:dialog.item?.status??'ready',completedAt:dialog.item?.completedAt??null,outcome:dialog.item?.outcome??null};store.update(s=>log({...s,quests:dialog.item?s.quests.map(x=>x.id===q.id?q:x):[q,...s.quests]},`${q.title} · ${dialog.item?'수정':'추가'}`));}
  if(dialog.type==='plan'){const p:Plan={id:dialog.item?.id??uid(),title:text(f,'title'),goal:text(f,'goal'),domainId:text(f,'domain'),active:dialog.item?.active??'A',branches:(['A','B','C'] as const).map(key=>({key,title:text(f,`title${key}`),cost:num(f,`cost${key}`),hours:num(f,`hours${key}`),duration:num(f,`duration${key}`),result:text(f,`result${key}`),trigger:text(f,`trigger${key}`),rule:buildRule(f,key),switchCost:num(f,`switch${key}`)}))};store.update(s=>log({...s,plans:dialog.item?s.plans.map(x=>x.id===p.id?p:x):[p,...s.plans]},`${p.title} · 플랜 저장`));}
- if(dialog.type==='observation'){const o={id:uid(),kind:text(f,'kind') as keyof typeof kindNames,value:num(f,'value'),date:text(f,'date'),note:text(f,'note')};if(o.kind==='sleep'&&o.value>24)throw Error('수면 시간은 24시간 이내로 입력해 주세요.');if(o.kind==='hours'&&o.value>168)throw Error('주간 시간은 168시간 이내로 입력해 주세요.');store.update(s=>log({...s,observations:[o,...s.observations]},`${kindNames[o.kind]} 기록 추가`));}
+ if(dialog.type==='observation'){const o={id:uid(),kind:text(f,'kind') as keyof typeof kindNames,value:num(f,'value'),date:text(f,'date'),note:text(f,'note')};if(o.kind==='sleep'&&o.value>24)throw Error('수면 시간은 24시간 이내로 입력해 주세요.');if(o.kind==='weight'&&(o.value<20||o.value>300))throw Error('체중은 20~300kg 범위로 입력해 주세요.');if(o.kind==='hours'&&o.value>168)throw Error('주간 시간은 168시간 이내로 입력해 주세요.');store.update(s=>log({...s,observations:[o,...s.observations]},`${kindNames[o.kind]} 기록 추가`));}
  if(dialog.type==='reward')store.update(s=>({...s,rewards:[{id:uid(),title:text(f,'title'),type:text(f,'type') as 'real'|'digital',cost:num(f,'cost'),requiredXp:num(f,'requiredXp'),domainId:text(f,'rewardDomain'),note:text(f,'note'),status:'wish',spent:null,usedAt:null,reservedAt:null},...s.rewards]}));
  if(dialog.type==='domain')store.update(s=>({...s,domains:[...s.domains,{id:uid(),name:text(f,'name'),color:text(f,'color') as 'sage',icon:text(f,'icon') as 'wallet'}]}));
  if(dialog.type==='review')store.update(s=>log({...s,reviews:[{id:uid(),date:today(),win:text(f,'win'),obstacle:text(f,'obstacle'),next:text(f,'next'),stats:weekStats(s)},...s.reviews]},'주간 회고를 남겼어요'));
@@ -99,8 +106,20 @@ export default function App(){
  {!ready&&<p role="status">기록을 불러오고 있어요…</p>}
  {view==='today'&&<>
  {sectionHead(new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',weekday:'long'}).format(new Date()),'오늘도, 나의 속도로','작은 한 걸음이 모여 내가 원하는 삶이 되어가요.',headAction)}
+ <section className="panel power-panel"><div className="power-head"><div><span className="eyebrow"><Swords size={13}/>전투력</span><b className="power-value">{power}</b></div><p>퀘스트를 끝내면 분야 레벨이 오르고, 레벨이 오르면 능력치가 <b>+10</b> 점프해요.</p></div>
+ <div className="stat-row">{statList(s).map(st=><div key={st.domain.id} className={`stat-chip ${st.domain.color}`}><span className="stat-name">{st.name}</span><b>{st.value}</b><small>Lv.{st.level}</small><div className="progress-track"><i style={{width:`${Math.max(3,st.progress*100)}%`}}/></div><em>다음까지 {st.remaining} XP</em></div>)}</div></section>
  <section className="chapter-hero"><div className="hero-copy"><span className="chapter-label"><Flag size={14}/>MY CHAPTER 01</span><h2>{s.chapter}</h2><p>완벽한 하루보다, 어제보다 조금 더 나다운 하루.<br/>지금의 나에게 맞는 다음 한 걸음을 찾아봐요.</p><button onClick={()=>go('plans')}>나의 플랜 살펴보기<ArrowRight size={16}/></button><div className="hero-progress"><span>쌓아온 작은 성취 <b>{done.length}개</b></span><span>진행 중 퀘스트 <b>{open.length}개</b></span></div></div><Landscape/></section>
- <div className="dashboard-columns"><div className="primary-column"><section className="panel today-quests"><div className="panel-heading"><div><h2>오늘의 퀘스트 <span className="count">{todayQs.length}</span></h2><p>가장 중요한 일부터, 가볍게 시작해요.</p></div><button className="icon-button" onClick={()=>setDialog({type:'quest'})} aria-label="퀘스트 추가"><Plus size={19}/></button></div>{todayQs.length?todayQs.map(questRow):<Empty title="다음 한 걸음을 골라볼까요?" body={open.length?'다가오는 퀘스트를 살펴보거나 오늘 할 일을 추가해요.':'10분 안에 할 수 있는 작은 행동부터 시작해요.'} action={<button className="secondary" onClick={()=>setDialog({type:'quest'})}>첫 퀘스트 만들기</button>}/>}<button className="panel-footer-link" onClick={()=>go('quests')}>모든 퀘스트 보기<ArrowRight size={15}/></button></section>
+ <div className="dashboard-columns"><div className="primary-column"><section className="panel focus-quest"><div className="panel-heading"><div><h2>오늘의 퀘스트</h2><p>하나만 봐요. 끝내면 다음이 나와요.</p></div><button className="icon-button" onClick={()=>setDialog({type:'quest'})} aria-label="퀘스트 추가"><Plus size={19}/></button></div>
+ {fq?<>{(()=>{const d=s.domains.find(x=>x.id===fq.domainId)??s.domains[0];return <div className="focus-card">
+  <span className="focus-meta"><i className={`dot ${d.color}`}/>{d.name}<b>·</b>{fq.minutes}분{fq.due<today()&&<em className="focus-late">지난 일정</em>}{fq.repeat!=='none'&&<span className="repeat-chip"><RefreshCw size={11}/>{fq.repeat==='daily'?'매일':'매주'}</span>}</span>
+  <h3>{fq.title}</h3>
+  {fq.criterion&&<p className="focus-criterion">{fq.criterion}</p>}
+  <div className="focus-actions"><button className="primary focus-done" onClick={()=>toggle(fq)} disabled={!ready}><Check size={18}/>완료했어요<b>+{fq.xp} XP</b></button><button className="text-button" onClick={()=>setDialog({type:'quest',item:fq})}>고치기 / 미루기</button></div></div>;})()}
+ {upNext&&<div className="next-teaser"><span>다음</span><strong>{upNext.title}</strong><em>+{upNext.xp} XP</em></div>}
+ <button className="panel-footer-link" onClick={()=>go('quests')}>남은 퀘스트 {queue.length}개 모두 보기<ArrowRight size={15}/></button></>
+ :<Empty title={actualToday?'오늘 할 건 다 끝냈어요':'다음 한 걸음을 골라볼까요?'} body={actualToday?'남은 퀘스트가 없어요. 아래 보너스를 받거나 쉬어가도 좋아요.':'10분 안에 할 수 있는 작은 행동부터 시작해요.'} action={<button className="secondary" onClick={()=>setDialog({type:'quest'})}>첫 퀘스트 만들기</button>}/>}
+ {bonus&&<div className="bonus-card"><span className="bonus-tag"><Zap size={13}/>보너스 서브퀘스트</span><strong>{bonus.title}</strong><p>{bonus.criterion}</p><div className="bonus-actions"><button className="secondary" onClick={()=>change(s=>acceptSubQuest(s),`보너스를 받았어요 · ${bonus.title}`)} disabled={!ready}>받기<b>+{bonus.xp} XP</b></button><small>{bonus.minutes}분 · 오늘 걸 다 끝냈을 때만 열려요</small></div></div>}
+ </section>
  <section className="growth-section"><div className="section-heading"><div><h2>조금씩 자라는 나</h2><p>각자의 속도로, 모든 분야가 자라고 있어요.</p></div><button className="text-button" onClick={()=>go('map')}>성장 지도<ArrowUpRight size={15}/></button></div>{domainCards(true)}</section>
  <section className="reflection-strip"><span className="reflection-icon"><BookOpen size={23}/></span><div><h3>잠깐 돌아보는 시간</h3><p>이번 주, 작지만 잘해낸 일은 무엇인가요?</p></div><button className="secondary" onClick={()=>setDialog({type:'review'})}>회고 남기기<ArrowRight size={15}/></button></section></div>
  <aside className="secondary-column"><section className="panel week-panel"><div className="panel-heading"><h2>이번 주의 발자국</h2><Badge>MY PACE</Badge></div><WeekDots quests={s.quests}/><div className="week-summary"><span>오늘 완료한 퀘스트</span><b>{actualToday}<small>개</small></b></div><p className="small-note">쉬어가는 날도 여정의 일부예요.</p></section>
@@ -163,6 +182,11 @@ export default function App(){
  <footer className="page-footer"><Sprout size={14}/><span>나의 삶은, 계속 자라는 중.</span><span>LIFE · ONE STEP AT A TIME</span></footer>
  </main></div>
  <nav className="mobile-nav">{[nav[0],nav[1],nav[3],nav[6]].map(n=><button key={n.id} className={view===n.id?'active':''} onClick={()=>go(n.id)}><n.icon size={20}/><span>{n.label}</span></button>)}</nav>
+ {levelUp&&<div className="levelup-scrim" onClick={()=>setLevelUp(null)}><div className="levelup-card" role="alert">
+ <span className="levelup-tag"><Trophy size={15}/>레벨 업</span>
+ {levelUp.ups.map(u=><p key={u.domain.id} className="levelup-stat"><b>{u.name}</b> Lv.{u.level} <span>{u.from} → <strong>{u.to}</strong></span></p>)}
+ <div className="levelup-power"><span>전투력</span><b>{levelUp.from}</b><ArrowRight size={18}/><b className="levelup-after">{levelUp.to}</b></div>
+ <button className="primary full" onClick={()=>setLevelUp(null)}>계속하기</button></div></div>}
  {toast&&<div className="toast" role="status"><Check size={17}/>{toast}</div>}
  {suggestion&&<div className="suggestion" role="status">
    <span className="suggestion-icon"><Compass size={17}/></span>
