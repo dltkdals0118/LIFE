@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest } from './model';
+import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest, OBS_GROUPS, OBS_NAME, OBS_UNIT, checkObservation, obsText } from './model';
 describe('actual execution and rewards',()=>{
  it('undo returns XP without changing observed cash',()=>{const s=createDemo(),xp=xpOf(s),done=completeQuest(s,'q1');expect(xpOf(done)).toBe(xp+15);const undone=completeQuest(done,'q1');expect(xpOf(undone)).toBe(xp);expect(undone.observations).toEqual(s.observations);});
  it('reserving a reward uses budget only once and requires evidence',()=>{let s=createDemo();s.rewards[1].requiredXp=0;const reserved=reserveReward(s,'r2');expect(rewardAvailable(reserved)).toBe(35000);expect(()=>reserveReward(reserved,'r2')).toThrow();expect(reserved.observations).toEqual(s.observations);});
@@ -309,5 +309,44 @@ describe('보너스 수락은 저장까지 통과해야 한다', () => {
    due: '2026-11-03', status: 'done', criterion: '', partialCriterion: '', minimumCriterion: '', planId: '',
    repeat: 'none', completedAt: '2026-11-03T01:00:00Z', outcome: 'full'}]};
   expect(() => parseBackup(acceptSubQuest(s0, '2026-11-03'))).not.toThrow();
+ });
+});
+
+// 2026-11-03: 기록 항목이 6개뿐이라 좁았다. 늘리면서 체중이 '(원)' 으로 표시되던 버그도 잡았다.
+describe('기록 항목과 단위', () => {
+ it('14개 항목이 모두 네 묶음 중 하나에 들어 있다 — 빠뜨리면 고를 수 없다', () => {
+  const grouped = OBS_GROUPS.flatMap(([, ks]) => ks);
+  expect(new Set(grouped).size).toBe(grouped.length);               // 중복 없음
+  expect(grouped.sort()).toEqual(Object.keys(OBS_NAME).sort());     // 빠진 것 없음
+ });
+
+ it('모든 항목에 이름과 단위가 있다', () => {
+  for (const k of Object.keys(OBS_NAME) as (keyof typeof OBS_NAME)[]) {
+   expect(OBS_NAME[k]).toBeTruthy();
+   expect(OBS_UNIT[k]).toBeTruthy();
+  }
+ });
+
+ it('체중의 단위는 kg 이다 — 화면에 (원) 으로 나왔던 회귀', () => {
+  expect(OBS_UNIT.weight).toBe('kg');
+  expect(obsText('weight', 72)).toBe('72kg');
+  expect(obsText('cash', 5000000)).toBe('5,000,000원');
+  expect(obsText('steps', 8200)).toBe('8200걸음');
+  expect(obsText('mood', 4)).toBe('4점');
+ });
+
+ it('범위를 벗어난 값은 항목 이름과 단위가 담긴 문장으로 막는다', () => {
+  expect(checkObservation('sleep', 25)).toContain('24시간');
+  expect(checkObservation('hours', 200)).toContain('168시간');
+  expect(checkObservation('weight', 10)).toContain('20kg');
+  expect(checkObservation('mood', 6)).toContain('5점');
+  expect(checkObservation('sleep', 7)).toBeNull();
+  expect(checkObservation('cash', 5_000_000)).toBeNull();   // 돈에는 상한을 두지 않는다
+ });
+
+ it('새 항목이 스키마를 통과한다', () => {
+  const s = {...createEmpty(), observations: (['spend', 'debt', 'income', 'poker-hours', 'exercise', 'steps', 'mood', 'study'] as const)
+   .map((kind, i) => ({id: `o${i}`, kind, value: 3, date: '2026-11-03', note: ''}))};
+  expect(() => parseBackup(s)).not.toThrow();
  });
 });

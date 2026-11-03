@@ -12,7 +12,7 @@ export const triggerRule = z.discriminatedUnion('when',[
  // 최근 N건의 결과 중 '끝까지'가 아닌 것이 M건 이상이면
  z.object({when:z.literal('outcomes'),recent:z.number().int().min(1).max(30),weak:z.number().int().min(1).max(30),to:z.enum(['A','B','C'])}),
  // 기록한 값이 기준을 밑돌거나 넘으면
- z.object({when:z.literal('observation'),kind:z.enum(['cash','hours','sleep','weight','poker-out','poker-in']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
+ z.object({when:z.literal('observation'),kind:z.enum(['cash','spend','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
  // 이 플랜에서 N일 동안 완료가 없으면
  z.object({when:z.literal('idle'),days:z.number().int().min(1).max(365),to:z.enum(['A','B','C'])}),
  // N건을 연달아 끝까지 해내면 (올라가는 쪽)
@@ -20,7 +20,7 @@ export const triggerRule = z.discriminatedUnion('when',[
 ]);
 export type TriggerRule=z.infer<typeof triggerRule>;
 export const planSchema = z.object({id,title:label,goal:label,domainId:id,active:z.enum(['A','B','C']),branches:z.array(z.object({key:z.enum(['A','B','C']),title:label,cost:amount,hours:amount.max(10000),duration:z.number().int().min(1).max(3650),result:label,trigger:z.string().max(2000),rule:triggerRule.nullable().default(null),switchCost:amount})).length(3)});
-export const observationSchema = z.object({id,kind:z.enum(['cash','hours','sleep','weight','poker-out','poker-in']),value:amount,date,note:z.string().max(2000)});
+export const observationSchema = z.object({id,kind:z.enum(['cash','spend','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study']),value:amount,date,note:z.string().max(2000)});
 export const rewardSchema = z.object({id,title:label,type:z.enum(['digital','real']),cost:amount,requiredXp:amount.max(1e7),domainId:z.string().max(150).default(''),note:z.string().max(1000).default(''),status:z.enum(['wish','reserved','used']),spent:amount.nullable(),usedAt:z.string().nullable(),reservedAt:z.string().nullable().default(null)}).refine(r=>r.type!=='digital'||r.cost===0,'성장 배지는 비용을 0원으로 입력해 주세요.');
 export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:z.string().max(4000),next:z.string().max(4000),stats:z.object({done:z.number().int(),full:z.number().int(),partial:z.number().int(),missed:z.number().int(),xp:z.number()}).nullable().default(null)});
 export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
@@ -216,8 +216,33 @@ export function evaluateTriggers(s:Workspace,p:Plan){
  }
  return out;
 }
-export const OBS_NAME={cash:'가용 현금',hours:'주간 가용시간',sleep:'수면 시간',weight:'체중','poker-out':'포커 송금','poker-in':'포커 회수'} as const;
-export const OBS_UNIT={cash:'원',hours:'시간',sleep:'시간',weight:'kg','poker-out':'원','poker-in':'원'} as const;
+export const OBS_NAME={cash:'가용 현금',spend:'월 지출',debt:'채무 잔액',income:'수입',
+ 'poker-out':'포커 송금','poker-in':'포커 회수','poker-hours':'포커 시간',
+ sleep:'수면 시간',weight:'체중',exercise:'운동 시간',steps:'걸음 수',mood:'컨디션',
+ hours:'주간 가용시간',study:'공부 시간'} as const;
+export const OBS_UNIT={cash:'원',spend:'원',debt:'원',income:'원',
+ 'poker-out':'원','poker-in':'원','poker-hours':'시간',
+ sleep:'시간',weight:'kg',exercise:'분',steps:'걸음',mood:'점(1~5)',
+ hours:'시간',study:'분'} as const;
+// 고를 것이 14개면 한 줄로 늘어놓을 수 없다. 묶어서 보여준다.
+export const OBS_GROUPS:[string,(keyof typeof OBS_NAME)[]][]=[
+ ['돈',['cash','spend','debt','income']],
+ ['포커',['poker-out','poker-in','poker-hours']],
+ ['몸',['sleep','weight','exercise','steps','mood']],
+ ['시간과 배움',['hours','study']],
+];
+// 범위는 **한 곳에서만** 정한다. 화면마다 따로 적으면 갈라진다(수면 24h 검사가 그랬다).
+const OBS_MAX:Partial<Record<keyof typeof OBS_NAME,number>>={sleep:24,'poker-hours':24,hours:168,
+ weight:300,mood:5,exercise:1440,study:1440,steps:200000};
+const OBS_MIN:Partial<Record<keyof typeof OBS_NAME,number>>={weight:20,mood:1};
+export function checkObservation(kind:keyof typeof OBS_NAME,value:number):string|null{
+ const hi=OBS_MAX[kind],lo=OBS_MIN[kind],u=OBS_UNIT[kind];
+ if(lo!==undefined&&value<lo)return `${OBS_NAME[kind]}은(는) ${lo}${u} 이상으로 입력해 주세요.`;
+ if(hi!==undefined&&value>hi)return `${OBS_NAME[kind]}은(는) ${hi}${u} 이하로 입력해 주세요.`;
+ return null;
+}
+export const obsText=(kind:keyof typeof OBS_NAME,value:number)=>
+ OBS_UNIT[kind]==='원'?won(value):`${value}${OBS_UNIT[kind]==='점(1~5)'?'점':OBS_UNIT[kind]}`;
 /** 조건을 사람 말로. 폼에서 만든 규칙을 카드에 그대로 보여 주기 위해서다. */
 /** 받침에 따라 조사를 고른다. '주간 가용시간가' 같은 말이 나오지 않게. */
 const josa=(word:string,withBatchim:string,without:string)=>{
