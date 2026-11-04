@@ -333,6 +333,7 @@ describe('기록 항목과 단위', () => {
   expect(obsText('cash', 5000000)).toBe('5,000,000원');
   expect(obsText('steps', 8200)).toBe('8200걸음');
   expect(obsText('mood', 4)).toBe('4점');
+  expect(obsText('late', 2)).toBe('2회');
  });
 
  it('범위를 벗어난 값은 항목 이름과 단위가 담긴 문장으로 막는다', () => {
