@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Trophy, Swords, Zap, Wallet, X } from 'lucide-react';
-import { OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
+import { compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
 import { AuthGate, NewPassword } from './Auth';
 import { useWorkspace } from './store';
 
@@ -199,7 +199,16 @@ export default function App(){
     <button className="secondary" onClick={()=>setSuggestion(null)}>닫기</button>
    </div>
   </div>}
- {store.conflict&&<Modal title="다른 기기에서도 기록이 바뀌었어요" onClose={()=>notify('기록을 선택할 때까지 동기화가 잠시 멈춥니다.')}><p>한 공간의 전체 기록이 서로 다릅니다. 먼저 현재 기기 기록을 백업한 뒤, 유지할 버전을 선택해 주세요. 선택하지 않은 변경은 덮어써집니다.</p><div className="conflict-grid"><div><h3>이 기기</h3><p>퀘스트 {s.quests.length}개 · 기록 {s.observations.length}개</p></div><div><h3>서버</h3><p>퀘스트 {store.conflict.data.quests.length}개 · 기록 {store.conflict.data.observations.length}개</p></div></div><button className="secondary" onClick={exportBackup}>이 기기 기록 백업</button><div className="modal-actions"><button className="secondary" onClick={()=>void store.resolveConflict('remote')}>서버 기록 사용</button><button className="primary" onClick={()=>{if(confirm('서버 기록 전체를 이 기기의 기록으로 바꿀까요?'))void store.resolveConflict('local');}}>이 기기 기록 사용</button></div></Modal>}
+ {store.conflict&&<Modal title="다른 기기에서도 기록이 바뀌었어요" onClose={()=>notify('기록을 선택할 때까지 동기화가 잠시 멈춥니다.')}><p>한 공간의 전체 기록이 서로 다릅니다. 먼저 현재 기기 기록을 백업한 뒤, 유지할 버전을 선택해 주세요. 선택하지 않은 변경은 덮어써집니다.</p>{(()=>{const c=compareWorkspaces(s,store.conflict!.data);return <>
+ <table className="conflict-table"><thead><tr><th>항목</th><th>이 기기</th><th>서버</th></tr></thead><tbody>
+ {c.rows.map(r=><tr key={r.key} className={r.diff?'differs':''}><th scope="row">{r.label}</th>
+  <td className={r.diff>0?'more':r.diff<0?'less':''}>{r.mine}</td>
+  <td className={r.diff<0?'more':r.diff>0?'less':''}>{r.theirs}</td></tr>)}
+ </tbody></table>
+ {c.mineLoses.length>0&&<p className="conflict-warn" role="alert">‘서버 기록 사용’ 을 고르면 <b>{c.mineLoses.map(r=>`${r.label} ${r.diff}개`).join(' · ')}</b> 가 사라져요.</p>}
+ {c.theirsLoses.length>0&&<p className="conflict-warn" role="alert">‘이 기기 기록 사용’ 을 고르면 <b>{c.theirsLoses.map(r=>`${r.label} ${-r.diff}개`).join(' · ')}</b> 가 사라져요.</p>}
+ {!c.mineLoses.length&&!c.theirsLoses.length&&<p className="small-note">개수는 같습니다. 내용이 다를 수 있으니 백업을 먼저 받아 주세요.</p>}
+</>;})()}<button className="secondary" onClick={exportBackup}>이 기기 기록 백업</button><div className="modal-actions"><button className="secondary" onClick={()=>void store.resolveConflict('remote')}>서버 기록 사용</button><button className="primary" onClick={()=>{if(confirm('서버 기록 전체를 이 기기의 기록으로 바꿀까요?'))void store.resolveConflict('local');}}>이 기기 기록 사용</button></div></Modal>}
  {dialog?.type==='outcome'&&<Modal title="오늘은 어디까지 갔나요?" onClose={()=>setDialog(null)}>
   <p className="outcome-intro"><strong>{dialog.item.title}</strong><span>{dialog.item.criterion||'완료 기준이 적혀 있지 않아요.'}</span></p>
   <div className="outcome-grid">

@@ -550,3 +550,16 @@ input,textarea,select{background-color:#0e1713}
  .focus-card h3{font-size:19px}
  .focus-done{width:100%;justify-content:center}
 }
+
+/* 충돌 화면 — 무엇이 사라지는지 숫자로 댄다 (2026-11-05) */
+.conflict-table{width:100%;border-collapse:collapse;margin:14px 0 4px;font-size:13px}
+.conflict-table th,.conflict-table td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right}
+.conflict-table thead th{font-size:10.5px;letter-spacing:.06em;color:var(--text-3);font-weight:700}
+.conflict-table tbody th{text-align:left;font-weight:600;color:var(--text-2)}
+.conflict-table td{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text-2)}
+.conflict-table tr.differs td.more{color:var(--neon)}
+.conflict-table tr.differs td.less{color:var(--amber)}
+.conflict-table tr.differs tbody th,.conflict-table tr.differs th{color:var(--text)}
+.conflict-warn{margin:9px 0 0;padding:10px 12px;border-radius:9px;font-size:12.5px;line-height:1.55;
+  background:var(--amber-bg);border:1px solid #3a2e16;color:#f0d9a8}
+.conflict-warn b{color:var(--amber)}

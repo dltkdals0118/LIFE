@@ -126,6 +126,17 @@ export function acceptSubQuest(s:Workspace,date=today()){
  return log({...s,quests:[q,...s.quests]},`보너스 수락 · ${t.title}`);
 }
 
+// 충돌 화면이 퀘스트·기록 수만 보여줘서, **플랜 7→1 과 보상 10→0 이 사라지는 선택을 구분할 수 없었다**
+// (2026-11-05 실제로 그렇게 줄었다). 사라지는 쪽을 숫자로 대 준다.
+export const COUNTED=[['quests','퀘스트'],['plans','플랜'],['observations','기록'],['rewards','보상'],['reviews','회고']] as const;
+export function compareWorkspaces(mine:Workspace,theirs:Workspace){
+ const rows=COUNTED.map(([key,label])=>({key,label,mine:mine[key].length,theirs:theirs[key].length,
+  diff:mine[key].length-theirs[key].length}));
+ return {rows,
+  mineLoses:rows.filter(r=>r.diff>0),      // '서버 기록 사용' 을 고르면 사라지는 것
+  theirsLoses:rows.filter(r=>r.diff<0)};   // '이 기기 기록 사용' 을 고르면 사라지는 것
+}
+
 export function pokerNet(s:Workspace,fromDate?:string){
  const pick=(k:Observation['kind'])=>s.observations.filter(o=>o.kind===k&&(!fromDate||o.date>=fromDate));
  const out=pick('poker-out'),back=pick('poker-in');

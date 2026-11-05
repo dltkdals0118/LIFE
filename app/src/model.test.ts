@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest, OBS_GROUPS, OBS_NAME, OBS_UNIT, checkObservation, obsText } from './model';
+import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest, OBS_GROUPS, OBS_NAME, OBS_UNIT, checkObservation, obsText, compareWorkspaces } from './model';
 describe('actual execution and rewards',()=>{
  it('undo returns XP without changing observed cash',()=>{const s=createDemo(),xp=xpOf(s),done=completeQuest(s,'q1');expect(xpOf(done)).toBe(xp+15);const undone=completeQuest(done,'q1');expect(xpOf(undone)).toBe(xp);expect(undone.observations).toEqual(s.observations);});
  it('reserving a reward uses budget only once and requires evidence',()=>{let s=createDemo();s.rewards[1].requiredXp=0;const reserved=reserveReward(s,'r2');expect(rewardAvailable(reserved)).toBe(35000);expect(()=>reserveReward(reserved,'r2')).toThrow();expect(reserved.observations).toEqual(s.observations);});
@@ -349,5 +349,37 @@ describe('기록 항목과 단위', () => {
   const s = {...createEmpty(), observations: (['spend', 'debt', 'income', 'poker-hours', 'exercise', 'steps', 'mood', 'study'] as const)
    .map((kind, i) => ({id: `o${i}`, kind, value: 3, date: '2026-11-03', note: ''}))};
   expect(() => parseBackup(s)).not.toThrow();
+ });
+});
+
+// 2026-11-05: 앱 상태가 뒤로 갔다 — 플랜 7→1, 보상 10→0. 충돌 화면은 퀘스트·기록 수만 보여줘서
+// 그 선택을 구분할 수 없었다. 사라지는 쪽을 숫자로 대 준다.
+describe('충돌 비교 — 무엇이 사라지는지', () => {
+ const ws = (q: number, p: number, r: number): Workspace => ({...createEmpty(),
+  quests: Array.from({length: q}, (_, i) => ({id: `q${i}`, title: `q${i}`, domainId: 'recovery', minutes: 1,
+   xp: 5, due: '2026-11-05', status: 'ready', criterion: '', partialCriterion: '', minimumCriterion: '',
+   planId: '', repeat: 'none', completedAt: null, outcome: null}) as Quest),
+  plans: Array.from({length: p}, (_, i) => ({id: `p${i}`, title: `p${i}`, goal: 'g', domainId: 'recovery',
+   active: 'A', branches: (['A', 'B', 'C'] as const).map(key => ({key, title: key, cost: 0, hours: 0,
+    duration: 1, result: 'r', trigger: '', rule: null, switchCost: 0}))}) as never),
+  rewards: Array.from({length: r}, (_, i) => ({id: `r${i}`, title: `r${i}`, type: 'digital', cost: 0,
+   requiredXp: 0, domainId: '', note: '', status: 'wish', spent: null, usedAt: null, reservedAt: null}) as never)});
+
+ it('실제로 난 경우 — 플랜 6개와 보상 10개가 사라진다고 말해 준다', () => {
+  const c = compareWorkspaces(ws(10, 7, 10), ws(10, 1, 0));
+  expect(c.mineLoses.map(r => `${r.label} ${r.diff}`)).toEqual(['플랜 6', '보상 10']);
+  expect(c.theirsLoses).toEqual([]);
+  expect(c.rows.find(r => r.key === 'quests')!.diff).toBe(0);   // 퀘스트만 보면 똑같아 보인다
+ });
+
+ it('반대쪽도 센다', () => {
+  const c = compareWorkspaces(ws(2, 0, 0), ws(5, 3, 0));
+  expect(c.theirsLoses.map(r => `${r.label} ${-r.diff}`)).toEqual(['퀘스트 3', '플랜 3']);
+  expect(c.mineLoses).toEqual([]);
+ });
+
+ it('같으면 양쪽 다 비어 있다', () => {
+  const c = compareWorkspaces(ws(3, 1, 2), ws(3, 1, 2));
+  expect(c.mineLoses).toEqual([]); expect(c.theirsLoses).toEqual([]);
  });
 });
