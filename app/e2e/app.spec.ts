@@ -68,3 +68,38 @@ test('게임 루프 — 하나씩 나오고, 레벨업에 전투력이 점프하
  await expect(page.locator('.bonus-card')).toHaveCount(0);
  expect(errors).toEqual([]);
 });
+
+// 2026-11-05: 하단 탭이 넷만 보여줘서 주간 회고·나의 기록·목표와 플랜에 갈 수 없었다.
+// 사용자는 그걸 '없어졌다'고 읽었다. 화면이 전부 닿는지 기계가 센다.
+test('모바일 하단 탭으로 모든 화면에 갈 수 있다',async({page},info)=>{
+ test.skip(info.project.name!=='mobile','모바일 전용');
+ await page.goto('./');
+ await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();
+ const tabs=page.locator('.mobile-nav>button');
+ await expect(tabs).toHaveCount(7);
+ for(const [label,heading] of [['오늘','오늘도, 나의 속도로'],['성장 지도','나의 성장 지도'],
+  ['목표와 플랜','목표와 플랜 ABC'],['퀘스트','나의 퀘스트'],['나의 기록','나의 기록'],
+  ['주간 회고','잠깐, 돌아보기'],['보상함','나를 위한 보상함']] as const){
+  await page.locator('.mobile-nav').getByRole('button',{name:label}).click();
+  await expect(page.getByRole('heading',{name:heading})).toBeVisible();
+ }
+ const over=await page.evaluate(()=>{const n=document.querySelector('.mobile-nav')!;return n.scrollWidth>n.clientWidth+1;});
+ expect(over,'하단 탭이 가로로 넘친다').toBe(false);
+});
+
+// 가로 넘침은 모바일에서 조용히 치명적이다: 브라우저가 페이지를 축소하고
+// **고정 하단 탭이 화면 밖으로 밀려 안 눌린다.** 기록 이력 표(539px)가 실제로 그랬다.
+// 화면마다 재서, 안쪽 스크롤로 가려진 경우까지 잡는다.
+test('모바일 어느 화면에서도 가로로 넘치지 않는다',async({page},info)=>{
+ test.skip(info.project.name!=='mobile','모바일 전용');
+ await page.goto('./');
+ await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();
+ for(const tab of ['오늘','성장 지도','목표와 플랜','퀘스트','나의 기록','주간 회고','보상함']){
+  await page.locator('.mobile-nav').getByRole('button',{name:tab}).click();
+  await page.waitForTimeout(250);
+  const m=await page.evaluate(()=>{const d=document.documentElement;
+   return {over:d.scrollWidth-d.clientWidth,navTop:document.querySelector('.mobile-nav')!.getBoundingClientRect().top,vh:window.innerHeight};});
+  expect(m.over,`${tab} 화면이 가로로 ${m.over}px 넘친다`).toBeLessThanOrEqual(0);
+  expect(m.navTop,`${tab} 화면에서 하단 탭이 뷰포트 밖으로 밀렸다`).toBeLessThan(m.vh);
+ }
+});
