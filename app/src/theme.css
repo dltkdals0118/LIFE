@@ -642,3 +642,15 @@ input,textarea,select{background-color:#0e1713}
  .sim-head b{font-size:17px}
  .sim-options button{flex:1 1 calc(50% - 4px);justify-content:center}
 }
+
+/* 손잡이 묶음 (2026-11-09) — 10개를 한 줄로 늘어놓으면 고를 수가 없다 */
+.sim-group{border-top:1px solid var(--line)}
+.sim-group:first-of-type{border-top:0}
+.sim-group-head{display:flex;align-items:baseline;gap:10px;padding:14px 18px 2px;flex-wrap:wrap}
+.sim-group-head h3{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--neon);margin:0}
+.sim-group-head p{margin:0;font-size:10.5px;color:var(--text-3);flex:1}
+.sim-group-count{font-size:10px;font-weight:700;color:var(--text-3);
+  background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.sim-group .sim-lever:first-of-type{border-top:0}
+.sim-options em.minus{color:var(--amber)}
+.sim-options button.active em.minus{color:var(--amber)}

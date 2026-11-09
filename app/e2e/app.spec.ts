@@ -125,10 +125,13 @@ test('시뮬레이션 — 손잡이를 당기면 결과가 바뀐다',async({pag
  await expect(page.getByRole('heading',{name:'아직 아무 손잡이도 안 당겼어요'})).toBeVisible();
 
  // 손잡이 하나를 당기면 숫자가 바뀐다
- await page.locator('.sim-lever').first().getByRole('button',{name:/월 60만/}).click();
+ await page.locator('.sim-lever').first().getByRole('button',{name:/월 80만/}).click();
  await expect(head.nth(1)).not.toHaveText(before);
  // 그리고 '무엇이 참이어야 하는가' 가 나타난다
  await expect(page.getByText('주 단위 상한을 정하고 지킨다')).toBeVisible();
+ // 묶음이 보이고, 당긴 개수가 세어진다
+ await expect(page.locator('.sim-group-head h3').first()).toBeVisible();
+ await expect(page.locator('.sim-group-count').first()).toHaveText(/^1\//);
 
  // 최선으로 맞추면 더 좋아지고, 0 아래로 가는 시점이 밀리거나 사라진다
  await page.getByRole('button',{name:'최선으로 맞추기'}).click();

@@ -176,13 +176,22 @@ export default function App(){
  </section>
  <section className="panel sim-levers"><div className="panel-heading"><div><h2>손잡이</h2><p>눌러서 바꿔 보세요. 숫자와 선이 바로 따라와요.</p></div>
   <button className="text-button" onClick={()=>setPicks(defaultPicks(sim))}>되돌리기</button></div>
-  {sim.levers.map(lv=><div className="sim-lever" key={lv.id}>
-   <div className="sim-lever-top"><strong>{lv.name}</strong><small>{lv.starts} 부터</small></div>
-   <div className="sim-options">{lv.options.map(o=>
-     <button key={o.key} className={(P[lv.id]??defaultPicks(sim)[lv.id])===o.key?'active':''}
-       onClick={()=>set(lv.id,o.key)}>{o.label}{o.delta?<em>+{won(o.delta)}</em>:null}</button>)}</div>
-   {lv.basis&&<p className="sim-basis-small">{lv.basis}</p>}
-  </div>)}
+  {(()=>{const gs=sim.groups.length?sim.groups:[{key:'',name:'',note:''}];
+   return gs.map(g=>{const mine=sim.levers.filter(l=>(l.group||'')===g.key);
+    if(!mine.length)return null;
+    const pulled=mine.filter(l=>{const o=l.options.find(x=>x.key===(P[l.id]??defaultPicks(sim)[l.id]));return o&&o.delta!==0;}).length;
+    return <div className="sim-group" key={g.key||'all'}>
+     {g.name&&<div className="sim-group-head"><h3>{g.name}</h3>{g.note&&<p>{g.note}</p>}
+       <span className="sim-group-count">{pulled}/{mine.length}</span></div>}
+     {mine.map(lv=><div className="sim-lever" key={lv.id}>
+      <div className="sim-lever-top"><strong>{lv.name}</strong><small>{lv.starts} 부터</small></div>
+      <div className="sim-options">{lv.options.map(o=>
+        <button key={o.key} className={(P[lv.id]??defaultPicks(sim)[lv.id])===o.key?'active':''}
+          onClick={()=>set(lv.id,o.key)}>{o.label}
+          {o.delta?<em className={o.delta<0?'minus':''}>{o.delta>0?'+':'−'}{won(Math.abs(o.delta))}</em>:null}</button>)}</div>
+      {lv.basis&&<p className="sim-basis-small">{lv.basis}</p>}
+     </div>)}
+    </div>;});})()}
  </section>
  {r.needPerMonth>0&&<section className="panel sim-target"><div className="panel-heading"><h2>그래도 모자란 만큼</h2><Target size={18}/></div>
   <p>이 조합으로도 매달 <b>{won(r.needPerMonth)}</b> 이 모자라요.
