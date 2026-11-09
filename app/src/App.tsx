@@ -155,7 +155,7 @@ export default function App(){
  <section className="quote-card"><span>“</span><p>멀리 가는 힘은<br/>작은 걸음에서 시작돼요.</p><small>LIFE, ONE STEP AT A TIME</small></section></aside></div>
  </>}
  {view==='sim'&&(()=>{const sim=s.sim;
- if(!sim)return <>{sectionHead('WHAT IF','시뮬레이션','아직 예측 자료가 없어요.')}<Empty title="예측 자료가 없어요" body="저장소에서 python sim/run.py 를 돌린 뒤 백업을 다시 가져오면 여기가 채워져요."/></>;
+ if(!sim)return <>{sectionHead('WHAT IF','시뮬레이션','아직 예측 자료가 없어요.')}<Empty title="예측 자료가 없어요" body="설정과 동기화 → 백업 가져오기 로 최신 파일을 한 번 더 가져오면 채워져요. 예시 공간에서는 바로 만져볼 수 있어요." action={<button className="secondary" onClick={()=>go('settings')}>설정과 동기화 열기<ArrowRight size={15}/></button>}/></>;
  const P=Object.keys(picks).length?picks:defaultPicks(sim);
  const r=projectCash(sim,P), none=projectCash(sim,defaultPicks(sim));
  const best=Object.fromEntries(sim.levers.map(l=>[l.id,l.options.reduce((a,b)=>b.delta>a.delta?b:a).key]));
