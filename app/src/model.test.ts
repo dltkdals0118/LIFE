@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest, OBS_GROUPS, OBS_NAME, OBS_UNIT, checkObservation, obsText, compareWorkspaces } from './model';
+import { createDemo,createEmpty,completeQuest,xpOf,level,reserveReward,rewardAvailable,assessBranch,parseBackup,nextSuggestion,accuracy,rewardProgress,pokerNet,evaluateTriggers,ruleText,weekStats, statOf, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, type Quest, type Workspace, isSubQuest, OBS_GROUPS, OBS_NAME, OBS_UNIT, checkObservation, obsText, compareWorkspaces, today } from './model';
 describe('actual execution and rewards',()=>{
  it('undo returns XP without changing observed cash',()=>{const s=createDemo(),xp=xpOf(s),done=completeQuest(s,'q1');expect(xpOf(done)).toBe(xp+15);const undone=completeQuest(done,'q1');expect(xpOf(undone)).toBe(xp);expect(undone.observations).toEqual(s.observations);});
  it('reserving a reward uses budget only once and requires evidence',()=>{let s=createDemo();s.rewards[1].requiredXp=0;const reserved=reserveReward(s,'r2');expect(rewardAvailable(reserved)).toBe(35000);expect(()=>reserveReward(reserved,'r2')).toThrow();expect(reserved.observations).toEqual(s.observations);});
@@ -381,5 +381,35 @@ describe('충돌 비교 — 무엇이 사라지는지', () => {
  it('같으면 양쪽 다 비어 있다', () => {
   const c = compareWorkspaces(ws(3, 1, 2), ws(3, 1, 2));
   expect(c.mineLoses).toEqual([]); expect(c.theirsLoses).toEqual([]);
+ });
+});
+
+// 2026-11-09: 생성기에 repeat:'monthly' 를 넣었는데 스키마에 없어 **가져오기가 통째로 거부**됐다.
+// 생성기를 고치고 검증기를 안 돌린 탓이다. 달 더하기는 말일 처리가 까다로워 따로 잰다.
+describe('매달 반복', () => {
+ const q = (due: string): Quest => ({id: 'm', title: '현금 한 줄', domainId: 'finance', minutes: 1, xp: 5,
+  due, status: 'ready', criterion: '', partialCriterion: '', minimumCriterion: '', planId: '',
+  repeat: 'monthly', completedAt: null, outcome: null});
+
+ it('스키마가 monthly 를 받는다', () => {
+  expect(() => parseBackup({...createEmpty(), quests: [q('2026-11-30')]})).not.toThrow();
+ });
+
+ it('완료하면 다음 달 같은 날로 새 퀘스트가 선다', () => {
+  const s = {...createEmpty(), quests: [q('2099-01-15')]};
+  const after = completeQuest(s, 'm', 'full');
+  const next = after.quests.find(x => x.status === 'ready')!;
+  expect(next.due).toBe('2099-02-15');
+  expect(next.repeat).toBe('monthly');
+ });
+
+ it('31일은 짧은 달에서 말일로 내려간다 — 건너뛰지 않는다', () => {
+  const after = completeQuest({...createEmpty(), quests: [q('2099-01-31')]}, 'm', 'full');
+  expect(after.quests.find(x => x.status === 'ready')!.due).toBe('2099-02-28');
+ });
+
+ it('마감이 한참 지났으면 오늘 이후로 따라잡는다', () => {
+  const after = completeQuest({...createEmpty(), quests: [q('2020-03-10')]}, 'm', 'full');
+  expect(after.quests.find(x => x.status === 'ready')!.due > today()).toBe(true);
  });
 });

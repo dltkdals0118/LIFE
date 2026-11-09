@@ -5,14 +5,14 @@ const label = z.string().trim().min(1).max(200);
 const amount = z.number().finite().min(0).max(1e12);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>{const d=new Date(v+'T00:00:00Z');return !Number.isNaN(d.valueOf())&&d.toISOString().slice(0,10)===v;},'유효한 날짜를 입력해 주세요.');
 export const domainSchema = z.object({id, name:label, color:z.enum(['sage','blue','amber','rose','violet','teal']), icon:z.enum(['wallet','sprout','briefcase','book','heart','sparkles'])});
-export const questSchema = z.object({id,title:label,domainId:id,minutes:amount.max(10000),xp:amount.max(50),due:date,status:z.enum(['ready','done','paused']),criterion:z.string().max(2000),partialCriterion:z.string().max(2000).default(''),minimumCriterion:z.string().max(2000).default(''),planId:z.string().max(150),repeat:z.enum(['none','daily','weekly']).default('none'),completedAt:z.string().nullable(),outcome:z.enum(['full','partial','missed']).nullable().default(null)});
+export const questSchema = z.object({id,title:label,domainId:id,minutes:amount.max(10000),xp:amount.max(50),due:date,status:z.enum(['ready','done','paused']),criterion:z.string().max(2000),partialCriterion:z.string().max(2000).default(''),minimumCriterion:z.string().max(2000).default(''),planId:z.string().max(150),repeat:z.enum(['none','daily','weekly','monthly']).default('none'),completedAt:z.string().nullable(),outcome:z.enum(['full','partial','missed']).nullable().default(null)});
 // 전환 조건. `trigger` 는 사람이 읽는 글이고, `rule` 이 있으면 기계도 같이 읽는다.
 // 규칙이 없어도 플랜은 그대로 동작한다 — 글만 있는 조건을 억지로 숫자로 바꾸지 않는다.
 export const triggerRule = z.discriminatedUnion('when',[
  // 최근 N건의 결과 중 '끝까지'가 아닌 것이 M건 이상이면
  z.object({when:z.literal('outcomes'),recent:z.number().int().min(1).max(30),weak:z.number().int().min(1).max(30),to:z.enum(['A','B','C'])}),
  // 기록한 값이 기준을 밑돌거나 넘으면
- z.object({when:z.literal('observation'),kind:z.enum(['cash','spend','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study','late']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
+ z.object({when:z.literal('observation'),kind:z.enum(['cash','spend','inflow','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study','late']),op:z.enum(['lt','gt']),value:amount,to:z.enum(['A','B','C'])}),
  // 이 플랜에서 N일 동안 완료가 없으면
  z.object({when:z.literal('idle'),days:z.number().int().min(1).max(365),to:z.enum(['A','B','C'])}),
  // N건을 연달아 끝까지 해내면 (올라가는 쪽)
@@ -20,7 +20,7 @@ export const triggerRule = z.discriminatedUnion('when',[
 ]);
 export type TriggerRule=z.infer<typeof triggerRule>;
 export const planSchema = z.object({id,title:label,goal:label,domainId:id,active:z.enum(['A','B','C']),branches:z.array(z.object({key:z.enum(['A','B','C']),title:label,cost:amount,hours:amount.max(10000),duration:z.number().int().min(1).max(3650),result:label,trigger:z.string().max(2000),rule:triggerRule.nullable().default(null),switchCost:amount})).length(3)});
-export const observationSchema = z.object({id,kind:z.enum(['cash','spend','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study','late']),value:amount,date,note:z.string().max(2000)});
+export const observationSchema = z.object({id,kind:z.enum(['cash','spend','inflow','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study','late']),value:amount,date,note:z.string().max(2000)});
 export const rewardSchema = z.object({id,title:label,type:z.enum(['digital','real']),cost:amount,requiredXp:amount.max(1e7),domainId:z.string().max(150).default(''),note:z.string().max(1000).default(''),status:z.enum(['wish','reserved','used']),spent:amount.nullable(),usedAt:z.string().nullable(),reservedAt:z.string().nullable().default(null)}).refine(r=>r.type!=='digital'||r.cost===0,'성장 배지는 비용을 0원으로 입력해 주세요.');
 export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:z.string().max(4000),next:z.string().max(4000),stats:z.object({done:z.number().int(),full:z.number().int(),partial:z.number().int(),missed:z.number().int(),xp:z.number()}).nullable().default(null)});
 // ── 시뮬레이션 ─────────────────────────────────────────────
@@ -202,10 +202,20 @@ export function pokerNet(s:Workspace,fromDate?:string){
 export function latest(s:Workspace,kind:Observation['kind']){return s.observations.filter(o=>o.kind===kind).sort((a,b)=>b.date.localeCompare(a.date))[0]??null;}
 export function log(s:Workspace,text:string){return {...s,events:[{id:uid(),at:new Date().toISOString(),text},...s.events].slice(0,20000)};}
 /** 반복 퀘스트의 다음 회차 마감일. 지난 마감이면 오늘 기준으로 당겨 잡는다 — 과거에 쌓인 회차를 되살리지 않는다. */
-function nextDue(due:string,repeat:'daily'|'weekly'){
- const step=repeat==='daily'?1:7;
+function nextDue(due:string,repeat:'daily'|'weekly'|'monthly'){
  const t=today();
  let d=new Date(due+'T00:00:00Z');
+ if(repeat==='monthly'){
+  // 달을 더한다. 31일이 없는 달은 그 달 마지막 날로 내린다 — 1/31 이 3/3 으로 건너뛰지 않게.
+  const day=d.getUTCDate();
+  do{
+   const y=d.getUTCFullYear(),m=d.getUTCMonth()+1;
+   const last=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+   d=new Date(Date.UTC(y,m,Math.min(day,last)));
+  }while(d.toISOString().slice(0,10)<=t);
+  return d.toISOString().slice(0,10);
+ }
+ const step=repeat==='daily'?1:7;
  do{d=new Date(d.getTime()+step*86400000);}while(d.toISOString().slice(0,10)<=t);
  return d.toISOString().slice(0,10);
 }
@@ -281,17 +291,17 @@ export function evaluateTriggers(s:Workspace,p:Plan){
  }
  return out;
 }
-export const OBS_NAME={cash:'가용 현금',spend:'월 지출',debt:'채무 잔액',income:'수입',
+export const OBS_NAME={cash:'가용 현금',spend:'월 총유출',inflow:'월 총유입',debt:'채무 잔액',income:'수입',
  'poker-out':'포커 송금','poker-in':'포커 회수','poker-hours':'포커 시간',
  sleep:'수면 시간',weight:'체중',exercise:'운동 시간',steps:'걸음 수',mood:'컨디션',
  hours:'주간 가용시간',study:'공부 시간',late:'지각'} as const;
-export const OBS_UNIT={cash:'원',spend:'원',debt:'원',income:'원',
+export const OBS_UNIT={cash:'원',spend:'원',inflow:'원',debt:'원',income:'원',
  'poker-out':'원','poker-in':'원','poker-hours':'시간',
  sleep:'시간',weight:'kg',exercise:'분',steps:'걸음',mood:'점(1~5)',
  hours:'시간',study:'분',late:'회'} as const;
 // 고를 것이 14개면 한 줄로 늘어놓을 수 없다. 묶어서 보여준다.
 export const OBS_GROUPS:[string,(keyof typeof OBS_NAME)[]][]=[
- ['돈',['cash','spend','debt','income']],
+ ['돈',['cash','spend','inflow','debt','income']],
  ['포커',['poker-out','poker-in','poker-hours']],
  ['몸',['sleep','weight','exercise','steps','mood']],
  ['시간과 배움',['hours','study','late']],
