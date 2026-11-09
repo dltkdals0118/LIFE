@@ -654,3 +654,8 @@ input,textarea,select{background-color:#0e1713}
 .sim-group .sim-lever:first-of-type{border-top:0}
 .sim-options em.minus{color:var(--amber)}
 .sim-options button.active em.minus{color:var(--amber)}
+
+/* 가져오기 — 예시 공간에 넣으면 저장되지 않는다. 그걸 말해주지 않아 한 번 잃었다 (2026-11-09) */
+.notice.warn{background:var(--amber-bg);border:1px solid #3a2e16;color:#f0d9a8}
+.notice.warn b{color:var(--amber)}
+.warn-inline{font-style:normal;color:var(--amber)}

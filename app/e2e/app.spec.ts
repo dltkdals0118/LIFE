@@ -145,3 +145,29 @@ test('시뮬레이션 — 손잡이를 당기면 결과가 바뀐다',async({pag
  await expect(head.nth(1)).toHaveText(before);
  expect(errors).toEqual([]);
 });
+
+// 2026-11-09: 예시 공간에서 가져오기를 하면 저장되지 않는데 앱이 말해주지 않았다.
+// 사용자가 "가져왔는데" 라고 했지만 실제로는 아무것도 남지 않았다.
+test('예시 공간에 가져오면 저장되지 않는다고 먼저 말한다',async({page})=>{
+ await page.goto('./');
+ await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();
+ // 모바일에선 사이드바가 숨어 있다 — 햄버거를 먼저 연다
+ if(await page.locator('.mobile-nav').isVisible())await page.getByRole('button',{name:'메뉴 열기'}).click();
+ await page.getByRole('button',{name:'설정과 동기화'}).first().click();
+ const file={schemaVersion:1,name:'가져오기 시험',chapter:'시험',
+  domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'}],
+  quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,events:[],
+  sim:{asOf:'2026-11-09',cash:1000000,netMonthly:-500000,startMonth:'2026-12',months:6,
+   flowBasis:'시험',incomeNow:null,groups:[],
+   levers:[{id:'a',name:'레버',group:'',starts:'2026-12',basis:'',
+     options:[{key:'A',label:'줄인다',delta:100000,requires:['무언가 한다']},
+              {key:'C',label:'그대로',delta:0,requires:[]}]}]}};
+ await page.setInputFiles('input[type=file]',{name:'import.json',mimeType:'application/json',
+   buffer:Buffer.from(JSON.stringify(file),'utf8')});
+ const d=page.getByRole('dialog');
+ await expect(d).toContainText('손잡이 1개');                    // 시뮬레이션이 들어 있는지 보여준다
+ await expect(d).toContainText('지금은 예시 공간이에요');          // 그리고 저장되지 않는다고 말한다
+ await expect(d.getByRole('button',{name:'이 기록으로 교체'})).toHaveCount(0);
+ await d.getByRole('button',{name:'내 공간으로 바꾸기'}).click();
+ await expect(page.getByRole('status')).toContainText('내 공간으로 바꿨어요');
+});
