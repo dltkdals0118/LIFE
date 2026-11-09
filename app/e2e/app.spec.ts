@@ -11,7 +11,7 @@ test('personal quest and observation survive reload, review and rewards work',as
  await page.getByRole('button',{name:'회고 남기기',exact:true}).click();await page.getByLabel('작지만 잘해낸 일').fill('걸었다');await page.getByLabel('다음 주의 한 걸음').fill('다시 걷기');await page.getByRole('button',{name:'저장하기',exact:true}).click();
  await page.getByRole('button',{name:'보상함 열어보기'}).click();await page.getByRole('button',{name:'보상 추가'}).click();await page.getByLabel('어떤 보상이 기다려지나요?').fill('공원 가기');await page.getByLabel('잠금 해제 경험치').fill('0');await page.getByRole('button',{name:'저장하기',exact:true}).click();await page.getByRole('button',{name:'보상 예약하기'}).click();await expect(page.getByText('예약됨',{exact:true})).toBeVisible();
 });
-test('desktop and mobile screenshots',async({page},info)=>{await page.goto('./');await expect(page.getByRole('heading',{name:'다시 만나 반가워요'})).toBeVisible();await page.screenshot({path:`test-results/${info.project.name}-login.png`,fullPage:true});await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();await page.getByRole('heading',{name:'오늘도, 나의 속도로'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-home.png`,fullPage:true});if(info.project.name==='desktop'){await page.getByRole('button',{name:'퀘스트'}).first().click();await page.getByRole('heading',{name:'나의 퀘스트'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-quests.png`,fullPage:true});await page.getByRole('button',{name:'나의 기록'}).first().click();await page.getByRole('heading',{name:'현금의 흐름'}).waitFor();await page.waitForTimeout(1400);await page.screenshot({path:`test-results/${info.project.name}-records.png`,fullPage:true});await page.getByRole('button',{name:'보상함'}).first().click();await page.getByRole('heading',{name:'나를 위한 보상함'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-rewards.png`,fullPage:true});await page.getByRole('button',{name:'목표와 플랜'}).first().click();await page.getByRole('heading',{name:'목표와 플랜 ABC'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-plans.png`,fullPage:true});}});
+test('desktop and mobile screenshots',async({page},info)=>{await page.goto('./');await expect(page.getByRole('heading',{name:'다시 만나 반가워요'})).toBeVisible();await page.screenshot({path:`test-results/${info.project.name}-login.png`,fullPage:true});await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();await page.getByRole('heading',{name:'오늘도, 나의 속도로'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-home.png`,fullPage:true});if(info.project.name==='desktop'){await page.getByRole('button',{name:'퀘스트'}).first().click();await page.getByRole('heading',{name:'나의 퀘스트'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-quests.png`,fullPage:true});await page.getByRole('button',{name:'나의 기록'}).first().click();await page.getByRole('heading',{name:'현금의 흐름'}).waitFor();await page.waitForTimeout(1400);await page.screenshot({path:`test-results/${info.project.name}-records.png`,fullPage:true});await page.getByRole('button',{name:'보상함'}).first().click();await page.getByRole('heading',{name:'나를 위한 보상함'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-rewards.png`,fullPage:true});await page.getByRole('button',{name:'목표와 플랜'}).first().click();await page.getByRole('heading',{name:'목표와 플랜 ABC'}).waitFor();await page.screenshot({path:`test-results/${info.project.name}-plans.png`,fullPage:true});await page.getByRole('button',{name:'시뮬레이션'}).first().click();await page.getByRole('heading',{name:/앞으로 \d+달/}).waitFor();await page.waitForTimeout(400);await page.screenshot({path:`test-results/${info.project.name}-sim.png`,fullPage:true});}});
 
 // 2026-11-03 요청: "일별 퀘스트 하나 띄워주고 그걸 완료하면 다음 퀘스트 / 가끔가다 서브 퀘스트",
 // "레벨업 했을 때 세지는 정도". 화면이 실제로 그렇게 도는지를 사람 경로 그대로 확인한다.
@@ -102,4 +102,43 @@ test('모바일 어느 화면에서도 가로로 넘치지 않는다',async({pag
   expect(m.over,`${tab} 화면이 가로로 ${m.over}px 넘친다`).toBeLessThanOrEqual(0);
   expect(m.navTop,`${tab} 화면에서 하단 탭이 뷰포트 밖으로 밀렸다`).toBeLessThan(m.vh);
  }
+});
+
+// 2026-11-09 사용자: "시뮬레이션이 아니라 그냥 기록 -> 퀘스트 -> 보상 구조잖아."
+// 시뮬레이션의 조건은 하나다 — **고른 것에 따라 결과가 바뀌고, 그걸 직접 돌려볼 수 있어야 한다.**
+// 그래서 '손잡이를 당기면 숫자와 선이 움직이는지' 를 잰다.
+test('시뮬레이션 — 손잡이를 당기면 결과가 바뀐다',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('./');
+ await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();
+ // 모바일에선 사이드바가 화면 밖이라 .first() 가 안 보이는 버튼을 집는다. **보이는 쪽**을 누른다.
+ const nav=await page.locator('.mobile-nav').isVisible()?page.locator('.mobile-nav'):page.locator('.sidebar nav');
+ await nav.getByRole('button',{name:'시뮬레이션'}).click();
+ await expect(page.getByRole('heading',{name:/앞으로 \d+달/})).toBeVisible();
+
+ const head=page.locator('.sim-head b');
+ const before=await head.nth(1).innerText();          // 마지막 달 현금
+ const zeroBefore=await head.nth(0).innerText();      // 0 아래로 가는 달
+ await expect(page.locator('.sim-line-mine')).toBeVisible();
+
+ // 아무것도 안 당긴 상태에서는 '성립하려면' 목록이 비어 있다
+ await expect(page.getByRole('heading',{name:'아직 아무 손잡이도 안 당겼어요'})).toBeVisible();
+
+ // 손잡이 하나를 당기면 숫자가 바뀐다
+ await page.locator('.sim-lever').first().getByRole('button',{name:/월 60만/}).click();
+ await expect(head.nth(1)).not.toHaveText(before);
+ // 그리고 '무엇이 참이어야 하는가' 가 나타난다
+ await expect(page.getByText('주 단위 상한을 정하고 지킨다')).toBeVisible();
+
+ // 최선으로 맞추면 더 좋아지고, 0 아래로 가는 시점이 밀리거나 사라진다
+ await page.getByRole('button',{name:'최선으로 맞추기'}).click();
+ const after=await head.nth(1).innerText();
+ const num=(t:string)=>Number(t.replace(/[^0-9-]/g,''));
+ expect(num(after)).toBeGreaterThan(num(before));
+ expect(await head.nth(0).innerText()).not.toBe(zeroBefore);
+
+ // 되돌리면 처음으로
+ await page.getByRole('button',{name:'되돌리기'}).click();
+ await expect(head.nth(1)).toHaveText(before);
+ expect(errors).toEqual([]);
 });

@@ -592,3 +592,53 @@ input,textarea,select{background-color:#0e1713}
  .table-wrap td:nth-child(5){grid-area:del;align-self:center;text-align:right}
  .table-wrap td:nth-child(4):empty{display:none}
 }
+
+/* ───── 시뮬레이션 (2026-11-09) ─────
+   사용자: "시뮬레이션이 아니라 그냥 기록 -> 퀘스트 -> 보상 구조잖아."
+   맞다. 시뮬레이션이 되려면 **시간이 앞으로 가고, 고른 것에 따라 결과가 갈리고, 직접 돌려볼 수 있어야** 한다. */
+.sim-panel{padding:18px 18px 14px;background:linear-gradient(145deg,var(--surface),#0d1813);border:1px solid #1d3328}
+.sim-head{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px}
+.sim-head .eyebrow{display:block;margin-bottom:3px}
+.sim-head b{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.sim-head b.bad{color:var(--amber)} .sim-head b.good{color:var(--neon)}
+.sim-chart{width:100%;overflow:hidden}
+.sim-chart svg{display:block;max-width:100%}
+.sim-zero{stroke:#2a3b33;stroke-width:1;stroke-dasharray:4 5}
+.sim-zero-label{fill:var(--text-3);font-size:9px}
+.sim-line-none{stroke:#3a4b42;stroke-width:2;stroke-dasharray:5 5}
+.sim-line-mine{stroke:var(--neon);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;
+  filter:drop-shadow(0 0 8px #5ee89a55);transition:d .35s ease}
+.sim-dot{fill:var(--neon)}
+.sim-x{fill:var(--text-3);font-size:9.5px}
+.sim-legend{display:flex;gap:14px;justify-content:flex-end;font-size:10px;color:var(--text-3);margin-top:2px}
+.sim-legend span::before{content:'';display:inline-block;width:14px;height:2px;margin-right:5px;vertical-align:middle}
+.sim-legend .mine::before{background:var(--neon)}
+.sim-legend .none::before{background:#3a4b42}
+.sim-basis{margin:10px 0 0;font-size:11px;line-height:1.7;color:var(--text-3)}
+.sim-levers .panel-heading{padding-bottom:10px}
+.sim-lever{padding:13px 18px;border-top:1px solid var(--line-soft)}
+.sim-lever-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.sim-lever-top strong{font-size:13px;color:var(--text)}
+.sim-lever-top small{font-size:9.5px;color:var(--text-3);white-space:nowrap}
+.sim-options{display:flex;gap:7px;flex-wrap:wrap}
+.sim-options button{border:1px solid var(--line);background:var(--bg-2);color:var(--text-2);
+  border-radius:9px;padding:8px 11px;font-size:11.5px;display:inline-flex;align-items:center;gap:6px;
+  transition:border-color .15s,background .15s,color .15s}
+.sim-options button:hover{border-color:#2d4a3a}
+.sim-options button.active{border-color:var(--neon-dim);background:#13241b;color:var(--text);font-weight:600}
+.sim-options em{font-style:normal;font-size:10px;color:var(--neon-dim)}
+.sim-options button.active em{color:var(--neon)}
+.sim-basis-small{margin:8px 0 0;font-size:10px;line-height:1.65;color:var(--text-3)}
+.sim-target{padding:0 18px 16px}
+.sim-target p{margin:0 0 6px;font-size:13px;line-height:1.7;color:var(--text-2)}
+.sim-target b{color:var(--neon)}
+.sim-req{padding:13px 18px;border-top:1px solid var(--line-soft)}
+.sim-req strong{font-size:12.5px;color:var(--text);margin-right:8px}
+.sim-req span{font-size:10.5px;color:var(--neon-dim)}
+.sim-req ul{margin:7px 0 0;padding-left:17px}
+.sim-req li{font-size:12px;line-height:1.75;color:var(--text-2)}
+@media (max-width:620px){
+ .sim-head{grid-template-columns:1fr 1fr;gap:10px}
+ .sim-head b{font-size:17px}
+ .sim-options button{flex:1 1 calc(50% - 4px);justify-content:center}
+}

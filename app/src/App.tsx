@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Trophy, Swords, Zap, Wallet, X } from 'lucide-react';
-import { compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
+import { projectCash, simRequires, defaultPicks, monthAdd, type Sim, compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
 import { AuthGate, NewPassword } from './Auth';
 import { useWorkspace } from './store';
 
-type View='today'|'map'|'plans'|'quests'|'records'|'review'|'rewards'|'settings';
+type View='today'|'sim'|'map'|'plans'|'quests'|'records'|'review'|'rewards'|'settings';
 type Dialog={type:'outcome';item:Quest}|{type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
-const nav=[{id:'today',label:'오늘',short:'오늘',icon:Home},{id:'map',label:'성장 지도',short:'성장',icon:Map},{id:'plans',label:'목표와 플랜',short:'플랜',icon:Flag},{id:'quests',label:'퀘스트',short:'퀘스트',icon:ListChecks},{id:'records',label:'나의 기록',short:'기록',icon:BookOpen},{id:'review',label:'주간 회고',short:'회고',icon:RefreshCw},{id:'rewards',label:'보상함',short:'보상',icon:Gift}] as const;
+const nav=[{id:'today',label:'오늘',short:'오늘',icon:Home},{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'map',label:'성장 지도',short:'성장',icon:Map},{id:'plans',label:'목표와 플랜',short:'플랜',icon:Flag},{id:'quests',label:'퀘스트',short:'퀘스트',icon:ListChecks},{id:'records',label:'나의 기록',short:'기록',icon:BookOpen},{id:'review',label:'주간 회고',short:'회고',icon:RefreshCw},{id:'rewards',label:'보상함',short:'보상',icon:Gift}] as const;
 const icons={wallet:Wallet,sprout:Sprout,briefcase:BriefcaseBusiness,book:BookOpen,heart:Heart,sparkles:Sparkles};
 const kindNames=OBS_NAME;   // 이름표 정본은 model.ts 하나다
 const text=(f:FormData,k:string)=>String(f.get(k)??'').trim();
@@ -17,6 +17,34 @@ function DomainIcon({domain,size=20}:{domain:Workspace['domains'][number];size?:
 function Empty({title,body,action}:{title:string;body:string;action?:ReactNode}){return <div className="empty"><Sprout size={32}/><h3>{title}</h3><p>{body}</p>{action}</div>;}
 function Field({label,children}:{label:string;children:ReactNode}){return <label className="field"><span>{label}</span>{children}</label>;}
 function Modal({title,children,onClose}:{title:string;children:ReactNode;onClose:()=>void}){const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close();},[]);return <dialog ref={ref} onCancel={onClose} onClick={e=>{if(e.target===ref.current)onClose();}}><div className="modal-heading"><h2>{title}</h2><button className="icon-button" onClick={onClose} aria-label="닫기"><X size={20}/></button></div>{children}</dialog>;}
+
+function SimChart({sim,picks}:{sim:Sim;picks:Record<string,string>}){
+ const box=useRef<HTMLDivElement>(null);const [w,setW]=useState(660);
+ useEffect(()=>{const el=box.current;if(!el)return;
+  const ro=new ResizeObserver(e=>setW(Math.max(260,Math.round(e[0].contentRect.width))));
+  ro.observe(el);return()=>ro.disconnect();},[]);
+ const h=196,PL=6,PR=6,PT=16,PB=24;
+ const mine=projectCash(sim,picks).rows, none=projectCash(sim,defaultPicks(sim)).rows;
+ const vals=[sim.cash,0,...mine.map(r=>r.cash),...none.map(r=>r.cash)];
+ const max=Math.max(...vals),min=Math.min(...vals),span=(max-min)||1;
+ const X=(i:number)=>PL+(i/sim.months)*(w-PL-PR);
+ const Y=(v:number)=>PT+(1-(v-min)/span)*(h-PT-PB);
+ const path=(rows:typeof mine)=>`M${X(0)},${Y(sim.cash)}`+rows.map((r,i)=>` L${X(i+1)},${Y(r.cash)}`).join('');
+ const step=sim.months>6?2:1;
+ return <div className="sim-chart" ref={box}>
+  <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img"
+       aria-label={`${sim.months}달 현금 예측. 고른 조합은 ${Math.round(mine[mine.length-1].cash).toLocaleString('ko-KR')}원`}>
+   <line className="sim-zero" x1={PL} x2={w-PR} y1={Y(0)} y2={Y(0)}/>
+   <text className="sim-zero-label" x={PL+2} y={Y(0)-5}>0원</text>
+   <path className="sim-line-none" d={path(none)} fill="none"/>
+   <path className="sim-line-mine" d={path(mine)} fill="none"/>
+   {mine.map((r,i)=><circle key={r.month} className="sim-dot" cx={X(i+1)} cy={Y(r.cash)} r={i===mine.length-1?4:2.5}/>)}
+   {mine.filter((_,i)=>i%step===0||i===mine.length-1).map((r)=>{
+     const i=mine.indexOf(r);return <text key={r.month} className="sim-x" x={X(i+1)} y={h-7} textAnchor="middle">{r.month.slice(5)}월</text>;})}
+  </svg>
+  <div className="sim-legend"><span className="mine">고른 조합</span><span className="none">아무것도 안 하면</span></div>
+ </div>;
+}
 
 function Landscape(){return <svg className="landscape" viewBox="0 0 400 230" fill="none" aria-hidden="true"><circle cx="302" cy="61" r="31" fill="#e7e9cb"/><path d="M21 168C74 111 125 112 181 149C249 70 310 82 396 151V230H21Z" fill="#dfe8d8"/><path d="M0 199C79 153 138 159 205 184C281 134 341 157 400 184V230H0Z" fill="#c4d5b9"/><path d="M168 230C184 197 250 206 227 177C214 161 231 143 258 140" stroke="#fafaf0" strokeWidth="17" strokeLinecap="round"/><path d="M69 197V128M69 165L47 144M69 153L88 134" stroke="#718d67" strokeWidth="5" strokeLinecap="round"/><ellipse cx="69" cy="120" rx="31" ry="38" fill="#92af81"/><ellipse cx="50" cy="139" rx="21" ry="26" fill="#9dbb8b"/><ellipse cx="88" cy="132" rx="20" ry="27" fill="#88a776"/><path d="M328 201V158" stroke="#718d67" strokeWidth="4"/><path d="M328 116L299 167H357L328 116Z" fill="#a6bd94"/><path d="M328 137L304 178H352L328 137Z" fill="#8fa97e"/><circle cx="258" cy="138" r="12" fill="#fff"/><circle cx="258" cy="138" r="5" fill="#6f8b62"/><path d="M258 125V99L282 105L258 113" stroke="#6a855f" strokeWidth="3" strokeLinejoin="round"/><path d="M124 82L130 79L136 82M169 56L175 53L181 56" stroke="#a2b29a" strokeWidth="2" strokeLinecap="round"/><circle cx="136" cy="192" r="3" fill="#f6f6dd"/><circle cx="292" cy="207" r="3" fill="#f6f6dd"/></svg>;}
 
@@ -34,7 +62,7 @@ function buildRule(f:FormData,key:string):TriggerRule|null{
 
 export default function App(){
  const store=useWorkspace();const {data:s,demo,ready}=store;
- const [view,setView]=useState<View>('today'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null);
+ const [view,setView]=useState<View>('today'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null),[picks,setPicks]=useState<Record<string,string>>({});
  const importRef=useRef<HTMLInputElement>(null);
  const xp=xpOf(s),done=s.quests.filter(q=>q.status==='done'),open=s.quests.filter(q=>q.status==='ready').sort((a,b)=>a.due.localeCompare(b.due)),todayQs=open.filter(q=>q.due<=today()).slice(0,3),actualToday=done.filter(q=>q.completedAt?.slice(0,10)===today()).length;
  const queue=questQueue(s),fq=queue[0]??null,upNext=queue[1]??null,bonus=subQuestFor(s),power=combatPower(s);
@@ -126,6 +154,45 @@ export default function App(){
  <section className="panel next-reward"><div className="panel-heading"><h2>다음 작은 선물</h2><Gift size={18}/></div><div className="gift-illustration"><Gift size={43} strokeWidth={1.3}/><Sparkles size={17}/></div>{(()=>{const r=s.rewards.find(r=>r.status==='wish');return r?<><h3>{r.title}</h3><p>{r.type==='real'?'나를 위한 현실 속 보상':'성장을 기억하는 나만의 배지'}</p><div className="reward-progress-label"><span>성장 경험치</span><b>{xp} / {r.requiredXp} XP</b></div><div className="progress-track"><i style={{width:`${Math.min(100,xp/Math.max(1,r.requiredXp)*100)}%`}}/></div></>:<><h3>나만의 보상을 골라봐요</h3><p>기다려지는 작은 즐거움을 만들어 보세요.</p></>;})()}<button className="secondary full" onClick={()=>go('rewards')}>보상함 열어보기<ArrowRight size={15}/></button></section>
  <section className="quote-card"><span>“</span><p>멀리 가는 힘은<br/>작은 걸음에서 시작돼요.</p><small>LIFE, ONE STEP AT A TIME</small></section></aside></div>
  </>}
+ {view==='sim'&&(()=>{const sim=s.sim;
+ if(!sim)return <>{sectionHead('WHAT IF','시뮬레이션','아직 예측 자료가 없어요.')}<Empty title="예측 자료가 없어요" body="저장소에서 python sim/run.py 를 돌린 뒤 백업을 다시 가져오면 여기가 채워져요."/></>;
+ const P=Object.keys(picks).length?picks:defaultPicks(sim);
+ const r=projectCash(sim,P), none=projectCash(sim,defaultPicks(sim));
+ const best=Object.fromEntries(sim.levers.map(l=>[l.id,l.options.reduce((a,b)=>b.delta>a.delta?b:a).key]));
+ const reqs=simRequires(sim,P);
+ const set=(id:string,key:string)=>setPicks({...P,[id]:key});
+ return <>{sectionHead('WHAT IF','앞으로 '+sim.months+'달','손잡이를 바꾸면 선이 움직여요. 고르는 건 나예요.',
+   <button className="secondary" onClick={()=>setPicks(best)}>최선으로 맞추기</button>)}
+ <section className="panel sim-panel">
+  <div className="sim-head">
+   <div><span className="eyebrow">{r.zeroMonth?'현금이 0 아래로':'버틴다'}</span>
+    <b className={r.zeroMonth?'bad':'good'}>{r.zeroMonth?r.zeroMonth:'안 간다'}</b></div>
+   <div><span className="eyebrow">{monthAdd(sim.startMonth,sim.months-1)} 현금</span>
+    <b className={r.endCash<0?'bad':'good'}>{won(Math.round(r.endCash))}</b></div>
+   <div><span className="eyebrow">마지막 달 수지</span><b>{won(Math.round(r.monthlyFlow))}</b></div>
+  </div>
+  <SimChart sim={sim} picks={P}/>
+  <p className="sim-basis">지금 현금 {won(sim.cash)} ({sim.asOf}) · 손대지 않으면 매달 {won(sim.netMonthly)}<br/>{sim.flowBasis}</p>
+ </section>
+ <section className="panel sim-levers"><div className="panel-heading"><div><h2>손잡이</h2><p>눌러서 바꿔 보세요. 숫자와 선이 바로 따라와요.</p></div>
+  <button className="text-button" onClick={()=>setPicks(defaultPicks(sim))}>되돌리기</button></div>
+  {sim.levers.map(lv=><div className="sim-lever" key={lv.id}>
+   <div className="sim-lever-top"><strong>{lv.name}</strong><small>{lv.starts} 부터</small></div>
+   <div className="sim-options">{lv.options.map(o=>
+     <button key={o.key} className={(P[lv.id]??defaultPicks(sim)[lv.id])===o.key?'active':''}
+       onClick={()=>set(lv.id,o.key)}>{o.label}{o.delta?<em>+{won(o.delta)}</em>:null}</button>)}</div>
+   {lv.basis&&<p className="sim-basis-small">{lv.basis}</p>}
+  </div>)}
+ </section>
+ {r.needPerMonth>0&&<section className="panel sim-target"><div className="panel-heading"><h2>그래도 모자란 만큼</h2><Target size={18}/></div>
+  <p>이 조합으로도 매달 <b>{won(r.needPerMonth)}</b> 이 모자라요.
+  {sim.incomeNow?<> 지금 세후 {won(sim.incomeNow)} 이니까 <b>세후 월 {won(sim.incomeNow+r.needPerMonth)}</b> 이면 수지가 맞아요.</>:null}</p>
+  <p className="small-note">받을 것 같은 금액이 아니라 <b>맞추려면 필요한 금액</b>이에요. 모자란 만큼은 다른 손잡이로 메우거나 적자로 남아요.</p></section>}
+ <section className="panel"><div className="panel-heading"><div><h2>이 조합이 성립하려면</h2><p>고른 손잡이가 요구하는 것들이에요.</p></div><ListChecks size={18}/></div>
+  {reqs.length?reqs.map(q=><div className="sim-req" key={q.lever}><strong>{q.lever}</strong><span>{q.option}</span>
+    <ul>{q.items.map(it=><li key={it}>{it}</li>)}</ul></div>)
+   :<Empty title="아직 아무 손잡이도 안 당겼어요" body={`이대로면 ${monthAdd(sim.startMonth,sim.months-1)} 에 ${won(Math.round(none.endCash))} 이에요. 위에서 하나씩 눌러 보세요.`}/>}
+ </section></>;})()}
  {view==='map'&&<>{sectionHead('MY GROWTH','나의 성장 지도','성장은 비교가 아니라, 내가 남긴 발자국이에요.',<button className="primary" onClick={()=>setDialog({type:'domain'})}><Plus size={17}/>분야 추가</button>)}{domainCards()}<section className="panel map-panel"><div className="panel-heading"><div><Badge color={activeDomain.color}>{activeDomain.name}</Badge><h2>나의 발자국, 다음 이정표</h2></div><span className="level-large">Lv. {currentLevel.level}</span></div><div className="map-road">{Array.from({length:5},(_,i)=>{const l=i+1,threshold=50*(l-1)*l,reached=xpOf(s,activeDomain.id)>=threshold;return <div className={`map-stop ${reached?'reached':''}`} key={l}><div className="map-node">{reached?<Check size={24}/>:<LockKeyhole size={20}/>}</div><strong>{['첫 발걸음','리듬 만들기','꾸준한 탐험','나만의 방식','단단한 성장'][i]}</strong><span>Lv. {l} · {threshold} XP</span></div>;})}</div><div className="map-caption"><Sprout size={18}/><span>다음 레벨까지 <b>{currentLevel.remaining} XP</b>. 레벨은 이 공간에서 쌓은 실행 경험을 나타내요.</span></div></section><section className="panel"><div className="panel-heading"><h2>{activeDomain.name}의 퀘스트</h2><button className="text-button" onClick={()=>setDialog({type:'quest'})}>추가<Plus size={15}/></button></div>{s.quests.filter(q=>q.domainId===activeDomain.id).slice(0,8).map(questRow)}{!s.quests.some(q=>q.domainId===activeDomain.id)&&<Empty title="첫 발자국을 남겨보세요" body="이 분야의 작은 퀘스트를 만들어 보세요."/>}</section></>}
  {view==='quests'&&<>{sectionHead('ONE STEP AT A TIME','나의 퀘스트','실행하고, 쉬어가고, 필요하면 더 작게 바꿔도 좋아요.',<button className="primary" onClick={()=>setDialog({type:'quest'})}><Plus size={17}/>퀘스트 만들기</button>)}<div className="toolbar"><div className="tabs">{[['all','전체'],['ready','진행 중'],['done','완료'],['paused','보류']].map(([k,l])=><button key={k} className={filter===k?'active':''} onClick={()=>setFilter(k)}>{l}</button>)}</div><input className="search-input" aria-label="퀘스트 검색" placeholder="퀘스트 검색…" value={query} onChange={e=>setQuery(e.target.value)}/></div><div className="panel">{s.quests.filter(q=>(filter==='all'||q.status===filter)&&q.title.includes(query)).map(questRow)}{!s.quests.some(q=>(filter==='all'||q.status===filter)&&q.title.includes(query))&&<Empty title="여기는 아직 여백이에요" body="작은 퀘스트를 추가하거나 다른 필터를 살펴보세요."/>}</div></>}
  {view==='plans'&&<>{sectionHead('MORE THAN ONE WAY','목표와 플랜 ABC','상황이 달라져도, 나에게 맞는 다음 길을 찾을 수 있도록.',<button className="primary" onClick={()=>setDialog({type:'plan'})}><Plus size={17}/>플랜 만들기</button>)}{s.plans.length>1&&(()=>{

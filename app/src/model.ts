@@ -23,7 +23,56 @@ export const planSchema = z.object({id,title:label,goal:label,domainId:id,active
 export const observationSchema = z.object({id,kind:z.enum(['cash','spend','debt','income','poker-out','poker-in','poker-hours','sleep','weight','exercise','steps','mood','hours','study','late']),value:amount,date,note:z.string().max(2000)});
 export const rewardSchema = z.object({id,title:label,type:z.enum(['digital','real']),cost:amount,requiredXp:amount.max(1e7),domainId:z.string().max(150).default(''),note:z.string().max(1000).default(''),status:z.enum(['wish','reserved','used']),spent:amount.nullable(),usedAt:z.string().nullable(),reservedAt:z.string().nullable().default(null)}).refine(r=>r.type!=='digital'||r.cost===0,'성장 배지는 비용을 0원으로 입력해 주세요.');
 export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:z.string().max(4000),next:z.string().max(4000),stats:z.object({done:z.number().int(),full:z.number().int(),partial:z.number().int(),missed:z.number().int(),xp:z.number()}).nullable().default(null)});
-export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
+// ── 시뮬레이션 ─────────────────────────────────────────────
+// 기록->퀘스트->보상은 트래커다. 시뮬레이션이 되려면 **시간이 앞으로 가고, 고른 것에 따라 결과가 갈리고,
+// 그걸 직접 돌려볼 수 있어야** 한다. 그래서 레버를 앱에 통째로 싣고 투영을 화면에서 계산한다.
+export const leverSchema = z.object({
+ id, name:label, starts:z.string().regex(/^\d{4}-\d{2}$/), basis:z.string().max(2000).default(''),
+ options:z.array(z.object({key:z.string().max(4),label:label,delta:z.number().finite(),
+   requires:z.array(z.string().max(300)).max(10).default([])})).min(1).max(6),
+});
+export const simSchema = z.object({
+ asOf:date, cash:z.number().finite(), netMonthly:z.number().finite(),
+ startMonth:z.string().regex(/^\d{4}-\d{2}$/), months:z.number().int().min(1).max(60),
+ flowBasis:z.string().max(1000).default(''), incomeNow:z.number().finite().nullable().default(null),
+ levers:z.array(leverSchema).max(12),
+});
+export type Lever=z.infer<typeof leverSchema>;
+export type Sim=z.infer<typeof simSchema>;
+export const monthAdd=(ym:string,k:number)=>{const t=Number(ym.slice(0,4))*12+Number(ym.slice(5,7))-1+k;
+ return `${String(Math.floor(t/12)).padStart(4,'0')}-${String(t%12+1).padStart(2,'0')}`;};
+/** 고른 조합으로 달마다 현금을 굴린다. 레버는 시작 달부터 듣는다. */
+export function projectCash(sim:Sim,picks:Record<string,string>){
+ const rows=[];let cash=sim.cash;
+ for(let i=0;i<sim.months;i++){
+  const month=monthAdd(sim.startMonth,i);
+  let gain=0;
+  for(const lv of sim.levers){
+   const o=lv.options.find(x=>x.key===(picks[lv.id]??lv.options[lv.options.length-1].key));
+   if(o&&month>=lv.starts)gain+=o.delta;
+  }
+  const flow=sim.netMonthly+gain;cash+=flow;
+  rows.push({month,gain,flow,cash});
+ }
+ const zero=rows.find(r=>r.cash<0);
+ const lastGain=rows[rows.length-1].gain;
+ return {rows,endCash:rows[rows.length-1].cash,zeroMonth:zero?zero.month:null,
+  monthlyFlow:sim.netMonthly+lastGain,
+  needPerMonth:Math.max(0,-(sim.netMonthly+lastGain))};   // 수지를 0 으로 만들려면 얼마가 더 필요한가
+}
+/** 이 조합이 성립하려면 참이어야 하는 것들 */
+export function simRequires(sim:Sim,picks:Record<string,string>){
+ const out:{lever:string;option:string;items:string[]}[]=[];
+ for(const lv of sim.levers){
+  const o=lv.options.find(x=>x.key===(picks[lv.id]??lv.options[lv.options.length-1].key));
+  if(o&&o.requires.length)out.push({lever:lv.name,option:o.label,items:o.requires});
+ }
+ return out;
+}
+export const defaultPicks=(sim:Sim)=>Object.fromEntries(
+ sim.levers.map(l=>[l.id,l.options[l.options.length-1].key]));   // 아무것도 안 한 상태에서 시작한다
+
+export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
  for(const key of ['domains','quests','plans','observations','rewards','reviews','events'] as const) if(new Set(s[key].map(x=>x.id)).size!==s[key].length)ctx.addIssue({code:'custom',message:`${key}: 중복 ID`});
  const domains=new Set(s.domains.map(x=>x.id)),plans=new Set(s.plans.map(x=>x.id));
  for(const q of s.quests)if(!domains.has(q.domainId)||(q.planId&&!plans.has(q.planId)))ctx.addIssue({code:'custom',message:'퀘스트 연결이 올바르지 않습니다.'});
@@ -270,7 +319,7 @@ export function ruleText(r:TriggerRule){
 }
 export function assessBranch(s:Workspace,p:Plan,key:Plan['active']){const b=p.branches.find(x=>x.key===key)!;const cash=latest(s,'cash'),hours=latest(s,'hours');const cost=b.cost+(key!==p.active?b.switchCost:0);const reasons:string[]=[];if(cash===null)reasons.push('현금 기록 필요');else if(cash.value<cost)reasons.push(`필요 자금 ${won(cost-cash.value)} 부족`);if(hours===null)reasons.push('주간 가용시간 기록 필요');else if(hours.value<b.hours)reasons.push(`주 ${b.hours-hours.value}시간 부족`);const unknown=cash===null||hours===null;return {cost,cash,hours,reasons,state:reasons.length?(unknown&&!reasons.some(x=>x.includes('부족'))?'unknown':'blocked'):'ready'};}
 export function parseBackup(raw:unknown){return workspaceSchema.parse(raw);}
-export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,events:[]};}
+export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,events:[]};}
 export function createDemo():Workspace{
  const s=createEmpty();s.name='나의 작은 우주';s.chapter='조금 더 단단한 일상 만들기';s.rewardBudget=50000;
  s.plans=[{id:'plan-1',title:'생활의 여유 만들기',goal:'이번 달 정기 지출 3개 점검하기',domainId:'finance',active:'A',branches:[{key:'A',title:'작은 것부터 차근차근',cost:0,hours:2,duration:30,result:'정기 지출 3개 확인',trigger:'2주 동안 진행이 없다면 B 검토',rule:{when:'idle',days:14,to:'B'},switchCost:0},{key:'B',title:'한 가지에 집중하기',cost:0,hours:1,duration:30,result:'가장 큰 지출 1개 확인',trigger:'주간 여유가 1시간 미만이면 C 검토',rule:{when:'observation',kind:'hours',op:'lt',value:1,to:'C'},switchCost:0},{key:'C',title:'기록만 이어가기',cost:0,hours:0.25,duration:30,result:'월말 잔액 1회 기록',trigger:'세 번 연달아 해내면 다시 올라간다',rule:{when:'streak',full:3,to:'A'},switchCost:0}]}];
@@ -280,5 +329,7 @@ export function createDemo():Workspace{
  s.observations=[{id:'o1',kind:'cash',value:3000000,date:today(),note:'가상 예시 금액'},
   {id:'o1b',kind:'cash',value:3450000,date:back(21),note:'가상 예시'},{id:'o1c',kind:'cash',value:2780000,date:back(44),note:'가상 예시'},{id:'o1d',kind:'cash',value:4100000,date:back(70),note:'가상 예시'},{id:'o2',kind:'hours',value:4,date:today(),note:'가상 예시'},{id:'o3',kind:'sleep',value:7,date:today(),note:'가상 예시'}];
  s.rewards=[{id:'r1',title:'초록빛 첫 걸음',type:'digital',cost:0,requiredXp:100,domainId:'',note:'첫 발자국을 남긴 날의 기록',status:'used',spent:null,usedAt:new Date().toISOString(),reservedAt:null},{id:'r2',title:'나를 위한 영화 한 편',type:'real',cost:15000,requiredXp:550,domainId:'recovery',note:'회복 습관이 자랐을 때, 보고 싶었던 영화 한 편',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r3',title:'느긋한 오후 산책',type:'real',cost:0,requiredXp:300,domainId:'',note:'느긋하게 걷는 시간',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r4',title:'꾸준한 탐험가',type:'digital',cost:0,requiredXp:700,domainId:'',note:'',status:'wish',spent:null,usedAt:null,reservedAt:null}];
+ // 예시 공간에도 시뮬레이션을 넣는다 — 가져오기 전에도 '무엇을 돌려보는 것인지' 가 보여야 한다.
+ s.sim={asOf:today(),cash:3000000,netMonthly:-1800000,startMonth:monthAdd(today().slice(0,7),1),months:6,flowBasis:'예시 값이에요. 내 기록을 가져오면 내 숫자로 바뀝니다.',incomeNow:2600000,levers:[{id:'spend',name:'생활비 줄이기',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 가장 큰 칸부터 줄인다.',options:[{key:'A',label:'월 60만',delta:600000,requires:['주 단위 상한을 정하고 지킨다','쓰지 않는 정기결제를 정리한다']},{key:'B',label:'월 30만',delta:300000,requires:['쓰지 않는 정기결제를 정리한다']},{key:'C',label:'그대로',delta:0,requires:[]}]},{id:'fixed',name:'고정비',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 통신·보험·금리.',options:[{key:'A',label:'월 23만',delta:230000,requires:['통신 약정을 확인한다','금리 인하를 요구한다']},{key:'C',label:'그대로',delta:0,requires:[]}]},{id:'income',name:'수입 늘리기',starts:monthAdd(today().slice(0,7),2),basis:'예시 — 협상이나 부업.',options:[{key:'A',label:'월 50만',delta:500000,requires:['근거가 될 결과물을 만든다']},{key:'C',label:'그대로',delta:0,requires:[]}]}]};
  return s;
 }
