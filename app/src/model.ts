@@ -77,7 +77,36 @@ export const neutralKey=(l:Lever)=>(l.options.find(o=>o.delta===0)
  ??l.options.reduce((a,b)=>Math.abs(b.delta)<Math.abs(a.delta)?b:a)).key;
 export const defaultPicks=(sim:Sim)=>Object.fromEntries(sim.levers.map(l=>[l.id,neutralKey(l)]));
 
-export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
+// 일기 — 하루에 하나. 웹에서 쓰고 저장소가 받아간다.
+export const journalSchema = z.object({
+ id, date, text:z.string().max(20000), mood:z.number().int().min(1).max(5).nullable().default(null),
+ createdAt:z.string(), updatedAt:z.string(),
+});
+export type Journal=z.infer<typeof journalSchema>;
+/** 같은 날이면 덮어쓴다 — '하루 한 번' 이 규칙이라 날짜가 열쇠다. */
+export function upsertJournal(s:Workspace,date:string,text:string,mood:number|null=null){
+ const now=new Date().toISOString();
+ const body=text.trim();
+ const rest=s.journal.filter(j=>j.date!==date);
+ if(!body)return log({...s,journal:rest},`${date} 일기를 비웠어요`);   // 지우는 것도 선택이다
+ const old=s.journal.find(j=>j.date===date);
+ const entry:Journal={id:old?.id??uid(),date,text:body,mood,
+  createdAt:old?.createdAt??now,updatedAt:now};
+ return log({...s,journal:[entry,...rest].sort((a,b)=>b.date.localeCompare(a.date))},
+  `${date} 일기를 ${old?'고쳤어요':'남겼어요'}`);
+}
+export const journalOf=(s:Workspace,date:string)=>s.journal.find(j=>j.date===date)??null;
+/** 며칠 연달아 썼나. 오늘 아직 안 썼으면 어제부터 센다 — 하루 쉬었다고 0 이 되면 안 적게 된다. */
+export function journalStreak(s:Workspace,from=today()){
+ const have=new Set(s.journal.map(j=>j.date));
+ let d=new Date(from+'T00:00:00Z');
+ if(!have.has(from))d=new Date(d.getTime()-86400000);
+ let n=0;
+ for(;;){const k=d.toISOString().slice(0,10);if(!have.has(k))break;n++;d=new Date(d.getTime()-86400000);}
+ return n;
+}
+
+export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),journal:z.array(journalSchema).max(5000).default([]),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
  for(const key of ['domains','quests','plans','observations','rewards','reviews','events'] as const) if(new Set(s[key].map(x=>x.id)).size!==s[key].length)ctx.addIssue({code:'custom',message:`${key}: 중복 ID`});
  const domains=new Set(s.domains.map(x=>x.id)),plans=new Set(s.plans.map(x=>x.id));
  for(const q of s.quests)if(!domains.has(q.domainId)||(q.planId&&!plans.has(q.planId)))ctx.addIssue({code:'custom',message:'퀘스트 연결이 올바르지 않습니다.'});
@@ -334,7 +363,7 @@ export function ruleText(r:TriggerRule){
 }
 export function assessBranch(s:Workspace,p:Plan,key:Plan['active']){const b=p.branches.find(x=>x.key===key)!;const cash=latest(s,'cash'),hours=latest(s,'hours');const cost=b.cost+(key!==p.active?b.switchCost:0);const reasons:string[]=[];if(cash===null)reasons.push('현금 기록 필요');else if(cash.value<cost)reasons.push(`필요 자금 ${won(cost-cash.value)} 부족`);if(hours===null)reasons.push('주간 가용시간 기록 필요');else if(hours.value<b.hours)reasons.push(`주 ${b.hours-hours.value}시간 부족`);const unknown=cash===null||hours===null;return {cost,cash,hours,reasons,state:reasons.length?(unknown&&!reasons.some(x=>x.includes('부족'))?'unknown':'blocked'):'ready'};}
 export function parseBackup(raw:unknown){return workspaceSchema.parse(raw);}
-export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,events:[]};}
+export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,journal:[],events:[]};}
 export function createDemo():Workspace{
  const s=createEmpty();s.name='나의 작은 우주';s.chapter='조금 더 단단한 일상 만들기';s.rewardBudget=50000;
  s.plans=[{id:'plan-1',title:'생활의 여유 만들기',goal:'이번 달 정기 지출 3개 점검하기',domainId:'finance',active:'A',branches:[{key:'A',title:'작은 것부터 차근차근',cost:0,hours:2,duration:30,result:'정기 지출 3개 확인',trigger:'2주 동안 진행이 없다면 B 검토',rule:{when:'idle',days:14,to:'B'},switchCost:0},{key:'B',title:'한 가지에 집중하기',cost:0,hours:1,duration:30,result:'가장 큰 지출 1개 확인',trigger:'주간 여유가 1시간 미만이면 C 검토',rule:{when:'observation',kind:'hours',op:'lt',value:1,to:'C'},switchCost:0},{key:'C',title:'기록만 이어가기',cost:0,hours:0.25,duration:30,result:'월말 잔액 1회 기록',trigger:'세 번 연달아 해내면 다시 올라간다',rule:{when:'streak',full:3,to:'A'},switchCost:0}]}];

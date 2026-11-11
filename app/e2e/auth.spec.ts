@@ -37,7 +37,7 @@ test('로그인 화면이 메인보다 먼저 나온다',async({page})=>{
  await mock(page);
  await page.goto('./');
  await expect(page.getByRole('heading',{name:'다시 만나 반가워요'})).toBeVisible();
- await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:/시뮬레이션|앞으로 \d+달/})).toHaveCount(0);
 });
 
 test('비밀번호로 로그인하면 메인으로 들어간다',async({page})=>{
@@ -47,7 +47,7 @@ test('비밀번호로 로그인하면 메인으로 들어간다',async({page})=>
  await page.getByLabel('이메일').fill(user.email);
  await page.getByLabel('비밀번호',{exact:true}).fill('test-password-1234');
  await page.getByRole('button',{name:'로그인',exact:true}).click();
- await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toBeVisible({timeout:15000});
+ await expect(page.getByRole('heading',{name:/시뮬레이션|앞으로 \d+달/})).toBeVisible({timeout:15000});
  expect(calls.token).toBeGreaterThan(0);
  expect(errors).toEqual([]);
 });
@@ -59,7 +59,7 @@ test('비밀번호가 틀리면 한국어로 안내하고 메인으로 넘어가
  await page.getByLabel('비밀번호',{exact:true}).fill('wrong-password-1');
  await page.getByRole('button',{name:'로그인',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('이메일 또는 비밀번호가 맞지 않습니다');
- await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:/시뮬레이션|앞으로 \d+달/})).toHaveCount(0);
 });
 
 test('회원가입 — 확인이 다르면 막고, 맞으면 계정을 만든다',async({page})=>{
@@ -74,7 +74,7 @@ test('회원가입 — 확인이 다르면 막고, 맞으면 계정을 만든다
  expect(calls.signup).toBe(0);
  await page.getByLabel('비밀번호 확인').fill('test-password-1234');
  await page.getByRole('button',{name:'계정 만들기'}).click();
- await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toBeVisible({timeout:15000});
+ await expect(page.getByRole('heading',{name:/시뮬레이션|앞으로 \d+달/})).toBeVisible({timeout:15000});
  expect(calls.signup).toBeGreaterThan(0);
 });
 
@@ -93,11 +93,11 @@ test('로그인 없이 둘러보기와 기기 저장 경로가 모두 열린다'
  await mock(page);
  await page.goto('./');
  await page.getByRole('button',{name:'로그인 없이 둘러보기'}).click();
- await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/시뮬레이션|앞으로 \d+달/})).toBeVisible();
  await page.evaluate(()=>{localStorage.removeItem('life:gate');localStorage.removeItem('life:mode');});
  await page.reload();
  await page.getByRole('button',{name:'이 기기에만 저장하고 시작하기'}).click();
- await expect(page.getByRole('heading',{name:'오늘도, 나의 속도로'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/시뮬레이션|앞으로 \d+달/})).toBeVisible();
 });
 
 test('확인 메일이 필요한 가입이면 안내와 재전송 버튼이 나온다',async({page})=>{

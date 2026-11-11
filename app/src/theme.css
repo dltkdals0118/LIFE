@@ -659,3 +659,19 @@ input,textarea,select{background-color:#0e1713}
 .notice.warn{background:var(--amber-bg);border:1px solid #3a2e16;color:#f0d9a8}
 .notice.warn b{color:var(--amber)}
 .warn-inline{font-style:normal;color:var(--amber)}
+
+/* 일기 (2026-11-09) — 하루 한 번. 입력이 커야 쓰게 된다 */
+.journal-today{padding:0 0 4px}
+.journal-form{padding:0 18px 16px}
+.journal-form textarea{width:100%;min-height:190px;font-size:14px;line-height:1.85;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text)}
+.journal-form textarea:focus{border-color:var(--neon-dim);background:#101a15}
+.journal-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+.journal-mood{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text-2)}
+.journal-mood select{padding:7px 9px;font-size:12px}
+.journal-past{padding:14px 18px;border-top:1px solid var(--line-soft)}
+.journal-past-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.journal-past-top strong{font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.journal-mood-chip{font-size:9.5px;font-weight:700;color:var(--teal);background:var(--teal-bg);
+  border:1px solid #16342c;border-radius:6px;padding:2px 7px}
+.journal-past p{margin:0;font-size:13px;line-height:1.85;color:var(--text-2);white-space:pre-wrap;overflow-wrap:anywhere}

@@ -1,7 +1,9 @@
-import {test,expect,type BrowserContext} from '@playwright/test';
+import {test,expect,type Page,type BrowserContext} from '@playwright/test';
+// 모바일에선 사이드바와 하단 탭에 같은 이름이 둘 다 있다 — 보이는 쪽을 쓴다.
+const navOf=async(p:Page)=>(await p.locator('.mobile-nav').isVisible())?'.mobile-nav':'.sidebar nav';
 import {createEmpty} from '../src/model';
 
-test('two authenticated device caches exchange a quest and completion through the sync API',async({browser})=>{
+test('two authenticated device caches exchange a journal entry through the sync API',async({browser})=>{
  const user={id:'11111111-1111-4111-8111-111111111111',email:'test@example.com',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{},created_at:new Date().toISOString()};
  const expires=Math.floor(Date.now()/1000)+3600;
  const encode=(o:object)=>Buffer.from(JSON.stringify(o)).toString('base64url');
@@ -21,8 +23,13 @@ test('two authenticated device caches exchange a quest and completion through th
  }
  const a=await contexts[0].newPage(),b=await contexts[1].newPage();
  await a.goto('http://127.0.0.1:4173/LIFE/');await b.goto('http://127.0.0.1:4173/LIFE/');await expect(a.getByRole('button',{name:'동기화됨',exact:true})).toBeVisible({timeout:15000});
- await a.getByRole('button',{name:'첫 퀘스트 만들기'}).click();await a.getByLabel('어떤 한 걸음을 내딛을까요?').fill('두 기기 연결 확인');await a.getByLabel('완료했다고 말할 수 있는 기준').fill('다른 기기에서 확인');await a.getByRole('button',{name:'저장하기',exact:true}).click();
- await expect(b.getByText('두 기기 연결 확인',{exact:true})).toBeVisible({timeout:15000});await b.getByRole('button',{name:/완료했어요/}).click();await b.getByRole('button',{name:/끝까지 했어요/}).click();
- await expect.poll(()=>row.data.quests.filter(q=>q.status==='done').length,{timeout:15000}).toBe(1);await a.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(a.getByText('1개',{exact:true}).first()).toBeVisible({timeout:15000});
+ // 퀘스트가 없어졌으므로 일기로 두 기기를 잇는다 (2026-11-09 개편)
+ await a.locator(await navOf(a)).getByRole('button',{name:'일기'}).click();
+ await a.getByLabel('오늘의 일기').fill('두 기기 연결 확인');
+ await a.getByRole('button',{name:'저장'}).click();
+ await expect.poll(()=>row.data.journal.length,{timeout:15000}).toBe(1);
+ await b.evaluate(()=>window.dispatchEvent(new Event('focus')));
+ await b.locator(await navOf(b)).getByRole('button',{name:'일기'}).click();
+ await expect(b.getByLabel('오늘의 일기')).toHaveValue('두 기기 연결 확인',{timeout:15000});
  for(const context of contexts)await context.close();
 });
