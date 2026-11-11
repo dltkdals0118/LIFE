@@ -152,11 +152,11 @@ export default function App(){
   </form>
  </section>
  <section className="panel"><div className="panel-heading"><div><h2>지난 일기</h2>
-   <p>{s.journal.length?`${s.journal.length}개`:'아직 없어요.'}</p></div><BookOpen size={18}/></div>
-  {s.journal.filter(x=>x.date!==d).slice(0,60).map(x=><article className="journal-past" key={x.id}>
+   <p>{(s.journal??[]).length?`${(s.journal??[]).length}개`:'아직 없어요.'}</p></div><BookOpen size={18}/></div>
+  {(s.journal??[]).filter(x=>x.date!==d).slice(0,60).map(x=><article className="journal-past" key={x.id}>
     <div className="journal-past-top"><strong>{x.date}</strong>{x.mood?<span className="journal-mood-chip">컨디션 {x.mood}</span>:null}</div>
     <p>{x.text}</p></article>)}
-  {!s.journal.filter(x=>x.date!==d).length&&<Empty title="여기가 쌓여요" body="하루 한 단락이면 돼요. 며칠 모이면 시뮬레이션 숫자와 같이 읽을 수 있어요."/>}
+  {!(s.journal??[]).filter(x=>x.date!==d).length&&<Empty title="여기가 쌓여요" body="하루 한 단락이면 돼요. 며칠 모이면 시뮬레이션 숫자와 같이 읽을 수 있어요."/>}
  </section></>;})()}
  {view==='sim'&&(()=>{const sim=s.sim;
  if(!sim){

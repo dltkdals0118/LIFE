@@ -87,18 +87,18 @@ export type Journal=z.infer<typeof journalSchema>;
 export function upsertJournal(s:Workspace,date:string,text:string,mood:number|null=null){
  const now=new Date().toISOString();
  const body=text.trim();
- const rest=s.journal.filter(j=>j.date!==date);
+ const rest=(s.journal??[]).filter(j=>j.date!==date);
  if(!body)return log({...s,journal:rest},`${date} 일기를 비웠어요`);   // 지우는 것도 선택이다
- const old=s.journal.find(j=>j.date===date);
+ const old=(s.journal??[]).find(j=>j.date===date);
  const entry:Journal={id:old?.id??uid(),date,text:body,mood,
   createdAt:old?.createdAt??now,updatedAt:now};
  return log({...s,journal:[entry,...rest].sort((a,b)=>b.date.localeCompare(a.date))},
   `${date} 일기를 ${old?'고쳤어요':'남겼어요'}`);
 }
-export const journalOf=(s:Workspace,date:string)=>s.journal.find(j=>j.date===date)??null;
+export const journalOf=(s:Workspace,date:string)=>(s.journal??[]).find(j=>j.date===date)??null;
 /** 며칠 연달아 썼나. 오늘 아직 안 썼으면 어제부터 센다 — 하루 쉬었다고 0 이 되면 안 적게 된다. */
 export function journalStreak(s:Workspace,from=today()){
- const have=new Set(s.journal.map(j=>j.date));
+ const have=new Set((s.journal??[]).map(j=>j.date));
  let d=new Date(from+'T00:00:00Z');
  if(!have.has(from))d=new Date(d.getTime()-86400000);
  let n=0;

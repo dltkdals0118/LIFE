@@ -5,6 +5,8 @@ import { createDemo, createEmpty, parseBackup, uid, type Workspace } from './mod
 
 export type Config={url:string;key:string};
 type Envelope={data:Workspace;revision:number;dirty:boolean;requestId:string};
+// 기기 캐시는 **반드시 parseBackup 을 거친 결과를 쓴다.** 원본을 그대로 쓰면 zod 기본값이 붙지 않아
+// 나중에 생긴 칸이 undefined 로 남고, 그 칸을 읽는 화면이 첫 렌더에서 터진다(2026-11-11 백지 사고).
 const fresh=(data:Workspace):Envelope=>({data,revision:0,dirty:false,requestId:uid()});
 export function configFromStorage():Config|null{try{const c=JSON.parse(localStorage.getItem('life:config')||'null');if(c)return c;const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;return url&&key?{url,key}:null;}catch{return null;}}
 export function validConfig(c:Config){const u=new URL(c.url);if(u.protocol!=='https:'||!u.hostname.endsWith('.supabase.co')||u.pathname!=='/'||u.search||u.username)throw Error('https://프로젝트.supabase.co 형식의 프로젝트 URL을 입력해 주세요.');if(!c.key.startsWith('sb_publishable_')){try{const payload=JSON.parse(atob(c.key.split('.')[1]));if(payload.role!=='anon')throw Error();}catch{throw Error('공개 publishable key 또는 anon key만 사용할 수 있습니다. 비밀 키를 입력하지 마세요.');}}}
@@ -18,7 +20,10 @@ export function useWorkspace(){
  useEffect(()=>{if(!config)return;const c=createClient(config.url,config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});client.current=c;let alive=true;c.auth.getSession().then(({data,error})=>{if(!alive)return;if(error)setError(error.message);setUser(data.session?.user??null);});const {data:listener}=c.auth.onAuthStateChange((event,session)=>{if(!alive)return;setUser(session?.user??null);if(event==='PASSWORD_RECOVERY')setRecovery(true);});return()=>{alive=false;listener.subscription.unsubscribe();c.auth.stopAutoRefresh();client.current=null;};},[config]);
  useEffect(()=>{const gen=++epoch.current;busy.current=false;conflictSet(null);setReady(false);if(demo){scope.current='demo';show(fresh(createDemo()));setStatus('예시 공간');setReady(true);return;}
  const key=user?`life:workspace:${user.id}`:'life:workspace:guest';scope.current=key;
- get<Envelope>(key).then(saved=>{if(gen!==epoch.current)return;if(saved)parseBackup(saved.data);show(saved??fresh(createEmpty()));setReady(true);setStatus(user?(saved?.dirty?'전송 대기':'연결 중'):'이 기기에 저장');}).catch(()=>{if(gen!==epoch.current)return;setError('저장된 데이터 형식을 읽지 못했습니다. 기존 데이터는 유지됩니다.');setReady(false);});
+ get<Envelope>(key).then(saved=>{if(gen!==epoch.current)return;
+ // **파싱 결과를 써야 한다.** 예전에는 parseBackup 을 부르고 결과를 버려 원본을 그대로 썼는데,
+ // 그러면 나중에 생긴 칸(journal 등)이 undefined 로 남아 화면이 첫 렌더에 터진다(2026-11-11 백지 사고).
+ show(saved?{...saved,data:parseBackup(saved.data)}:fresh(createEmpty()));setReady(true);setStatus(user?(saved?.dirty?'전송 대기':'연결 중'):'이 기기에 저장');}).catch(()=>{if(gen!==epoch.current)return;setError('저장된 데이터 형식을 읽지 못했습니다. 기존 데이터는 유지됩니다.');setReady(false);});
  },[demo,user?.id]);
  async function sync(){const c=client.current;if(!c||!user||demo||!ready||busy.current||conflictRef.current)return;if(!navigator.onLine){setStatus('오프라인 · 전송 대기');return;}busy.current=true;const gen=epoch.current,key=scope.current,env=current.current;
  try{setStatus(env.dirty?'동기화 중':'확인 중');if(env.dirty){const {data:result,error}=await c.rpc('save_life_workspace',{expected_revision:env.revision,new_data:env.data,mutation_id:env.requestId});if(error)throw error;if(gen!==epoch.current)return;

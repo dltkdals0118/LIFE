@@ -151,3 +151,42 @@ test('desktop and mobile screenshots', async ({page}, info) => {
   await page.getByRole('heading', {name: '일기', exact: true}).waitFor();
   await page.screenshot({path: `test-results/${info.project.name}-journal.png`, fullPage: true});
 });
+
+// 2026-11-11 백지 사고: store 가 parseBackup 결과를 버리고 **원본 캐시를 그대로** 썼다.
+// 그래서 나중에 생긴 칸(journal)이 undefined 로 남아 사이드바 첫 렌더에서 터졌고 화면이 통째로 백지가 됐다.
+// 캐시가 없는 새 브라우저에서는 재현되지 않는다 — 그래서 **예전 형식 캐시를 직접 심어** 잰다.
+test('예전 형식 캐시로도 앱이 열린다 — journal 이 없던 시절 데이터', async ({page}) => {
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+
+  // journal·sim 이 없던 때의 워크스페이스를 IndexedDB 에 심는다
+  await page.addInitScript(() => {
+    localStorage.setItem('life:mode', 'personal');
+    localStorage.setItem('life:gate', 'local');
+    const old = {
+      schemaVersion: 1, name: '옛 공간', chapter: '옛 챕터',
+      domains: [{id: 'finance', name: '재정 운영', color: 'sage', icon: 'wallet'}],
+      quests: [], plans: [], observations: [], rewards: [], reviews: [],
+      rewardBudget: null, events: [],      // journal 없음 · sim 없음
+    };
+    const open = indexedDB.open('keyval-store', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('keyval');
+    open.onsuccess = () => {
+      const tx = open.result.transaction('keyval', 'readwrite');
+      tx.objectStore('keyval').put({data: old, revision: 3, dirty: false, requestId: 'x'},
+        'life:workspace:guest');
+    };
+  });
+
+  await page.goto('./');
+  await page.waitForTimeout(1200);
+  // 백지가 아니어야 한다
+  const len = await page.evaluate(() => document.querySelector('#root')!.innerHTML.length);
+  expect(len, '첫 렌더에서 터져 화면이 비었다').toBeGreaterThan(500);
+  await expect(page.locator('.sidebar nav, .mobile-nav').getByRole('button', {name: '시뮬레이션'}).first()).toBeVisible();
+  // 일기 화면도 열린다 (journal 이 undefined 여도)
+  await go(page, '일기');
+  await expect(page.getByRole('heading', {name: '일기', exact: true})).toBeVisible();
+  await expect(page.getByLabel('오늘의 일기')).toBeVisible();
+  expect(errors, '페이지 오류가 났다').toEqual([]);
+});
