@@ -159,7 +159,17 @@ export default function App(){
   {!s.journal.filter(x=>x.date!==d).length&&<Empty title="여기가 쌓여요" body="하루 한 단락이면 돼요. 며칠 모이면 시뮬레이션 숫자와 같이 읽을 수 있어요."/>}
  </section></>;})()}
  {view==='sim'&&(()=>{const sim=s.sim;
- if(!sim)return <>{sectionHead('WHAT IF','시뮬레이션','아직 예측 자료가 없어요.')}<Empty title="예측 자료가 없어요" body="설정과 동기화 → 백업 가져오기 로 최신 파일을 한 번 더 가져오면 채워져요. 예시 공간에서는 바로 만져볼 수 있어요." action={<button className="secondary" onClick={()=>go('settings')}>설정과 동기화 열기<ArrowRight size={15}/></button>}/></>;
+ if(!sim){
+  // 로그인했는데 아직 동기화가 안 끝났으면 '없다'가 아니라 '오는 중'이다.
+  // 9초쯤 걸리는데 그 사이 '자료가 없어요'라고 하면 고장난 줄 안다(2026-11-11).
+  const coming=!!store.user&&!demo&&store.status!=='동기화됨';
+  return <>{sectionHead('WHAT IF','시뮬레이션',coming?'서버에서 불러오는 중이에요.':'아직 예측 자료가 없어요.')}
+   {coming
+    ?<section className="panel sim-loading"><div className="sim-loading-bar"><i/></div>
+      <h3>불러오는 중이에요</h3><p>다른 기기에 저장된 기록을 받아오고 있어요. 보통 몇 초면 끝나요.</p>
+      <small>상태: {store.status}</small></section>
+    :<Empty title="예측 자료가 없어요" body="설정과 동기화 → 백업 가져오기 로 최신 파일을 한 번 더 가져오면 채워져요. 예시 공간에서는 바로 만져볼 수 있어요." action={<button className="secondary" onClick={()=>go('settings')}>설정과 동기화 열기<ArrowRight size={15}/></button>}/>}
+  </>;}
  const P=Object.keys(picks).length?picks:defaultPicks(sim);
  const r=projectCash(sim,P), none=projectCash(sim,defaultPicks(sim));
  const best=Object.fromEntries(sim.levers.map(l=>[l.id,l.options.reduce((a,b)=>b.delta>a.delta?b:a).key]));

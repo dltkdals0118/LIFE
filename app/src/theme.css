@@ -675,3 +675,14 @@ input,textarea,select{background-color:#0e1713}
 .journal-mood-chip{font-size:9.5px;font-weight:700;color:var(--teal);background:var(--teal-bg);
   border:1px solid #16342c;border-radius:6px;padding:2px 7px}
 .journal-past p{margin:0;font-size:13px;line-height:1.85;color:var(--text-2);white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* 로그인 직후 서버에서 당겨오는 몇 초 — '없다'가 아니라 '오는 중'이라고 말한다 (2026-11-11) */
+.sim-loading{padding:34px 22px;text-align:center}
+.sim-loading h3{margin:16px 0 6px;font-size:15px;color:var(--text)}
+.sim-loading p{margin:0 0 10px;font-size:12.5px;color:var(--text-2)}
+.sim-loading small{font-size:10.5px;color:var(--text-3)}
+.sim-loading-bar{height:3px;background:#14201a;border-radius:2px;overflow:hidden;max-width:260px;margin:0 auto}
+.sim-loading-bar i{display:block;height:100%;width:40%;border-radius:2px;background:var(--neon-dim);
+  animation:sim-slide 1.1s ease-in-out infinite}
+@keyframes sim-slide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+@media (prefers-reduced-motion:reduce){.sim-loading-bar i{animation:none;width:100%}}
