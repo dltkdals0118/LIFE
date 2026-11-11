@@ -175,7 +175,7 @@ export default function App(){
  const best=Object.fromEntries(sim.levers.map(l=>[l.id,l.options.reduce((a,b)=>b.delta>a.delta?b:a).key]));
  const reqs=simRequires(sim,P);
  const set=(id:string,key:string)=>setPicks({...P,[id]:key});
- return <>{sectionHead('WHAT IF','앞으로 '+sim.months+'달','손잡이를 바꾸면 선이 움직여요. 고르는 건 나예요.',
+ return <>{sectionHead('WHAT IF','앞으로 '+sim.months+'달','바꿔 보세요. 돈과 시간이 같이 움직여요. 고르는 건 나예요.',
    <button className="secondary" onClick={()=>setPicks(best)}>최선으로 맞추기</button>)}
  <section className="panel sim-panel">
   <div className="sim-head">
@@ -184,11 +184,14 @@ export default function App(){
    <div><span className="eyebrow">{monthAdd(sim.startMonth,sim.months-1)} 현금</span>
     <b className={r.endCash<0?'bad':'good'}>{won(Math.round(r.endCash))}</b></div>
    <div><span className="eyebrow">마지막 달 수지</span><b>{won(Math.round(r.monthlyFlow))}</b></div>
+   {r.freeHours!==null&&<div><span className="eyebrow">하루 남는 시간</span>
+    <b className={r.freeHours<0?'bad':r.hourGain>0?'good':''}>{r.freeHours}시간</b>
+    {r.hourGain!==0&&<small className="sim-hour-delta">{r.hourGain>0?'+':''}{Math.round(r.hourGain*10)/10}</small>}</div>}
   </div>
   <SimChart sim={sim} picks={P}/>
   <p className="sim-basis">지금 현금 {won(sim.cash)} ({sim.asOf}) · 손대지 않으면 매달 {won(sim.netMonthly)}<br/>{sim.flowBasis}</p>
  </section>
- <section className="panel sim-levers"><div className="panel-heading"><div><h2>손잡이</h2><p>눌러서 바꿔 보세요. 숫자와 선이 바로 따라와요.</p></div>
+ <section className="panel sim-levers"><div className="panel-heading"><div><h2>바꿀 수 있는 것</h2><p>눌러서 바꿔 보세요. 숫자와 선이 바로 따라와요.</p></div>
   <button className="text-button" onClick={()=>setPicks(defaultPicks(sim))}>되돌리기</button></div>
   {(()=>{const gs=sim.groups.length?sim.groups:[{key:'',name:'',note:''}];
    return gs.map(g=>{const mine=sim.levers.filter(l=>(l.group||'')===g.key);
@@ -202,7 +205,8 @@ export default function App(){
       <div className="sim-options">{lv.options.map(o=>
         <button key={o.key} className={(P[lv.id]??defaultPicks(sim)[lv.id])===o.key?'active':''}
           onClick={()=>set(lv.id,o.key)}>{o.label}
-          {o.delta?<em className={o.delta<0?'minus':''}>{o.delta>0?'+':'−'}{won(Math.abs(o.delta))}</em>:null}</button>)}</div>
+          {o.delta?<em className={o.delta<0?'minus':''}>{o.delta>0?'+':'−'}{won(Math.abs(o.delta))}</em>:null}
+          {o.hours?<em className={`hours ${o.hours<0?'minus':''}`}>{o.hours>0?'+':'−'}{Math.abs(Math.round(o.hours*10)/10)}시간</em>:null}</button>)}</div>
       {lv.basis&&<p className="sim-basis-small">{lv.basis}</p>}
      </div>)}
     </div>;});})()}
@@ -210,11 +214,11 @@ export default function App(){
  {r.needPerMonth>0&&<section className="panel sim-target"><div className="panel-heading"><h2>그래도 모자란 만큼</h2><Target size={18}/></div>
   <p>이 조합으로도 매달 <b>{won(r.needPerMonth)}</b> 이 모자라요.
   {sim.incomeNow?<> 지금 세후 {won(sim.incomeNow)} 이니까 <b>세후 월 {won(sim.incomeNow+r.needPerMonth)}</b> 이면 수지가 맞아요.</>:null}</p>
-  <p className="small-note">받을 것 같은 금액이 아니라 <b>맞추려면 필요한 금액</b>이에요. 모자란 만큼은 다른 손잡이로 메우거나 적자로 남아요.</p></section>}
- <section className="panel"><div className="panel-heading"><div><h2>이 조합이 성립하려면</h2><p>고른 손잡이가 요구하는 것들이에요.</p></div><ListChecks size={18}/></div>
+  <p className="small-note">받을 것 같은 금액이 아니라 <b>맞추려면 필요한 금액</b>이에요. 모자란 만큼은 다른 것으로 메우거나 적자로 남아요.</p></section>}
+ <section className="panel"><div className="panel-heading"><div><h2>이 조합이 성립하려면</h2><p>고른 것들이 요구하는 조건이에요.</p></div><ListChecks size={18}/></div>
   {reqs.length?reqs.map(q=><div className="sim-req" key={q.lever}><strong>{q.lever}</strong><span>{q.option}</span>
     <ul>{q.items.map(it=><li key={it}>{it}</li>)}</ul></div>)
-   :<Empty title="아직 아무 손잡이도 안 당겼어요" body={`이대로면 ${monthAdd(sim.startMonth,sim.months-1)} 에 ${won(Math.round(none.endCash))} 이에요. 위에서 하나씩 눌러 보세요.`}/>}
+   :<Empty title="아직 아무것도 안 바꿨어요" body={`이대로면 ${monthAdd(sim.startMonth,sim.months-1)} 에 ${won(Math.round(none.endCash))} 이에요. 위에서 하나씩 눌러 보세요.`}/>}
  </section></>;})()}
  {view==='settings'&&<>{sectionHead('YOUR SPACE','설정과 동기화','내 기록을 안전하게 보관하고, 다른 기기에서도 이어가요.')}<div className="settings-grid"><section className="panel settings-panel"><h2><Cloud size={20}/>휴대폰 · PC 연결</h2><p>같은 계정으로 로그인하면 개인 공간이 자동으로 동기화돼요.</p>{!store.config&&<div className="notice">아직 클라우드 저장소가 연결되지 않았어요. 지금 기록은 이 기기에만 저장됩니다.</div>}{store.user?<><Badge>{store.user.email}</Badge><p>상태: {store.status}</p><div className="button-row"><button className="primary" onClick={()=>void store.sync()}>지금 동기화</button><button className="secondary" onClick={()=>store.logout().then(()=>{localStorage.removeItem('life:gate');setGate(null);}).catch(e=>notify(e.message))}>로그아웃</button></div></>:<form onSubmit={e=>{e.preventDefault();const run=authMode==='signup'?store.signup(authEmail,authPassword):store.login(authEmail,authPassword).then(()=>false);run.then(needsConfirm=>{setAuthPassword('');if(needsConfirm){setAuthSent(true);notify('가입 확인 메일을 보냈어요. 메일의 링크를 누른 뒤 다시 로그인해 주세요.');}else{setAuthSent(false);notify(authMode==='signup'?'계정을 만들고 로그인했어요.':'로그인했어요.');}}).catch(e=>notify(e.message));}}><Field label="이메일"><input type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} required autoComplete="username" placeholder="name@example.com"/></Field><Field label="비밀번호"><input type="password" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} required minLength={8} autoComplete={authMode==='signup'?'new-password':'current-password'} placeholder="8자 이상"/></Field><button className="primary" disabled={!store.config}>{authMode==='signup'?'계정 만들고 시작하기':'로그인'}<ArrowRight size={16}/></button><button type="button" className="text-button" onClick={()=>{setAuthMode(m=>m==='signup'?'login':'signup');setAuthSent(false);}}>{authMode==='signup'?'이미 계정이 있어요 · 로그인하기':'계정이 없어요 · 새로 만들기'}</button><p className="small-note">{authMode==='signup'?'휴대폰에서도 같은 이메일과 비밀번호로 로그인하면 두 기기가 같은 공간을 씁니다.':'처음이라면 아래에서 계정을 먼저 만들어 주세요.'}</p>{authSent&&<p className="small-note">메일의 확인 링크를 누른 뒤, 이 화면에서 같은 이메일과 비밀번호로 로그인해 주세요.</p>}</form>}<details className="advanced"><summary>동기화 서비스 연결 설정</summary><p className="small-note">본인이 관리하는 Supabase 프로젝트를 연결할 때만 입력하세요. 데이터는 해당 프로젝트로 전송됩니다. DB 설치 파일은 저장소의 app/supabase/schema.sql에 있습니다.</p><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{store.configure({url:text(f,'url'),key:text(f,'key')});notify('서비스를 연결했어요. 이메일로 로그인해 주세요.');}catch(e){notify((e as Error).message);}}}><Field label="프로젝트 URL"><input name="url" type="url" required defaultValue={store.config?.url??''} placeholder="https://project.supabase.co"/></Field><Field label="공개 publishable key"><input name="key" required defaultValue={store.config?.key??''} placeholder="sb_publishable_…" autoComplete="off"/></Field><button className="secondary">연결 저장</button></form></details><p className="small-note">로그인하면 계정별 공간을 불러옵니다. 기기 공간의 기존 기록을 옮기려면 로그인 전에 백업한 뒤 로그인 후 가져와 주세요.</p></section>
  <section className="panel settings-panel"><h2><ArrowDownToLine size={20}/>기록 보관</h2><p>백업 파일에는 현재 공간의 모든 기록이 담겨요. 기기를 바꾸기 전에도 한 번 저장해 두세요.</p><div className="button-row"><button className="primary" onClick={exportBackup}>백업 내려받기</button><button className="secondary" onClick={()=>importRef.current?.click()}>백업 가져오기</button></div><input ref={importRef} hidden type="file" accept="application/json,.json" onChange={e=>void importFile(e.target.files?.[0])}/><hr/><h3>나의 공간</h3><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);change(s=>({...s,name:text(f,'name'),chapter:text(f,'chapter')}),'공간 이름을 바꿨어요.');}}><Field label="공간 이름"><input name="name" required maxLength={100} defaultValue={s.name} key={s.name}/></Field><Field label="현재 챕터"><input name="chapter" required maxLength={150} defaultValue={s.chapter} key={s.chapter}/></Field><button className="secondary">저장</button></form><hr/><button className="text-button" onClick={()=>demo?store.startPersonal():store.viewDemo()}>{demo?'내 개인 공간으로 이동':'가상 예시 다시 둘러보기'}<ArrowRight size={15}/></button><p className="small-note">예시 공간과 개인 기록은 분리돼 있어요. 예시의 변경은 저장되지 않습니다.</p></section></div><section className="panel settings-panel"><h2>최근 변경 이력</h2>{s.events.slice(0,12).map(e=><div className="event-row" key={e.id}><span>{e.text}</span><small>{new Date(e.at).toLocaleString('ko-KR')}</small></div>)}{!s.events.length&&<p className="muted">새로운 활동이 이곳에 기록됩니다.</p>}<p className="small-note">LIFE v0.1 · 실제 관측과 시뮬레이션을 구분합니다. 미래의 성공률은 근거가 쌓이기 전까지 미산정입니다.</p></section></>}

@@ -23,14 +23,22 @@ test('시뮬레이션 — 손잡이를 당기면 결과가 바뀐다', async ({p
   await expect(page.locator('.sim-line-mine')).toBeVisible();
 
   // 아무것도 안 당긴 상태에서는 '성립하려면' 목록이 비어 있다
-  await expect(page.getByRole('heading', {name: '아직 아무 손잡이도 안 당겼어요'})).toBeVisible();
+  await expect(page.getByRole('heading', {name: '아직 아무것도 안 바꿨어요'})).toBeVisible();
 
   // 손잡이 하나를 당기면 숫자가 바뀌고, 무엇이 참이어야 하는지가 나타난다
-  await page.locator('.sim-lever').first().getByRole('button', {name: /월 80만/}).click();
+  await page.locator('.sim-lever').first().getByRole('button', {name: /거의 안 한다/}).click();
   await expect(head.nth(1)).not.toHaveText(before);
-  await expect(page.getByText('주 단위 상한을 정하고 지킨다')).toBeVisible();
+  await expect(page.getByText('그 시간에 무엇을 할지 먼저 정한다')).toBeVisible();
   await expect(page.locator('.sim-group-head h3').first()).toBeVisible();
   await expect(page.locator('.sim-group-count').first()).toHaveText(/^1\//);
+
+  // **시간도 같이 움직인다.** 돈만 보여주던 것이 사용자가 지적한 문제였다(2026-11-11).
+  const hours = page.locator('.sim-head b').nth(3);
+  await expect(hours).toContainText('시간');
+  const h0 = Number((await hours.innerText()).replace(/[^0-9.-]/g, ''));
+  await page.locator('.sim-lever').filter({hasText: '수면'}).getByRole('button', {name: /하루 1시간 더/}).click();
+  const h1 = Number((await hours.innerText()).replace(/[^0-9.-]/g, ''));
+  expect(h1, '수면을 늘리면 남는 시간이 줄어야 한다').toBeLessThan(h0);
 
   // 최선으로 맞추면 더 좋아지고, 되돌리면 처음으로
   await page.getByRole('button', {name: '최선으로 맞추기'}).click();

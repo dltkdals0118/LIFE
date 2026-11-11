@@ -30,12 +30,14 @@ export const leverSchema = z.object({
  id, name:label, starts:z.string().regex(/^\d{4}-\d{2}$/), basis:z.string().max(2000).default(''),
  group:z.string().max(40).default(''),
  options:z.array(z.object({key:z.string().max(4),label:label,delta:z.number().finite(),
+   hours:z.number().finite().default(0),   // 남는 시간이 하루 몇 시간 느는가 (쓰면 음수)
    requires:z.array(z.string().max(300)).max(10).default([])})).min(1).max(6),
 });
 export const simSchema = z.object({
  asOf:date, cash:z.number().finite(), netMonthly:z.number().finite(),
  startMonth:z.string().regex(/^\d{4}-\d{2}$/), months:z.number().int().min(1).max(60),
  flowBasis:z.string().max(1000).default(''), incomeNow:z.number().finite().nullable().default(null),
+ baseFreeHours:z.number().finite().nullable().default(null),   // FACT-0097 하루 남는 시간
  groups:z.array(z.object({key:z.string().max(40),name:label,note:z.string().max(300).default('')})).max(8).default([]),
  levers:z.array(leverSchema).max(30),
 });
@@ -56,11 +58,19 @@ export function projectCash(sim:Sim,picks:Record<string,string>){
   const flow=sim.netMonthly+gain;cash+=flow;
   rows.push({month,gain,flow,cash});
  }
+ // 시간은 달마다 쌓이지 않는다 — 고른 조합의 '하루 남는 시간'이 하나 나올 뿐이다.
+ let hourGain=0;
+ for(const lv of sim.levers){
+  const o=lv.options.find(x=>x.key===(picks[lv.id]??neutralKey(lv)));
+  if(o)hourGain+=o.hours??0;
+ }
  const zero=rows.find(r=>r.cash<0);
  const lastGain=rows[rows.length-1].gain;
+ const base=sim.baseFreeHours??null;
  return {rows,endCash:rows[rows.length-1].cash,zeroMonth:zero?zero.month:null,
   monthlyFlow:sim.netMonthly+lastGain,
-  needPerMonth:Math.max(0,-(sim.netMonthly+lastGain))};   // 수지를 0 으로 만들려면 얼마가 더 필요한가
+  needPerMonth:Math.max(0,-(sim.netMonthly+lastGain)),
+  hourGain,freeHours:base===null?null:Math.round((base+hourGain)*10)/10};   // 수지를 0 으로 만들려면 얼마가 더 필요한가
 }
 /** 이 조합이 성립하려면 참이어야 하는 것들 */
 export function simRequires(sim:Sim,picks:Record<string,string>){
@@ -73,7 +83,8 @@ export function simRequires(sim:Sim,picks:Record<string,string>){
 }
 /** 중립은 **delta 가 0 인 옵션**이다. 위치나 키 이름으로 찾으면 레버마다 달라 틀린다
  *  — 실제로 '개인회생(-31만)'이 기본값으로 잡힐 뻔했다. */
-export const neutralKey=(l:Lever)=>(l.options.find(o=>o.delta===0)
+export const neutralKey=(l:Lever)=>(l.options.find(o=>o.delta===0&&(o.hours??0)===0)
+ ??l.options.find(o=>o.delta===0)
  ??l.options.reduce((a,b)=>Math.abs(b.delta)<Math.abs(a.delta)?b:a)).key;
 export const defaultPicks=(sim:Sim)=>Object.fromEntries(sim.levers.map(l=>[l.id,neutralKey(l)]));
 
@@ -374,6 +385,6 @@ export function createDemo():Workspace{
   {id:'o1b',kind:'cash',value:3450000,date:back(21),note:'가상 예시'},{id:'o1c',kind:'cash',value:2780000,date:back(44),note:'가상 예시'},{id:'o1d',kind:'cash',value:4100000,date:back(70),note:'가상 예시'},{id:'o2',kind:'hours',value:4,date:today(),note:'가상 예시'},{id:'o3',kind:'sleep',value:7,date:today(),note:'가상 예시'}];
  s.rewards=[{id:'r1',title:'초록빛 첫 걸음',type:'digital',cost:0,requiredXp:100,domainId:'',note:'첫 발자국을 남긴 날의 기록',status:'used',spent:null,usedAt:new Date().toISOString(),reservedAt:null},{id:'r2',title:'나를 위한 영화 한 편',type:'real',cost:15000,requiredXp:550,domainId:'recovery',note:'회복 습관이 자랐을 때, 보고 싶었던 영화 한 편',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r3',title:'느긋한 오후 산책',type:'real',cost:0,requiredXp:300,domainId:'',note:'느긋하게 걷는 시간',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r4',title:'꾸준한 탐험가',type:'digital',cost:0,requiredXp:700,domainId:'',note:'',status:'wish',spent:null,usedAt:null,reservedAt:null}];
  // 예시 공간에도 시뮬레이션을 넣는다 — 가져오기 전에도 '무엇을 돌려보는 것인지' 가 보여야 한다.
- s.sim={asOf:today(),cash:3000000,netMonthly:-1800000,startMonth:monthAdd(today().slice(0,7),1),months:6,flowBasis:'예시 값이에요. 내 기록을 가져오면 내 숫자와 내 손잡이로 바뀝니다.',incomeNow:2600000,groups:[{key:'cut',name:'줄이기',note:'지금 당길 수 있는 것들'},{key:'earn',name:'늘리기',note:'금액이 미확인이면 민감도로만 본다'},{key:'structure',name:'구조 바꾸기',note:'되돌리기 어렵다. 숫자보다 조건을 먼저 본다'}],levers:[{id:'food',name:'식비·카페',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 보통 가장 큰 칸이에요.',options:[{key:'A',label:'월 80만',delta:800000,requires:['주 단위 상한을 정하고 지킨다','배달·카페를 주 N회로 못 박는다']},{key:'B',label:'월 40만',delta:400000,requires:['주 단위 상한을 정한다']},{key:'C',label:'그대로',delta:0,requires:[]}]},{id:'subs',name:'구독·정기결제',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 목록부터 봐야 해요.',options:[{key:'A',label:'월 7만',delta:70000,requires:['결제 내역에서 구독을 전부 찾아낸다','안 쓰는 것을 해지한다']},{key:'B',label:'그대로',delta:0,requires:[]}]},{id:'telecom',name:'통신 요금',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 약정이 변수예요.',options:[{key:'A',label:'월 10만',delta:100000,requires:['약정과 위약금을 확인한다']},{key:'B',label:'월 5만',delta:50000,requires:['약정을 확인한다']},{key:'C',label:'그대로',delta:0,requires:[]}]},{id:'rate',name:'대출 금리',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 1%p 면 잔액에 따라 달라요.',options:[{key:'A',label:'월 10만',delta:100000,requires:['금리 인하 요구권을 신청한다','중도상환수수료를 확인한다']},{key:'B',label:'그대로',delta:0,requires:[]}]},{id:'promo',name:'연봉·승진',group:'earn',starts:monthAdd(today().slice(0,7),2),basis:'예시 — 금액이 미확인이면 0 으로 두고 필요한 액수를 역산해요.',options:[{key:'A',label:'만약 +80만이라면',delta:800000,requires:['근거가 될 결과물을 만든다']},{key:'B',label:'만약 +50만이라면',delta:500000,requires:['근거가 될 결과물을 만든다']},{key:'C',label:'모름 — 0',delta:0,requires:[]}]},{id:'side',name:'부업',group:'earn',starts:monthAdd(today().slice(0,7),2),basis:'예시 — 아직 매출이 없으면 0 이에요.',options:[{key:'A',label:'만약 월 50만이라면',delta:500000,requires:['첫 거래를 한 건 만든다']},{key:'B',label:'안 한다 / 모름',delta:0,requires:[]}]},{id:'housing',name:'주거',group:'structure',starts:monthAdd(today().slice(0,7),5),basis:'예시 — 계약 만료에 맞춰 결정해요.',options:[{key:'A',label:'월 30만',delta:300000,requires:['대안을 미리 알아본다','통보 기한을 확인한다']},{key:'B',label:'그대로',delta:0,requires:[]}]}]};
+ s.sim={asOf:today(),cash:3000000,netMonthly:-1800000,startMonth:monthAdd(today().slice(0,7),1),months:6,flowBasis:'예시 값이에요. 내 기록을 가져오면 내 숫자와 내 항목으로 바뀝니다.',incomeNow:2600000,baseFreeHours:2,groups:[{key:'day',name:'하루 쓰기',note:'매일 내가 정하는 것. 시간이 움직여요'},{key:'cut',name:'줄이기',note:'지금 당길 수 있는 돈'},{key:'earn',name:'늘리기',note:'금액이 미확인이면 민감도로만 봐요'}],levers:[{id:'play',name:'취미 시간',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 시간과 돈이 같이 움직이는 칸이에요.',options:[{key:'A',label:'거의 안 한다',delta:500000,hours:3,requires:['그 시간에 무엇을 할지 먼저 정한다']},{key:'B',label:'하루 2시간쯤',delta:250000,hours:1.5,requires:['주간 상한을 정한다']},{key:'C',label:'지금 그대로',delta:0,hours:0,requires:[]}]},{id:'sleep',name:'수면 챙기기',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 시간을 쓰는 쪽이지만 낮이 달라져요.',options:[{key:'A',label:'하루 1시간 더',delta:0,hours:-1,requires:['잠드는 시각을 정해 둔다']},{key:'B',label:'하루 30분 더',delta:0,hours:-0.5,requires:['잠드는 시각을 정해 둔다']},{key:'C',label:'지금 그대로',delta:0,hours:0,requires:[]}]},{id:'study',name:'공부',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 매일 조금씩.',options:[{key:'A',label:'하루 1시간',delta:0,hours:-1,requires:['할 시간을 고정한다']},{key:'B',label:'하루 30분',delta:0,hours:-0.5,requires:[]},{key:'C',label:'안 한다',delta:0,hours:0,requires:[]}]},{id:'food',name:'식비·카페',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 보통 가장 큰 칸이에요.',options:[{key:'A',label:'월 80만',delta:800000,hours:0,requires:['주 단위 상한을 정하고 지킨다','배달·카페를 주 N회로 못 박는다']},{key:'B',label:'월 40만',delta:400000,hours:0,requires:['주 단위 상한을 정한다']},{key:'C',label:'그대로',delta:0,hours:0,requires:[]}]},{id:'telecom',name:'통신 요금',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 약정이 변수예요.',options:[{key:'A',label:'월 10만',delta:100000,hours:0,requires:['약정과 위약금을 확인한다']},{key:'B',label:'그대로',delta:0,hours:0,requires:[]}]},{id:'income',name:'수입 늘리기',group:'earn',starts:monthAdd(today().slice(0,7),2),basis:'예시 — 금액이 미확인이면 0 으로 두고 필요한 액수를 역산해요.',options:[{key:'A',label:'만약 +50만이라면',delta:500000,hours:0,requires:['근거가 될 결과물을 만든다']},{key:'B',label:'모름 — 0',delta:0,hours:0,requires:[]}]}]};
  return s;
 }

@@ -686,3 +686,11 @@ input,textarea,select{background-color:#0e1713}
   animation:sim-slide 1.1s ease-in-out infinite}
 @keyframes sim-slide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 @media (prefers-reduced-motion:reduce){.sim-loading-bar i{animation:none;width:100%}}
+
+/* 시간 축 (2026-11-11) — 돈만 보여주면 매일 손에 잡히는 것이 안 보인다는 지적에서 나왔다 */
+.sim-hour-delta{display:block;font-size:10px;font-weight:700;color:var(--teal);margin-top:1px}
+.sim-options em.hours{color:var(--teal)}
+.sim-options em.hours.minus{color:var(--amber)}
+.sim-options button.active em.hours{color:var(--teal)}
+.sim-options button.active em.hours.minus{color:var(--amber)}
+.sim-head b.good{color:var(--neon)}
