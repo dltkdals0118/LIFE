@@ -2,11 +2,12 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Trophy, Swords, Zap, Wallet, X } from 'lucide-react';
 import { upsertJournal, journalOf, journalStreak, projectCash, simRequires, defaultPicks, monthAdd, type Sim, compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
 import { AuthGate, NewPassword } from './Auth';
+import HomeView from './Home';
 import { useWorkspace } from './store';
 
-type View='sim'|'journal'|'settings';
+type View='home'|'sim'|'journal'|'settings';
 type Dialog={type:'outcome';item:Quest}|{type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
-const nav=[{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'journal',label:'일기',short:'일기',icon:BookOpen}] as const;
+const nav=[{id:'home',label:'홈',short:'홈',icon:Home},{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'journal',label:'일기',short:'일기',icon:BookOpen}] as const;
 const icons={wallet:Wallet,sprout:Sprout,briefcase:BriefcaseBusiness,book:BookOpen,heart:Heart,sparkles:Sparkles};
 const kindNames=OBS_NAME;   // 이름표 정본은 model.ts 하나다
 const text=(f:FormData,k:string)=>String(f.get(k)??'').trim();
@@ -62,7 +63,7 @@ function buildRule(f:FormData,key:string):TriggerRule|null{
 
 export default function App(){
  const store=useWorkspace();const {data:s,demo,ready}=store;
- const [view,setView]=useState<View>('sim'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null),[picks,setPicks]=useState<Record<string,string>>({});
+ const [view,setView]=useState<View>('home'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null),[picks,setPicks]=useState<Record<string,string>>({});
  const importRef=useRef<HTMLInputElement>(null);
  const xp=xpOf(s),done=s.quests.filter(q=>q.status==='done'),open=s.quests.filter(q=>q.status==='ready').sort((a,b)=>a.due.localeCompare(b.due)),todayQs=open.filter(q=>q.due<=today()).slice(0,3),actualToday=done.filter(q=>q.completedAt?.slice(0,10)===today()).length;
  const queue=questQueue(s),fq=queue[0]??null,upNext=queue[1]??null,bonus=subQuestFor(s),power=combatPower(s);
@@ -121,7 +122,7 @@ export default function App(){
    onGuest={()=>{localStorage.setItem('life:gate','local');setGate('local');store.startPersonal();}}/>;
  return <div className="app-shell">
  {menu&&<button className="sidebar-scrim" onClick={()=>setMenu(false)} aria-label="메뉴 닫기"/>}
- <aside className={`sidebar ${menu?'open':''}`}><button className="brand" onClick={()=>go('sim')}><span className="brand-mark"><Sprout size={24}/></span><span>LIFE<span className="brand-sub">YOUR LIFE, IN PROGRESS</span></span></button>
+ <aside className={`sidebar ${menu?'open':''}`}><button className="brand" onClick={()=>go('home')}><span className="brand-mark"><Sprout size={24}/></span><span>LIFE<span className="brand-sub">YOUR LIFE, IN PROGRESS</span></span></button>
  <div className="workspace-switch"><span className="avatar">L</span><div><strong>{s.name}</strong><small>나만의 라이프 워크스페이스</small></div><ChevronDown size={15}/></div>
  <div className="nav-caption">MY WORKSPACE</div><nav>{nav.map(n=><button key={n.id} className={view===n.id?'active':''} onClick={()=>go(n.id)}><n.icon size={19}/><span>{n.label}</span>{n.id==='journal'&&journalStreak(s)>0&&<small>{journalStreak(s)}일</small>}</button>)}</nav>
  <div className="sidebar-note"><div><Leaf size={17}/><span>작은 걸음도, 앞으로.</span></div><p>오늘의 나에게 맞는<br/>속도로 걸어가면 돼요.</p><svg viewBox="0 0 160 38" aria-hidden="true"><path d="M0 35Q30 0 60 25T120 17T160 8" fill="none" stroke="#b6c8a6" strokeWidth="2" strokeDasharray="4 5"/><circle cx="120" cy="17" r="4" fill="#799063"/></svg></div>
@@ -131,6 +132,7 @@ export default function App(){
  {demo&&<div className="demo-banner"><span><Sparkles size={15}/>가상 데이터로 둘러보는 공간이에요. 자유롭게 눌러보세요.</span><button onClick={()=>{store.startPersonal();notify('빈 개인 공간을 준비했어요. 첫 퀘스트를 만들어 보세요.');}}>내 공간 시작하기<ArrowRight size={14}/></button></div>}
  {store.error&&<div className="error-banner" role="alert"><span>{store.error}</span><button onClick={()=>store.setError('')} aria-label="알림 닫기"><X size={17}/></button></div>}
  {!ready&&<p role="status">기록을 불러오고 있어요…</p>}
+ {view==='home'&&<HomeView s={s} onGo={v=>go(v)}/>}
  {view==='journal'&&(()=>{const d=today();const mine=journalOf(s,d);const streak=journalStreak(s);
  return <>{sectionHead('ONE A DAY','일기',streak>0?`${streak}일 연속으로 쓰고 있어요.`:'오늘 하루를 한 단락으로 남겨요.')}
  <section className="panel journal-today">

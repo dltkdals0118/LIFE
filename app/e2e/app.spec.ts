@@ -15,6 +15,7 @@ test('시뮬레이션 — 손잡이를 당기면 결과가 바뀐다', async ({p
   page.on('pageerror', e => errors.push(e.message));
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
+  await go(page, '시뮬레이션');
   await expect(page.getByRole('heading', {name: /앞으로 \d+달/})).toBeVisible();
 
   const head = page.locator('.sim-head b');
@@ -115,10 +116,10 @@ test('모바일 하단 탭으로 모든 화면에 갈 수 있다', async ({page}
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
   const tabs = page.locator('.mobile-nav>button');
-  await expect(tabs).toHaveCount(2);
-  for (const [label, heading] of [['시뮬레이션', /앞으로 \d+달/], ['일기', /^일기$/]] as const) {
+  await expect(tabs).toHaveCount(3);
+  for (const [label, sel] of [['홈', '.home-figure'], ['시뮬레이션', '.sim-panel'], ['일기', '.journal-form']] as const) {
     await page.locator('.mobile-nav').getByRole('button', {name: label}).click();
-    await expect(page.getByRole('heading', {name: heading})).toBeVisible();
+    await expect(page.locator(sel)).toBeVisible();
   }
   const over = await page.evaluate(() => {
     const n = document.querySelector('.mobile-nav')!;
@@ -133,7 +134,7 @@ test('모바일 어느 화면에서도 가로로 넘치지 않는다', async ({p
   test.skip(info.project.name !== 'mobile', '모바일 전용');
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
-  for (const tab of ['시뮬레이션', '일기']) {
+  for (const tab of ['홈', '시뮬레이션', '일기']) {
     await page.locator('.mobile-nav').getByRole('button', {name: tab}).click();
     await page.waitForTimeout(250);
     const m = await page.evaluate(() => {
@@ -152,6 +153,10 @@ test('desktop and mobile screenshots', async ({page}, info) => {
   await expect(page.getByRole('heading', {name: '다시 만나 반가워요'})).toBeVisible();
   await page.screenshot({path: `test-results/${info.project.name}-login.png`, fullPage: true});
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
+  await page.locator('.home-figure').waitFor();
+  await page.waitForTimeout(500);
+  await page.screenshot({path: `test-results/${info.project.name}-home.png`, fullPage: true});
+  await go(page, '시뮬레이션');
   await page.getByRole('heading', {name: /앞으로 \d+달/}).waitFor();
   await page.waitForTimeout(400);
   await page.screenshot({path: `test-results/${info.project.name}-sim.png`, fullPage: true});
@@ -197,4 +202,31 @@ test('예전 형식 캐시로도 앱이 열린다 — journal 이 없던 시절 
   await expect(page.getByRole('heading', {name: '일기', exact: true})).toBeVisible();
   await expect(page.getByLabel('오늘의 일기')).toBeVisible();
   expect(errors, '페이지 오류가 났다').toEqual([]);
+});
+
+// 2026-11-15: 메인 화면. 캐릭터가 밟고 선 바닥이 현금 궤적이다 —
+// 장식이 아니라 데이터라서, 숫자가 바뀌면 그림도 바뀌어야 한다.
+test('메인 — 갈림길이 데이터로 그려지고 두 길로 이어진다', async ({page}) => {
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto('./');
+  await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
+
+  // 큰 숫자 하나가 먼저 읽힌다
+  await expect(page.locator('.home-figure')).toBeVisible();
+  // 바닥이 두 갈래다 — 지금 흐름과 바꿨을 때
+  await expect(page.locator('.home-path-drop')).toBeVisible();
+  await expect(page.locator('.home-path-rise')).toBeVisible();
+  // 캐릭터가 서 있다
+  await expect(page.locator('.home-figure-art')).toBeVisible();
+  // 세 숫자
+  await expect(page.locator('.home-facts dd')).toHaveCount(3);
+
+  // 두 버튼이 각각 제 화면으로 간다
+  await page.getByRole('button', {name: '길 바꿔 보기'}).click();
+  await expect(page.getByRole('heading', {name: /앞으로 \d+달/})).toBeVisible();
+  await go(page, '홈');
+  await page.getByRole('button', {name: /오늘 일기/}).click();
+  await expect(page.getByRole('heading', {name: '일기', exact: true})).toBeVisible();
+  expect(errors).toEqual([]);
 });
