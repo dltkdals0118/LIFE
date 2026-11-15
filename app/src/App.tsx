@@ -1,3 +1,5 @@
+import Planning from './Planning';
+import {baselineNotice} from './planning';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Trophy, Swords, Zap, Wallet, X } from 'lucide-react';
 import { setPicks, picksOf, toggleWeek, upsertJournal, journalOf, journalStreak, projectCash, simRequires, defaultPicks, monthAdd, type Sim, compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
@@ -5,9 +7,9 @@ import { AuthGate, NewPassword } from './Auth';
 import HomeView from './Home';
 import { useWorkspace } from './store';
 
-type View='home'|'sim'|'curriculum'|'journal'|'settings';
+type View='planning'|'home'|'sim'|'curriculum'|'journal'|'settings';
 type Dialog={type:'outcome';item:Quest}|{type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
-const nav=[{id:'home',label:'홈',short:'홈',icon:Home},{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'curriculum',label:'커리큘럼',short:'커리',icon:ListChecks},{id:'journal',label:'일기',short:'일기',icon:BookOpen}] as const;
+const nav=[{id:'planning',label:'실행과 검토',short:'실행',icon:ListChecks},{id:'home',label:'홈',short:'홈',icon:Home},{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'curriculum',label:'커리큘럼',short:'커리',icon:ListChecks},{id:'journal',label:'일기',short:'일기',icon:BookOpen}] as const;
 const icons={wallet:Wallet,sprout:Sprout,briefcase:BriefcaseBusiness,book:BookOpen,heart:Heart,sparkles:Sparkles};
 const kindNames=OBS_NAME;   // 이름표 정본은 model.ts 하나다
 const text=(f:FormData,k:string)=>String(f.get(k)??'').trim();
@@ -132,6 +134,7 @@ export default function App(){
  {demo&&<div className="demo-banner"><span><Sparkles size={15}/>가상 데이터로 둘러보는 공간이에요. 자유롭게 눌러보세요.</span><button onClick={()=>{store.startPersonal();notify('빈 개인 공간을 준비했어요. 첫 퀘스트를 만들어 보세요.');}}>내 공간 시작하기<ArrowRight size={14}/></button></div>}
  {store.error&&<div className="error-banner" role="alert"><span>{store.error}</span><button onClick={()=>store.setError('')} aria-label="알림 닫기"><X size={17}/></button></div>}
  {!ready&&<p role="status">기록을 불러오고 있어요…</p>}
+ {view==='planning'&&<Planning s={s} ready={ready} update={fn=>store.update(fn)} onSim={()=>go('sim')} onQuest={id=>{const q=s.quests.find(q=>q.id===id);if(q)toggle(q);else setDialog({type:'quest'});}} onEdit={id=>{const item=s.quests.find(q=>q.id===id);if(item)setDialog({type:'quest',item});}} onRecord={()=>setDialog({type:'observation'})} onReview={()=>setDialog({type:'review'})}/>}
  {view==='home'&&<HomeView s={s} onGo={v=>go(v)}/>}
  {view==='journal'&&(()=>{const d=today();const mine=journalOf(s,d);const streak=journalStreak(s);
  return <>{sectionHead('ONE A DAY','일기',streak>0?`${streak}일 연속으로 쓰고 있어요.`:'오늘 하루를 한 단락으로 남겨요.')}
@@ -170,7 +173,7 @@ export default function App(){
     ?<section className="panel sim-loading"><div className="sim-loading-bar"><i/></div>
       <h3>불러오는 중이에요</h3><p>다른 기기에 저장된 기록을 받아오고 있어요. 보통 몇 초면 끝나요.</p>
       <small>상태: {store.status}</small></section>
-    :<Empty title="예측 자료가 없어요" body="설정과 동기화 → 백업 가져오기 로 최신 파일을 한 번 더 가져오면 채워져요. 예시 공간에서는 바로 만져볼 수 있어요." action={<button className="secondary" onClick={()=>go('settings')}>설정과 동기화 열기<ArrowRight size={15}/></button>}/>}
+    :<Empty title="예측 자료가 없어요" body="실행과 검토에서 기준값과 비교할 선택을 입력해 주세요." action={<button className="secondary" onClick={()=>go('planning')}>현재 상황 입력하기<ArrowRight size={15}/></button>}/>}
   </>;}
  const P=picksOf(s);
  const r=projectCash(sim,P), none=projectCash(sim,defaultPicks(sim));
@@ -178,15 +181,19 @@ export default function App(){
  const reqs=simRequires(sim,P);
  const set=(id:string,key:string)=>change(w=>setPicks(w,{...P,[id]:key}));
  return <>{sectionHead('WHAT IF','앞으로 '+sim.months+'달','바꿔 보세요. 돈과 시간이 같이 움직여요. 고르는 건 나예요.',
-   <button className="secondary" onClick={()=>change(w=>setPicks(w,best))}>최선으로 맞추기</button>)}
+   <button className="secondary" onClick={()=>change(w=>setPicks(w,best))}>현금 증가액이 큰 조합</button>)}
+ {baselineNotice(s)&&<p className="notice warn">{baselineNotice(s)} <button className="text-button" onClick={()=>go('planning')}>기준값 확인</button></p>}
+ <p className="small-note">가정에 따른 월말 잔액 비교입니다. 정확한 소진일·월중 결제일·성공 확률을 계산하지 않아요. 현금 증가액이 큰 조합도 시간과 전제 조건을 별도로 확인해야 합니다.</p>
+ {r.timeBlocked&&<p className="notice warn">시간이 부족한 달이 있어요. 조합을 수정한 뒤 실행 계획으로 채택해 주세요.</p>}
+ <button className="secondary" onClick={()=>go('planning')}>선택 편집 · 실행 계획 채택</button>
  <section className="panel sim-panel">
   <div className="sim-head">
-   <div><span className="eyebrow">{r.zeroMonth?'현금이 0 아래로':'버틴다'}</span>
-    <b className={r.zeroMonth?'bad':'good'}>{r.zeroMonth?r.zeroMonth:'안 간다'}</b></div>
+   <div><span className="eyebrow">{r.zeroMonth?'첫 월말 현금 부족':'기간 내 월말 잔액'}</span>
+    <b className={r.zeroMonth?'bad':'good'}>{r.zeroMonth?r.zeroMonth:'음수 없음'}</b></div>
    <div><span className="eyebrow">{monthAdd(sim.startMonth,sim.months-1)} 현금</span>
     <b className={r.endCash<0?'bad':'good'}>{won(Math.round(r.endCash))}</b></div>
    <div><span className="eyebrow">마지막 달 수지</span><b>{won(Math.round(r.monthlyFlow))}</b></div>
-   {r.freeHours!==null&&<div><span className="eyebrow">하루 남는 시간</span>
+   {r.freeHours!==null&&<div><span className="eyebrow">마지막 달 하루 여유</span>
     <b className={r.freeHours<0?'bad':r.hourGain>0?'good':''}>{r.freeHours}시간</b>
     {r.hourGain!==0&&<small className="sim-hour-delta">{r.hourGain>0?'+':''}{Math.round(r.hourGain*10)/10}</small>}</div>}
   </div>
@@ -195,8 +202,8 @@ export default function App(){
  </section>
  <section className="panel sim-levers"><div className="panel-heading"><div><h2>바꿀 수 있는 것</h2><p>눌러서 바꿔 보세요. 숫자와 선이 바로 따라와요.</p></div>
   <button className="text-button" onClick={()=>change(w=>setPicks(w,defaultPicks(sim)))}>되돌리기</button></div>
-  {(()=>{const gs=sim.groups.length?sim.groups:[{key:'',name:'',note:''}];
-   return gs.map(g=>{const mine=sim.levers.filter(l=>(l.group||'')===g.key);
+  {(()=>{const known=new Set(sim.groups.map(g=>g.key));const gs=[...sim.groups,...(sim.levers.some(l=>!known.has(l.group))?[{key:'__other',name:'기타 선택',note:''}]:[])];
+   return gs.map(g=>{const mine=sim.levers.filter(l=>g.key==='__other'?!known.has(l.group):(l.group||'')===g.key);
     if(!mine.length)return null;
     const pulled=mine.filter(l=>{const o=l.options.find(x=>x.key===P[l.id]);return o&&(o.delta!==0||o.hours!==0);}).length;
     return <div className="sim-group" key={g.key||'all'}>

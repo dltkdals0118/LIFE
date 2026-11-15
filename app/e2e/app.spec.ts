@@ -42,7 +42,7 @@ test('시뮬레이션 — 손잡이를 당기면 결과가 바뀐다', async ({p
   expect(h1, '수면을 늘리면 남는 시간이 줄어야 한다').toBeLessThan(h0);
 
   // 최선으로 맞추면 더 좋아지고, 되돌리면 처음으로
-  await page.getByRole('button', {name: '최선으로 맞추기'}).click();
+  await page.getByRole('button', {name: '현금 증가액이 큰 조합'}).click();
   const after = await head.nth(1).innerText();
   const num = (t: string) => Number(t.replace(/[^0-9-]/g, ''));
   expect(num(after)).toBeGreaterThan(num(before));
@@ -116,8 +116,8 @@ test('모바일 하단 탭으로 모든 화면에 갈 수 있다', async ({page}
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
   const tabs = page.locator('.mobile-nav>button');
-  await expect(tabs).toHaveCount(4);
-  for (const [label, sel] of [['홈', '.home-figure'], ['시뮬레이션', '.sim-panel'], ['커리큘럼', '.curri'], ['일기', '.journal-form']] as const) {
+  await expect(tabs).toHaveCount(5);
+  for (const [label, sel] of [['실행과 검토', '.planning'], ['홈', '.home-figure'], ['시뮬레이션', '.sim-panel'], ['커리큘럼', '.curri'], ['일기', '.journal-form']] as const) {
     await page.locator('.mobile-nav').getByRole('button', {name: label}).click();
     await expect(page.locator(sel)).toBeVisible();
   }
@@ -134,7 +134,7 @@ test('모바일 어느 화면에서도 가로로 넘치지 않는다', async ({p
   test.skip(info.project.name !== 'mobile', '모바일 전용');
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
-  for (const tab of ['홈', '시뮬레이션', '커리큘럼', '일기']) {
+  for (const tab of ['홈', '실행과 검토', '시뮬레이션', '커리큘럼', '일기']) {
     await page.locator('.mobile-nav').getByRole('button', {name: tab}).click();
     await page.waitForTimeout(250);
     const m = await page.evaluate(() => {
@@ -247,7 +247,7 @@ test('고른 조합이 홈까지 따라간다', async ({page}) => {
 
   const figure = page.locator('.home-figure');
   const before = await figure.innerText();
-  await expect(page.getByText('아무것도 안 바꾸면 바닥나기까지')).toBeVisible();
+  await expect(page.getByText('가정에 따른 첫 월말 현금 부족')).toBeVisible();
 
   // 시뮬레이션에서 하나 바꾸고
   await go(page, '시뮬레이션');
@@ -256,7 +256,7 @@ test('고른 조합이 홈까지 따라간다', async ({page}) => {
   // 홈으로 돌아오면 숫자와 문구가 바뀌어 있다
   await go(page, '홈');
   await expect(figure).not.toHaveText(before);
-  await expect(page.getByText('지금 고른 대로면')).toBeVisible();
+  await expect(page.getByText('가정에 따른 첫 월말 현금 부족')).toBeVisible();
 
   // 예시 공간은 **설계상 저장하지 않는다** — 새로고침 지속은 아래 개인 공간 시험이 맡는다.
   expect(errors).toEqual([]);
@@ -313,5 +313,5 @@ test('개인 공간에서는 선택과 진도가 새로고침 뒤에도 남는�
   await go(page, '시뮬레이션');
   await expect(page.locator('.sim-options button.active').first()).toHaveText(/줄인다/);
   await go(page, '홈');
-  await expect(page.getByText('지금 고른 대로면').first()).toBeVisible();
+  await expect(page.locator('.home-figure')).toContainText('월말 잔액 유지');
 });

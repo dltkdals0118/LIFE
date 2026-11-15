@@ -12,14 +12,7 @@ import {projectCash, picksOf, defaultPicks, today, won, type Sim, type Workspace
 
 const VB = {w: 1200, h: 560};
 
-function daysUntilMonth(ym: string | null) {
-  if (!ym) return null;
-  const first = new Date(`${ym}-01T00:00:00Z`).getTime();
-  const now = new Date(`${today()}T00:00:00Z`).getTime();
-  return Math.max(0, Math.round((first - now) / 86400000));
-}
-
-export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journal') => void}) {
+export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journal' | 'planning') => void}) {
   const sim = s.sim as Sim | null;
   const box = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({x: 0, y: 0});
@@ -48,11 +41,11 @@ export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journa
       <section className="home home-bare">
         <Scene tilt={tilt} boxRef={box} drop={null} rise={null} months={[]} />
         <div className="home-copy">
-          <p className="home-lead">숫자가 아직 없어요.</p>
-          <h1 className="home-figure home-figure-quiet">기다리는 중</h1>
-          <p className="home-sub">기록이 들어오면 여기에 길이 그려져요.</p>
+          <p className="home-lead">현재 상황부터 입력해 주세요.</p>
+          <h1 className="home-figure home-figure-quiet">첫 계획 시작</h1>
+          <p className="home-sub">기준값을 입력하고 비교할 선택과 이번 주 행동을 정해요.</p>
           <div className="home-actions">
-            <button className="primary" onClick={() => onGo('journal')}>오늘 일기 쓰기</button>
+            <button className="primary" onClick={() => onGo('planning')}>현재 상황 입력하기</button>
           </div>
         </div>
       </section>
@@ -64,7 +57,7 @@ export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journa
   const mine = projectCash(sim, picks);
   const plain = projectCash(sim, defaultPicks(sim));
   const changed = sim.levers.some(l => picks[l.id] !== defaultPicks(sim)[l.id]);
-  const days = daysUntilMonth(mine.zeroMonth);
+
   const months = mine.rows.map((r, i) => ({month: r.month, drop: plain.rows[i].cash, rise: r.cash}));
 
   return (
@@ -72,28 +65,30 @@ export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journa
       <Scene tilt={tilt} boxRef={box} drop={months.map(m => m.drop)} rise={months.map(m => m.rise)}
              months={months.map(m => m.month)} />
       <div className="home-copy">
-        {days === null ? (
+        {mine.zeroMonth === null ? (
           <>
             <p className="home-lead">{changed ? '지금 고른 대로면' : '지금 흐름이면'}</p>
-            <h1 className="home-figure">버틴다</h1>
+            <h1 className="home-figure">월말 잔액 유지</h1>
             <p className="home-sub">
-              {changed ? '지금 고른 대로면 6달 안에 바닥나지 않아요.' : '지금 흐름대로도 6달 안에 바닥나지 않아요.'}
+              {sim.months}개월 계산에서 월말 잔액이 음수가 되지 않아요. 월중 부족은 별도 확인이 필요해요.
             </p>
           </>
         ) : (
           <>
-            <p className="home-lead">{changed ? '지금 고른 대로면 바닥나기까지' : '아무것도 안 바꾸면 바닥나기까지'}</p>
-            <h1 className="home-figure"><b>{days}</b><span>일</span></h1>
-            <p className="home-sub">{mine.zeroMonth}. {changed ? '더 바꾸면 더 달라져요.' : '바꾸면 달라져요.'}</p>
+            <p className="home-lead">가정에 따른 첫 월말 현금 부족</p>
+            <h1 className="home-figure"><b>{mine.zeroMonth}</b></h1>
+            <p className="home-sub">월 단위 추정이며 정확한 소진일은 계산하지 않아요.</p>
           </>
         )}
         <dl className="home-facts">
-          <div><dt>가진 돈</dt><dd>{won(sim.cash)}</dd></div>
-          <div><dt>매달</dt><dd className={sim.netMonthly < 0 ? 'minus' : ''}>{won(sim.netMonthly)}</dd></div>
-          <div><dt>오늘 남는 시간</dt>
+          <div><dt>기준 현금 · {sim.asOf}</dt><dd>{won(sim.cash)}</dd></div>
+          <div><dt>변경 전 월수지</dt><dd className={sim.netMonthly < 0 ? 'minus' : ''}>{won(sim.netMonthly)}</dd></div>
+          <div><dt>마지막 달 하루 여유</dt>
             <dd className={(mine.freeHours ?? 1) < 0 ? 'minus' : ''}>{mine.freeHours ?? '—'}시간</dd></div>
         </dl>
+        <p className="small-note">가상 선택은 실행 기록이 아니에요. {mine.timeBlocked ? '시간이 부족한 달이 있어 조합을 수정해야 해요.' : '채택한 계획은 실행과 검토에서 확인하세요.'}</p>
         <div className="home-actions">
+          <button className="secondary" onClick={() => onGo('planning')}>실행과 검토</button>
           <button className="primary" onClick={() => onGo('sim')}>{changed ? '길 더 바꾸기' : '길 바꿔 보기'}</button>
           <button className="ghost" onClick={() => onGo('journal')}>
             {wrote ? '오늘 일기 고치기' : '오늘 일기 쓰기'}

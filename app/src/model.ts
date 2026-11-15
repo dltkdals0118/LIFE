@@ -27,7 +27,7 @@ export const reviewSchema = z.object({id,date,win:z.string().max(4000),obstacle:
 // 기록->퀘스트->보상은 트래커다. 시뮬레이션이 되려면 **시간이 앞으로 가고, 고른 것에 따라 결과가 갈리고,
 // 그걸 직접 돌려볼 수 있어야** 한다. 그래서 레버를 앱에 통째로 싣고 투영을 화면에서 계산한다.
 export const leverSchema = z.object({
- id, name:label, starts:z.string().regex(/^\d{4}-\d{2}$/), basis:z.string().max(2000).default(''),
+ id, name:label, starts:z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/), basis:z.string().max(2000).default(''),
  group:z.string().max(40).default(''),
  options:z.array(z.object({key:z.string().max(4),label:label,delta:z.number().finite(),
    hours:z.number().finite().default(0),   // 남는 시간이 하루 몇 시간 느는가 (쓰면 음수)
@@ -35,7 +35,7 @@ export const leverSchema = z.object({
 });
 export const simSchema = z.object({
  asOf:date, cash:z.number().finite(), netMonthly:z.number().finite(),
- startMonth:z.string().regex(/^\d{4}-\d{2}$/), months:z.number().int().min(1).max(60),
+ startMonth:z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/), months:z.number().int().min(1).max(60),
  flowBasis:z.string().max(1000).default(''), incomeNow:z.number().finite().nullable().default(null),
  baseFreeHours:z.number().finite().nullable().default(null),   // FACT-0097 하루 남는 시간
  groups:z.array(z.object({key:z.string().max(40),name:label,note:z.string().max(300).default('')})).max(8).default([]),
@@ -58,16 +58,19 @@ export function projectCash(sim:Sim,picks:Record<string,string>){
   const flow=sim.netMonthly+gain;cash+=flow;
   rows.push({month,gain,flow,cash});
  }
- // 시간은 달마다 쌓이지 않는다 — 고른 조합의 '하루 남는 시간'이 하나 나올 뿐이다.
- let hourGain=0;
- for(const lv of sim.levers){
+ // 시간은 해당 월에 시작한 선택만 적용한다. 월별 제약도 함께 검사한다.
+ const timeAt=(month:string)=>sim.levers.reduce((n,lv)=>{
   const o=lv.options.find(x=>x.key===(picks[lv.id]??neutralKey(lv)));
-  if(o)hourGain+=o.hours??0;
- }
+  return n+(o&&month>=lv.starts?o.hours:0);
+ },0);
+ const hourGain=timeAt(rows[rows.length-1].month);
+ const timeRows=rows.map(r=>({month:r.month,freeHours:sim.baseFreeHours===null?null:sim.baseFreeHours+timeAt(r.month)}));
+ const timeBlocked=timeRows.some(r=>r.freeHours!==null&&r.freeHours<0);
+
  const zero=rows.find(r=>r.cash<0);
  const lastGain=rows[rows.length-1].gain;
  const base=sim.baseFreeHours??null;
- return {rows,endCash:rows[rows.length-1].cash,zeroMonth:zero?zero.month:null,
+ return {rows,timeRows,timeBlocked,endCash:rows[rows.length-1].cash,zeroMonth:zero?zero.month:null,
   monthlyFlow:sim.netMonthly+lastGain,
   needPerMonth:Math.max(0,-(sim.netMonthly+lastGain)),
   hourGain,freeHours:base===null?null:Math.round((base+hourGain)*10)/10};   // 수지를 0 으로 만들려면 얼마가 더 필요한가
@@ -146,8 +149,14 @@ export const curriculumSchema = z.object({
 });
 export type Curriculum=z.infer<typeof curriculumSchema>;
 
-export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),simPicks:z.record(z.string(),z.string()).default({}),curriculum:curriculumSchema.nullable().default(null),curriculumDone:z.array(z.number().int()).max(200).default([]),journal:z.array(journalSchema).max(5000).default([]),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
- for(const key of ['domains','quests','plans','observations','rewards','reviews','events'] as const) if(new Set(s[key].map(x=>x.id)).size!==s[key].length)ctx.addIssue({code:'custom',message:`${key}: 중복 ID`});
+export const decisionSchema=z.object({id,title:label,goal:label,reviewDate:date,createdAt:z.string(),
+ modelVersion:z.literal('monthly-v2'),sim:simSchema,picks:z.record(z.string(),z.string()),
+ actionId:id,assumptions:z.string().max(4000),status:z.enum(['active','reviewed']).default('active'),
+ review:z.object({at:date,actualCash:z.number().finite().nullable(),actualMonth:z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).nullable(),
+ obstacle:z.enum(['none','time','method','waiting','priority','condition','other']),note:z.string().max(4000),next:label}).nullable().default(null)});
+export type Decision=z.infer<typeof decisionSchema>;
+export const workspaceSchema = z.object({schemaVersion:z.literal(1),decisions:z.array(decisionSchema).max(500).default([]),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),simPicks:z.record(z.string(),z.string()).default({}),curriculum:curriculumSchema.nullable().default(null),curriculumDone:z.array(z.number().int()).max(200).default([]),journal:z.array(journalSchema).max(5000).default([]),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
+ for(const key of ['domains','quests','plans','observations','rewards','reviews','events','decisions'] as const) if(new Set(s[key].map(x=>x.id)).size!==s[key].length)ctx.addIssue({code:'custom',message:`${key}: 중복 ID`});
  const domains=new Set(s.domains.map(x=>x.id)),plans=new Set(s.plans.map(x=>x.id));
  for(const q of s.quests)if(!domains.has(q.domainId)||(q.planId&&!plans.has(q.planId)))ctx.addIssue({code:'custom',message:'퀘스트 연결이 올바르지 않습니다.'});
  for(const p of s.plans)if(!domains.has(p.domainId)||new Set(p.branches.map(x=>x.key)).size!==3)ctx.addIssue({code:'custom',message:'플랜의 분야 또는 ABC 구성이 올바르지 않습니다.'});
@@ -251,7 +260,7 @@ export function acceptSubQuest(s:Workspace,date=today()){
 
 // 충돌 화면이 퀘스트·기록 수만 보여줘서, **플랜 7→1 과 보상 10→0 이 사라지는 선택을 구분할 수 없었다**
 // (2026-11-05 실제로 그렇게 줄었다). 사라지는 쪽을 숫자로 대 준다.
-export const COUNTED=[['quests','퀘스트'],['plans','플랜'],['observations','기록'],['rewards','보상'],['reviews','회고']] as const;
+export const COUNTED=[['decisions','결정'],['journal','일기'],['quests','퀘스트'],['plans','플랜'],['observations','기록'],['rewards','보상'],['reviews','회고']] as const;
 export function compareWorkspaces(mine:Workspace,theirs:Workspace){
  const rows=COUNTED.map(([key,label])=>({key,label,mine:mine[key].length,theirs:theirs[key].length,
   diff:mine[key].length-theirs[key].length}));
@@ -309,21 +318,7 @@ export function nextSuggestion(s:Workspace,id:string):{text:string;switchTo?:Pla
  const q=s.quests.find(x=>x.id===id);
  if(!q||q.status!=='done'||!q.outcome)return null;
  const plan=q.planId?s.plans.find(p=>p.id===q.planId):undefined;
- // 같은 플랜에서 최근 결과 셋을 본다 — 한 번의 실패로 경로를 흔들지 않는다.
- if(plan){
-  const recent=s.quests.filter(x=>x.planId===plan.id&&x.status==='done'&&x.outcome)
-    .sort((a,b)=>(b.completedAt??'').localeCompare(a.completedAt??'')).slice(0,3);
-  const weak=recent.filter(x=>x.outcome!=='full').length;
-  if(recent.length>=2&&weak>=2&&plan.active!=='C'){
-   const to=(plan.active==='A'?'B':'C') as Plan['active'];
-   const name=plan.branches.find(b=>b.key===to)?.title??to;
-   return {text:`최근 ${recent.length}번 중 ${weak}번이 끝까지 가지 못했어요. ${plan.title} 을 ${to} 경로(${name})로 바꾸면 더 가벼워집니다.`,switchTo:to,planId:plan.id};
-  }
-  if(recent.length>=3&&weak===0&&plan.active!=='A'){
-   const name=plan.branches.find(b=>b.key==='A')?.title??'A';
-   return {text:`최근 3번을 끝까지 해냈어요. ${plan.title} 을 A 경로(${name})로 올려볼 만합니다.`,switchTo:'A',planId:plan.id};
-  }
- }
+ if(plan&&q.outcome!=='full')return {text:'어디서 막혔는지 기록하고 시간·방법·외부 대기 중 무엇을 바꿀지 검토해 보세요. A/B/C는 난이도 순서가 아닙니다.'};
  if(q.outcome==='partial')return {text:'절반까지 왔어요. 다음엔 완료 기준을 더 작게 잡으면 끝까지 갈 수 있어요.'};
  if(q.outcome==='missed')return {text:'오늘은 어려웠네요. 기준을 낮춰 다시 세우거나, 하루 미뤄도 괜찮아요.'};
  return null;
@@ -350,7 +345,7 @@ export function evaluateTriggers(s:Workspace,p:Plan){
   }else if(r.when==='idle'){
    const last=done[0]?.completedAt;
    const days=last?Math.floor((Date.now()-Date.parse(last))/86400000):null;
-   if(days===null||days>=r.days)
+   if(days!==null&&days>=r.days)
     out.push({key:b.key,to:r.to,reason:last?`${days}일 동안 완료가 없었어요`:'아직 완료한 퀘스트가 없어요'});
   }else{
    const o=latest(s,r.kind);
@@ -403,7 +398,7 @@ export function ruleText(r:TriggerRule){
 }
 export function assessBranch(s:Workspace,p:Plan,key:Plan['active']){const b=p.branches.find(x=>x.key===key)!;const cash=latest(s,'cash'),hours=latest(s,'hours');const cost=b.cost+(key!==p.active?b.switchCost:0);const reasons:string[]=[];if(cash===null)reasons.push('현금 기록 필요');else if(cash.value<cost)reasons.push(`필요 자금 ${won(cost-cash.value)} 부족`);if(hours===null)reasons.push('주간 가용시간 기록 필요');else if(hours.value<b.hours)reasons.push(`주 ${b.hours-hours.value}시간 부족`);const unknown=cash===null||hours===null;return {cost,cash,hours,reasons,state:reasons.length?(unknown&&!reasons.some(x=>x.includes('부족'))?'unknown':'blocked'):'ready'};}
 export function parseBackup(raw:unknown){return workspaceSchema.parse(raw);}
-export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,simPicks:{},curriculum:null,curriculumDone:[],journal:[],events:[]};}
+export function createEmpty():Workspace{return {schemaVersion:1,decisions:[],name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,simPicks:{},curriculum:null,curriculumDone:[],journal:[],events:[]};}
 export function createDemo():Workspace{
  const s=createEmpty();s.name='나의 작은 우주';s.chapter='조금 더 단단한 일상 만들기';s.rewardBudget=50000;
  s.plans=[{id:'plan-1',title:'생활의 여유 만들기',goal:'이번 달 정기 지출 3개 점검하기',domainId:'finance',active:'A',branches:[{key:'A',title:'작은 것부터 차근차근',cost:0,hours:2,duration:30,result:'정기 지출 3개 확인',trigger:'2주 동안 진행이 없다면 B 검토',rule:{when:'idle',days:14,to:'B'},switchCost:0},{key:'B',title:'한 가지에 집중하기',cost:0,hours:1,duration:30,result:'가장 큰 지출 1개 확인',trigger:'주간 여유가 1시간 미만이면 C 검토',rule:{when:'observation',kind:'hours',op:'lt',value:1,to:'C'},switchCost:0},{key:'C',title:'기록만 이어가기',cost:0,hours:0.25,duration:30,result:'월말 잔액 1회 기록',trigger:'세 번 연달아 해내면 다시 올라간다',rule:{when:'streak',full:3,to:'A'},switchCost:0}]}];
