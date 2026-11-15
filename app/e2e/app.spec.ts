@@ -160,6 +160,11 @@ test('desktop and mobile screenshots', async ({page}, info) => {
   await page.getByRole('heading', {name: /앞으로 \d+달/}).waitFor();
   await page.waitForTimeout(400);
   await page.screenshot({path: `test-results/${info.project.name}-sim.png`, fullPage: true});
+  if (await page.locator('.curri').count()) {
+    await page.locator('.curri').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await page.screenshot({path: `test-results/${info.project.name}-curri.png`});
+  }
   await go(page, '일기');
   await page.getByRole('heading', {name: '일기', exact: true}).waitFor();
   await page.screenshot({path: `test-results/${info.project.name}-journal.png`, fullPage: true});
@@ -229,4 +234,81 @@ test('메인 — 갈림길이 데이터로 그려지고 두 길로 이어진다'
   await page.getByRole('button', {name: /오늘 일기/}).click();
   await expect(page.getByRole('heading', {name: '일기', exact: true})).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+// 2026-11-15 지적: "시뮬레이션 값에 따라 홈의 날짜가 안 바뀌어."
+// 고른 조합이 화면 상태로만 있어서 다른 화면으로 가면 사라졌다. 이제 기록으로 남는다.
+test('고른 조합이 홈까지 따라간다', async ({page}) => {
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto('./');
+  await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
+
+  const figure = page.locator('.home-figure');
+  const before = await figure.innerText();
+  await expect(page.getByText('아무것도 안 바꾸면 바닥나기까지')).toBeVisible();
+
+  // 시뮬레이션에서 하나 바꾸고
+  await go(page, '시뮬레이션');
+  await page.locator('.sim-lever').first().getByRole('button', {name: /거의 안 한다/}).click();
+
+  // 홈으로 돌아오면 숫자와 문구가 바뀌어 있다
+  await go(page, '홈');
+  await expect(figure).not.toHaveText(before);
+  await expect(page.getByText('지금 고른 대로면')).toBeVisible();
+
+  // 예시 공간은 **설계상 저장하지 않는다** — 새로고침 지속은 아래 개인 공간 시험이 맡는다.
+  expect(errors).toEqual([]);
+});
+
+// 커리큘럼 — 시뮬레이션 아래. 체크가 남아야 진도다.
+test('커리큘럼 — 주차를 체크하면 보인다', async ({page}) => {
+  await page.goto('./');
+  await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
+  await go(page, '시뮬레이션');
+  const curri = page.locator('.curri');
+  await expect(curri).toBeVisible();
+  await expect(curri.locator('.curri-week')).toHaveCount(3);
+  await expect(curri.locator('.curri-count')).toHaveText('1/3주');
+  await curri.locator('.curri-week').nth(1).locator('input').check();
+  await expect(curri.locator('.curri-count')).toHaveText('2/3주');
+});
+
+// 고른 조합과 진도는 **기록**이다 — 새로고침해도 남아야 한다.
+// 예시 공간은 저장하지 않으므로 개인 공간에 자료를 넣고 잰다.
+test('개인 공간에서는 선택과 진도가 새로고침 뒤에도 남는다', async ({page}) => {
+  await page.goto('./');
+  await page.getByRole('button', {name: '이 기기에만 저장하고 시작하기'}).click();
+  if (await page.locator('.mobile-nav').isVisible()) await page.getByRole('button', {name: '메뉴 열기'}).click();
+  await page.getByRole('button', {name: '설정과 동기화'}).first().click();
+  const file = {
+    schemaVersion: 1, name: '지속 시험', chapter: '시험',
+    domains: [{id: 'finance', name: '재정 운영', color: 'sage', icon: 'wallet'}],
+    quests: [], plans: [], observations: [], rewards: [], reviews: [], rewardBudget: null,
+    journal: [], events: [], simPicks: {}, curriculumDone: [],
+    sim: {asOf: '2026-11-15', cash: 3000000, netMonthly: -900000, startMonth: '2026-12', months: 6,
+      flowBasis: '시험', incomeNow: 2600000, baseFreeHours: 2, groups: [],
+      levers: [{id: 'a', name: '레버', group: '', starts: '2026-12', basis: '',
+        options: [{key: 'A', label: '줄인다', delta: 400000, hours: 0, requires: ['무언가 한다']},
+                  {key: 'C', label: '그대로', delta: 0, hours: 0, requires: []}]}]},
+    curriculum: {title: '시험 커리큘럼', subtitle: '', areas: [], phases: [],
+      weeks: [{n: 1, phase: '', from: '2026-11-17', to: '2026-11-23', areas: [],
+               title: '첫 주', what: '', done_when: ''}]},
+  };
+  await page.setInputFiles('input[type=file]', {name: 'd.json', mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(file), 'utf8')});
+  await page.getByRole('dialog').getByRole('button', {name: '이 기록으로 교체'}).click();
+
+  await go(page, '시뮬레이션');
+  await page.locator('.sim-lever').first().getByRole('button', {name: '줄인다'}).click();
+  await page.locator('.curri-week').first().locator('input').check();
+  await expect(page.locator('.curri-count')).toHaveText('1/1주');
+
+  await page.waitForTimeout(500);
+  await page.reload();
+  await go(page, '시뮬레이션');
+  await expect(page.locator('.curri-count')).toHaveText('1/1주');
+  await expect(page.locator('.sim-options button.active').first()).toHaveText(/줄인다/);
+  await go(page, '홈');
+  await expect(page.getByText('지금 고른 대로면').first()).toBeVisible();
 });

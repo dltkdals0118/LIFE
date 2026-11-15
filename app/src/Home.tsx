@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {projectCash, defaultPicks, monthAdd, today, won, type Sim, type Workspace} from './model';
+import {projectCash, picksOf, defaultPicks, today, won, type Sim, type Workspace} from './model';
 
 /** 메인 화면 — 갈림길에 선 사람.
  *
@@ -58,13 +58,13 @@ export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journa
     );
   }
 
-  const neutral = projectCash(sim, defaultPicks(sim));
-  const best = projectCash(sim, Object.fromEntries(
-    sim.levers.map(l => [l.id, l.options.reduce((a, b) => (b.delta + b.hours * 60000) > (a.delta + a.hours * 60000) ? b : a).key])));
-  const days = daysUntilMonth(neutral.zeroMonth);
-  const months = neutral.rows.map((r, i) => ({
-    month: r.month, drop: r.cash, rise: best.rows[i].cash,
-  }));
+  // 지금 고른 조합이 '내 길'이다. 시뮬레이션에서 바꾸면 여기 날짜도 따라 바뀐다.
+  const picks = picksOf(s);
+  const mine = projectCash(sim, picks);
+  const plain = projectCash(sim, defaultPicks(sim));
+  const changed = sim.levers.some(l => picks[l.id] !== defaultPicks(sim)[l.id]);
+  const days = daysUntilMonth(mine.zeroMonth);
+  const months = mine.rows.map((r, i) => ({month: r.month, drop: plain.rows[i].cash, rise: r.cash}));
 
   return (
     <section className="home">
@@ -73,24 +73,24 @@ export default function Home({s, onGo}: {s: Workspace; onGo: (v: 'sim' | 'journa
       <div className="home-copy">
         {days === null ? (
           <>
-            <p className="home-lead">지금 흐름이면</p>
+            <p className="home-lead">{changed ? '지금 고른 대로면' : '지금 흐름이면'}</p>
             <h1 className="home-figure">버틴다</h1>
-            <p className="home-sub">6달 안에 현금이 0 아래로 가지 않아요.</p>
+            <p className="home-sub">{changed ? '지금 고른 대로면 6달 안에 바닥나지 않아요.' : '지금 흐름대로도 6달 안에 바닥나지 않아요.'}</p>
           </>
         ) : (
           <>
-            <p className="home-lead">지금 흐름이면 현금이 바닥나기까지</p>
+            <p className="home-lead">{changed ? '지금 고른 대로면 바닥나기까지' : '아무것도 안 바꾸면 바닥나기까지'}</p>
             <h1 className="home-figure"><b>{days}</b><span>일</span></h1>
-            <p className="home-sub">{neutral.zeroMonth}. 바꾸면 달라져요.</p>
+            <p className="home-sub">{mine.zeroMonth}. {changed ? '더 바꾸면 더 달라져요.' : '바꾸면 달라져요.'}</p>
           </>
         )}
         <dl className="home-facts">
           <div><dt>가진 돈</dt><dd>{won(sim.cash)}</dd></div>
           <div><dt>매달</dt><dd className={sim.netMonthly < 0 ? 'minus' : ''}>{won(sim.netMonthly)}</dd></div>
-          <div><dt>오늘 남는 시간</dt><dd>{neutral.freeHours ?? '—'}시간</dd></div>
+          <div><dt>오늘 남는 시간</dt><dd className={(mine.freeHours ?? 1) < 0 ? 'minus' : ''}>{mine.freeHours ?? '—'}시간</dd></div>
         </dl>
         <div className="home-actions">
-          <button className="primary" onClick={() => onGo('sim')}>길 바꿔 보기</button>
+          <button className="primary" onClick={() => onGo('sim')}>{changed ? '길 더 바꾸기' : '길 바꿔 보기'}</button>
           <button className="ghost" onClick={() => onGo('journal')}>
             {wrote ? '오늘 일기 고치기' : '오늘 일기 쓰기'}
           </button>
@@ -143,6 +143,15 @@ function Scene({tilt, boxRef, drop, rise, months}: {
           <radialGradient id="glow" cx=".5" cy=".5" r=".5">
             <stop offset="0" stopColor="#5ee89a" stopOpacity=".3"/><stop offset="1" stopColor="#5ee89a" stopOpacity="0"/>
           </radialGradient>
+          <radialGradient id="shadowG" cx=".5" cy=".5" r=".5">
+            <stop offset="0" stopColor="#020504" stopOpacity=".72"/><stop offset="1" stopColor="#020504" stopOpacity="0"/>
+          </radialGradient>
+          <linearGradient id="limb" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#6ab98c"/><stop offset="1" stopColor="#285c43"/>
+          </linearGradient>
+          <linearGradient id="bounce" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stopColor="#5ee89a" stopOpacity=".5"/><stop offset="1" stopColor="#5ee89a" stopOpacity="0"/>
+          </linearGradient>
         </defs>
 
         <rect x={-400} y={-200} width={w + 800} height={h + 400} fill="url(#sky)"/>
@@ -177,20 +186,43 @@ function Scene({tilt, boxRef, drop, rise, months}: {
         {/* 가까운 평면 — 캐릭터. 빛은 길 쪽에서 온다 */}
         <g style={{transform: p(40)}}>
           <ellipse cx={left + 150} cy={groundY - 52} rx="190" ry="140" fill="url(#glow)"/>
-          <ellipse className="home-shadow" cx={left} cy={groundY + 12} rx="62" ry="14"/>
+          <ellipse cx={left + 6} cy={groundY + 13} rx="76" ry="18" fill="url(#shadowG)"/>
           <g className="home-figure-art">
-            <rect x={left - 31} y={groundY - 110} width="62" height="86" rx="29" fill="url(#body)"/>
-            <path d={`M${left + 24},${groundY - 104} q11,40 -3,76`} stroke="#e3bd72" strokeWidth="3.4"
-                  strokeLinecap="round" fill="none" opacity=".75"/>
-            <rect x={left - 21} y={groundY - 28} width="16" height="34" rx="8" fill="#2f6a4d"/>
-            <rect x={left + 5} y={groundY - 28} width="16" height="34" rx="8" fill="#357756"/>
-            <circle cx={left} cy={groundY - 138} r="39" fill="url(#head)"/>
-            <path d={`M${left + 28},${groundY - 160} a39,39 0 0 1 3,43`} stroke="#e3bd72" strokeWidth="3.4"
-                  strokeLinecap="round" fill="none" opacity=".8"/>
-            <circle cx={left - 13} cy={groundY - 141} r="4" fill="#17352a"/>
-            <circle cx={left + 11} cy={groundY - 143} r="4" fill="#17352a"/>
-            <path d={`M${left - 7},${groundY - 128} q8,6 16,-2`} stroke="#17352a" strokeWidth="2.6"
-                  strokeLinecap="round" fill="none"/>
+            <g className="home-breathe">
+              {/* 뒤에 남은 발 */}
+              <path d={`M${left - 14},${groundY - 44} q-10,22 -14,40`} stroke="#24533d" strokeWidth="15"
+                    strokeLinecap="round" fill="none"/>
+              <ellipse cx={left - 30} cy={groundY - 2} rx="14" ry="6.5" fill="#1f4a36"/>
+              {/* 내딛는 발 */}
+              <path d={`M${left + 10},${groundY - 44} q12,20 20,36`} stroke="url(#limb)" strokeWidth="15"
+                    strokeLinecap="round" fill="none"/>
+              <ellipse cx={left + 33} cy={groundY + 1} rx="15" ry="6.5" fill="#35775a"/>
+              {/* 뒤로 젖힌 팔 */}
+              <path d={`M${left - 26},${groundY - 96} q-22,20 -20,42`} stroke="#2a6047" strokeWidth="12.5"
+                    strokeLinecap="round" fill="none"/>
+              {/* 몸 — 머리와 겹쳐 이어진다 */}
+              <rect x={left - 32} y={groundY - 118} width="64" height="92" rx="31" fill="url(#body)"/>
+              <path d={`M${left - 30},${groundY - 52} a31,31 0 0 0 62,0 v-8 a31,31 0 0 1 -62,0 z`}
+                    fill="url(#bounce)" opacity=".5"/>
+              <path d={`M${left + 25},${groundY - 112} q13,44 -3,84`} stroke="#e3bd72" strokeWidth="3.6"
+                    strokeLinecap="round" fill="none" opacity=".8"/>
+              {/* 앞으로 뻗은 팔 */}
+              <path d={`M${left + 26},${groundY - 98} q24,14 27,36`} stroke="url(#limb)" strokeWidth="12.5"
+                    strokeLinecap="round" fill="none"/>
+              {/* 머리 — 몸 위에 12px 겹친다 */}
+              <circle cx={left + 3} cy={groundY - 144} r="38" fill="url(#head)"/>
+              <path d={`M${left + 31},${groundY - 166} a38,38 0 0 1 3,43`} stroke="#e3bd72" strokeWidth="3.6"
+                    strokeLinecap="round" fill="none" opacity=".85"/>
+              <ellipse cx={left - 11} cy={groundY - 157} rx="11" ry="7.5" fill="#ffffff" opacity=".26"/>
+              <ellipse className="home-blink" cx={left - 8} cy={groundY - 146} rx="4.2" ry="4.8" fill="#17352a"/>
+              <ellipse className="home-blink" cx={left + 16} cy={groundY - 147} rx="4.2" ry="4.8" fill="#17352a"/>
+              <circle cx={left - 6.6} cy={groundY - 147.8} r="1.4" fill="#eafff2"/>
+              <circle cx={left + 17.4} cy={groundY - 148.8} r="1.4" fill="#eafff2"/>
+              <path d={`M${left - 2},${groundY - 132} q8,7 16,-2`} stroke="#17352a" strokeWidth="2.8"
+                    strokeLinecap="round" fill="none"/>
+              <ellipse cx={left - 22} cy={groundY - 135} rx="6" ry="4" fill="#e78da0" opacity=".28"/>
+              <ellipse cx={left + 28} cy={groundY - 136} rx="6" ry="4" fill="#e78da0" opacity=".28"/>
+            </g>
           </g>
         </g>
       </svg>

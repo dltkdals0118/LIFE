@@ -747,3 +747,45 @@ input,textarea,select{background-color:#0e1713}
   .home-scene g{transition:none}
   .home-stop,.home-figure-art{animation:none;opacity:1}
 }
+
+/* 커리큘럼 — 시뮬레이션 아래. 능력을 올리는 것도 손잡이다 (2026-11-15) */
+.curri .panel-heading{align-items:flex-start}
+.curri-count{font-size:11px;font-weight:700;color:var(--neon);background:var(--sage-bg);
+  border:1px solid #1c3a28;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.curri-bar{height:3px;margin:0 18px 4px;background:#14201a;border-radius:2px;overflow:hidden}
+.curri-bar i{display:block;height:100%;background:var(--neon-dim);border-radius:2px;transition:width .4s ease-out}
+.curri-phase{border-top:1px solid var(--line);margin-top:14px}
+.curri-phase-head{padding:14px 18px 6px}
+.curri-phase-head h3{margin:0;font-size:12.5px;font-weight:800;letter-spacing:.05em;color:var(--neon)}
+.curri-phase-head p{margin:3px 0 0;font-size:11px;color:var(--text-3);line-height:1.6;max-width:62ch}
+.curri-week{display:grid;grid-template-columns:20px 40px 1fr auto;gap:11px;align-items:start;
+  padding:11px 18px;border-top:1px solid var(--line-soft);cursor:pointer;transition:background .15s}
+.curri-week:hover{background:#0c1410}
+.curri-week input{margin-top:3px;width:16px;height:16px;accent-color:#5ee89a}
+.curri-n{font-size:11px;font-weight:700;color:var(--text-3);padding-top:2px;font-variant-numeric:tabular-nums}
+.curri-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.curri-body strong{font-size:13.5px;color:var(--text);font-weight:650}
+.curri-body em{font-style:normal;font-size:12px;color:var(--text-2);line-height:1.65}
+.curri-body small{font-size:10.5px;color:var(--text-3);line-height:1.6}
+.curri-areas{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.curri-areas i{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.02em;
+  color:var(--teal);background:var(--teal-bg);border:1px solid #16342c;border-radius:5px;padding:2px 6px}
+.curri-when{font-size:10px;color:var(--text-3);white-space:nowrap;padding-top:3px;font-variant-numeric:tabular-nums}
+.curri-week.is-now{background:#0d1a14;box-shadow:inset 2px 0 0 var(--neon)}
+.curri-week.is-done .curri-body strong{color:var(--text-3);text-decoration:line-through}
+.curri-week.is-done .curri-body em,.curri-week.is-done .curri-body small{color:#4e5b54}
+.curri .small-note{padding:14px 18px 16px;border-top:1px solid var(--line);margin:0}
+@media (max-width:620px){
+  .curri-week{grid-template-columns:18px 1fr;gap:9px;padding:12px 15px}
+  .curri-n{grid-column:2;font-size:10px}
+  .curri-body{grid-column:2}
+  .curri-when{grid-column:2;padding-top:4px}
+}
+
+/* 캐릭터 — 숨쉬기와 눈 깜빡임. 둘 다 아주 작게, 살아 있다는 신호만 (2026-11-15) */
+.home-breathe{animation:home-breathe 4.2s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes home-breathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-2px) scaleY(1.012)}}
+.home-blink{animation:home-blink 6.4s infinite}
+@keyframes home-blink{0%,95%,100%{transform:scaleY(1)}97%{transform:scaleY(.12)}}
+.home-blink{transform-box:fill-box;transform-origin:50% 50%}
+@media (prefers-reduced-motion:reduce){.home-breathe,.home-blink{animation:none}}

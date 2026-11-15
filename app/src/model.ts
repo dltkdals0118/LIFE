@@ -86,6 +86,19 @@ export function simRequires(sim:Sim,picks:Record<string,string>){
 export const neutralKey=(l:Lever)=>(l.options.find(o=>o.delta===0&&(o.hours??0)===0)
  ??l.options.find(o=>o.delta===0)
  ??l.options.reduce((a,b)=>Math.abs(b.delta)<Math.abs(a.delta)?b:a)).key;
+/** 고른 조합을 워크스페이스에 적는다. 화면 상태로 두면 다른 화면으로 가는 순간 사라지고,
+ *  홈의 숫자가 시뮬레이션과 어긋난다(2026-11-15 지적). */
+export function setPicks(s:Workspace,picks:Record<string,string>){return {...s,simPicks:picks};}
+/** 지금 고른 조합. 비어 있으면 '아무것도 안 바꾼' 상태다. */
+export function picksOf(s:Workspace){
+ const sim=s.sim; if(!sim)return {};
+ const saved=s.simPicks??{};
+ return Object.fromEntries(sim.levers.map(l=>[l.id,saved[l.id]??neutralKey(l)]));
+}
+export const toggleWeek=(s:Workspace,n:number)=>({...s,
+ curriculumDone:(s.curriculumDone??[]).includes(n)
+  ? (s.curriculumDone??[]).filter(x=>x!==n)
+  : [...(s.curriculumDone??[]),n].sort((a,b)=>a-b)});
 export const defaultPicks=(sim:Sim)=>Object.fromEntries(sim.levers.map(l=>[l.id,neutralKey(l)]));
 
 // 일기 — 하루에 하나. 웹에서 쓰고 저장소가 받아간다.
@@ -117,7 +130,20 @@ export function journalStreak(s:Workspace,from=today()){
  return n;
 }
 
-export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),journal:z.array(journalSchema).max(5000).default([]),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
+// 커리큘럼 — **정의는 엔진이, 진도는 웹이** 가진다. 일기와 같은 규칙이다.
+export const curriculumSchema = z.object({
+ title:label, subtitle:z.string().max(300).default(''),
+ areas:z.array(z.object({key:z.string().max(20),name:label})).max(12).default([]),
+ phases:z.array(z.object({key:z.string().max(4),name:label,why:z.string().max(500).default('')})).max(8).default([]),
+ weeks:z.array(z.object({
+   n:z.number().int().min(1).max(120), phase:z.string().max(4).default(''),
+   from:date, to:date, areas:z.array(z.string().max(20)).max(8).default([]),
+   title:label, what:z.string().max(800).default(''), done_when:z.string().max(800).default(''),
+ })).max(120).default([]),
+});
+export type Curriculum=z.infer<typeof curriculumSchema>;
+
+export const workspaceSchema = z.object({schemaVersion:z.literal(1),name:label,chapter:label,domains:z.array(domainSchema).min(1).max(30),quests:z.array(questSchema).max(20000),plans:z.array(planSchema).max(500),observations:z.array(observationSchema).max(30000),rewards:z.array(rewardSchema).max(1000),reviews:z.array(reviewSchema).max(2000),rewardBudget:amount.nullable(),sim:simSchema.nullable().default(null),simPicks:z.record(z.string(),z.string()).default({}),curriculum:curriculumSchema.nullable().default(null),curriculumDone:z.array(z.number().int()).max(200).default([]),journal:z.array(journalSchema).max(5000).default([]),events:z.array(z.object({id,at:z.string(),text:z.string().max(1000)})).max(20000)}).superRefine((s,ctx)=>{
  for(const key of ['domains','quests','plans','observations','rewards','reviews','events'] as const) if(new Set(s[key].map(x=>x.id)).size!==s[key].length)ctx.addIssue({code:'custom',message:`${key}: 중복 ID`});
  const domains=new Set(s.domains.map(x=>x.id)),plans=new Set(s.plans.map(x=>x.id));
  for(const q of s.quests)if(!domains.has(q.domainId)||(q.planId&&!plans.has(q.planId)))ctx.addIssue({code:'custom',message:'퀘스트 연결이 올바르지 않습니다.'});
@@ -374,7 +400,7 @@ export function ruleText(r:TriggerRule){
 }
 export function assessBranch(s:Workspace,p:Plan,key:Plan['active']){const b=p.branches.find(x=>x.key===key)!;const cash=latest(s,'cash'),hours=latest(s,'hours');const cost=b.cost+(key!==p.active?b.switchCost:0);const reasons:string[]=[];if(cash===null)reasons.push('현금 기록 필요');else if(cash.value<cost)reasons.push(`필요 자금 ${won(cost-cash.value)} 부족`);if(hours===null)reasons.push('주간 가용시간 기록 필요');else if(hours.value<b.hours)reasons.push(`주 ${b.hours-hours.value}시간 부족`);const unknown=cash===null||hours===null;return {cost,cash,hours,reasons,state:reasons.length?(unknown&&!reasons.some(x=>x.includes('부족'))?'unknown':'blocked'):'ready'};}
 export function parseBackup(raw:unknown){return workspaceSchema.parse(raw);}
-export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,journal:[],events:[]};}
+export function createEmpty():Workspace{return {schemaVersion:1,name:'나의 LIFE',chapter:'나의 속도로, 다음 한 걸음',domains:[{id:'finance',name:'재정 운영',color:'sage',icon:'wallet'},{id:'recovery',name:'회복 습관',color:'teal',icon:'sprout'},{id:'career',name:'일과 성장',color:'blue',icon:'briefcase'},{id:'learning',name:'배움',color:'amber',icon:'book'},{id:'relationships',name:'관계',color:'rose',icon:'heart'},{id:'creative',name:'창작',color:'violet',icon:'sparkles'}],quests:[],plans:[],observations:[],rewards:[],reviews:[],rewardBudget:null,sim:null,simPicks:{},curriculum:null,curriculumDone:[],journal:[],events:[]};}
 export function createDemo():Workspace{
  const s=createEmpty();s.name='나의 작은 우주';s.chapter='조금 더 단단한 일상 만들기';s.rewardBudget=50000;
  s.plans=[{id:'plan-1',title:'생활의 여유 만들기',goal:'이번 달 정기 지출 3개 점검하기',domainId:'finance',active:'A',branches:[{key:'A',title:'작은 것부터 차근차근',cost:0,hours:2,duration:30,result:'정기 지출 3개 확인',trigger:'2주 동안 진행이 없다면 B 검토',rule:{when:'idle',days:14,to:'B'},switchCost:0},{key:'B',title:'한 가지에 집중하기',cost:0,hours:1,duration:30,result:'가장 큰 지출 1개 확인',trigger:'주간 여유가 1시간 미만이면 C 검토',rule:{when:'observation',kind:'hours',op:'lt',value:1,to:'C'},switchCost:0},{key:'C',title:'기록만 이어가기',cost:0,hours:0.25,duration:30,result:'월말 잔액 1회 기록',trigger:'세 번 연달아 해내면 다시 올라간다',rule:{when:'streak',full:3,to:'A'},switchCost:0}]}];
@@ -385,6 +411,19 @@ export function createDemo():Workspace{
   {id:'o1b',kind:'cash',value:3450000,date:back(21),note:'가상 예시'},{id:'o1c',kind:'cash',value:2780000,date:back(44),note:'가상 예시'},{id:'o1d',kind:'cash',value:4100000,date:back(70),note:'가상 예시'},{id:'o2',kind:'hours',value:4,date:today(),note:'가상 예시'},{id:'o3',kind:'sleep',value:7,date:today(),note:'가상 예시'}];
  s.rewards=[{id:'r1',title:'초록빛 첫 걸음',type:'digital',cost:0,requiredXp:100,domainId:'',note:'첫 발자국을 남긴 날의 기록',status:'used',spent:null,usedAt:new Date().toISOString(),reservedAt:null},{id:'r2',title:'나를 위한 영화 한 편',type:'real',cost:15000,requiredXp:550,domainId:'recovery',note:'회복 습관이 자랐을 때, 보고 싶었던 영화 한 편',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r3',title:'느긋한 오후 산책',type:'real',cost:0,requiredXp:300,domainId:'',note:'느긋하게 걷는 시간',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r4',title:'꾸준한 탐험가',type:'digital',cost:0,requiredXp:700,domainId:'',note:'',status:'wish',spent:null,usedAt:null,reservedAt:null}];
  // 예시 공간에도 시뮬레이션을 넣는다 — 가져오기 전에도 '무엇을 돌려보는 것인지' 가 보여야 한다.
+ // 예시 공간에도 커리큘럼을 넣는다 — 가져오기 전에도 '무엇을 쌓는 것인지' 가 보여야 한다.
+ s.curriculum={title:'배우고 싶은 것',subtitle:'하루 1시간 · 예시예요. 내 커리큘럼을 가져오면 바뀝니다.',
+  areas:[{key:'a',name:'기초'},{key:'b',name:'도구'},{key:'c',name:'결과물'}],
+  phases:[{key:'1',name:'재는 법',why:'잘하고 있는지 모르면 늘었는지도 모른다.'},
+          {key:'2',name:'만들기',why:'배운 것은 남는 것으로 바꿔야 쓸 수 있다.'}],
+  weeks:[
+   {n:1,phase:'1',from:back(0),to:back(-6),areas:['a'],title:'기준 정하기',
+    what:'무엇을 잘한다고 할지 먼저 적는다.',done_when:'기준이 문장으로 있다.'},
+   {n:2,phase:'1',from:back(-7),to:back(-13),areas:['a','b'],title:'지금 수준 재기',
+    what:'그 기준으로 지금을 한 번 재 둔다.',done_when:'숫자가 하나 있다.'},
+   {n:3,phase:'2',from:back(-14),to:back(-20),areas:['b','c'],title:'작은 결과물 하나',
+    what:'배운 것으로 남는 것을 하나 만든다.',done_when:'남 앞에 보여줄 수 있다.'}]};
+ s.curriculumDone=[1];
  s.sim={asOf:today(),cash:3000000,netMonthly:-1800000,startMonth:monthAdd(today().slice(0,7),1),months:6,flowBasis:'예시 값이에요. 내 기록을 가져오면 내 숫자와 내 항목으로 바뀝니다.',incomeNow:2600000,baseFreeHours:2,groups:[{key:'day',name:'하루 쓰기',note:'매일 내가 정하는 것. 시간이 움직여요'},{key:'cut',name:'줄이기',note:'지금 당길 수 있는 돈'},{key:'earn',name:'늘리기',note:'금액이 미확인이면 민감도로만 봐요'}],levers:[{id:'play',name:'취미 시간',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 시간과 돈이 같이 움직이는 칸이에요.',options:[{key:'A',label:'거의 안 한다',delta:500000,hours:3,requires:['그 시간에 무엇을 할지 먼저 정한다']},{key:'B',label:'하루 2시간쯤',delta:250000,hours:1.5,requires:['주간 상한을 정한다']},{key:'C',label:'지금 그대로',delta:0,hours:0,requires:[]}]},{id:'sleep',name:'수면 챙기기',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 시간을 쓰는 쪽이지만 낮이 달라져요.',options:[{key:'A',label:'하루 1시간 더',delta:0,hours:-1,requires:['잠드는 시각을 정해 둔다']},{key:'B',label:'하루 30분 더',delta:0,hours:-0.5,requires:['잠드는 시각을 정해 둔다']},{key:'C',label:'지금 그대로',delta:0,hours:0,requires:[]}]},{id:'study',name:'공부',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 매일 조금씩.',options:[{key:'A',label:'하루 1시간',delta:0,hours:-1,requires:['할 시간을 고정한다']},{key:'B',label:'하루 30분',delta:0,hours:-0.5,requires:[]},{key:'C',label:'안 한다',delta:0,hours:0,requires:[]}]},{id:'food',name:'식비·카페',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 보통 가장 큰 칸이에요.',options:[{key:'A',label:'월 80만',delta:800000,hours:0,requires:['주 단위 상한을 정하고 지킨다','배달·카페를 주 N회로 못 박는다']},{key:'B',label:'월 40만',delta:400000,hours:0,requires:['주 단위 상한을 정한다']},{key:'C',label:'그대로',delta:0,hours:0,requires:[]}]},{id:'telecom',name:'통신 요금',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 약정이 변수예요.',options:[{key:'A',label:'월 10만',delta:100000,hours:0,requires:['약정과 위약금을 확인한다']},{key:'B',label:'그대로',delta:0,hours:0,requires:[]}]},{id:'income',name:'수입 늘리기',group:'earn',starts:monthAdd(today().slice(0,7),2),basis:'예시 — 금액이 미확인이면 0 으로 두고 필요한 액수를 역산해요.',options:[{key:'A',label:'만약 +50만이라면',delta:500000,hours:0,requires:['근거가 될 결과물을 만든다']},{key:'B',label:'모름 — 0',delta:0,hours:0,requires:[]}]}]};
  return s;
 }

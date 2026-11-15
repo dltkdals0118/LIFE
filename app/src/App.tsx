@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowDownToLine, ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleHelp, Cloud, CloudOff, Compass, Flag, Gift, Heart, Home, Leaf, ListChecks, LockKeyhole, Map, Menu, MoreHorizontal, Plus, RefreshCw, Settings, Sparkles, Sprout, Target, Trash2, TrendingUp, Trophy, Swords, Zap, Wallet, X } from 'lucide-react';
-import { upsertJournal, journalOf, journalStreak, projectCash, simRequires, defaultPicks, monthAdd, type Sim, compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
+import { setPicks, picksOf, toggleWeek, upsertJournal, journalOf, journalStreak, projectCash, simRequires, defaultPicks, monthAdd, type Sim, compareWorkspaces, OBS_GROUPS, OBS_UNIT, checkObservation, obsText, statList, combatPower, powerDiff, questQueue, focusQuest, subQuestFor, acceptSubQuest, OUTCOME, OBS_NAME, weekStats, nextSuggestion, accuracy, pokerNet, rewardProgress, evaluateTriggers, ruleText, type TriggerRule, type Outcome, assessBranch, completeQuest, createEmpty, latest, level, log, parseBackup, reserveReward, rewardAvailable, today, uid, won, xpOf, type Plan, type Quest, type Workspace } from './model';
 import { AuthGate, NewPassword } from './Auth';
 import HomeView from './Home';
 import { useWorkspace } from './store';
@@ -63,7 +63,7 @@ function buildRule(f:FormData,key:string):TriggerRule|null{
 
 export default function App(){
  const store=useWorkspace();const {data:s,demo,ready}=store;
- const [view,setView]=useState<View>('home'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null),[picks,setPicks]=useState<Record<string,string>>({});
+ const [view,setView]=useState<View>('home'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null);
  const importRef=useRef<HTMLInputElement>(null);
  const xp=xpOf(s),done=s.quests.filter(q=>q.status==='done'),open=s.quests.filter(q=>q.status==='ready').sort((a,b)=>a.due.localeCompare(b.due)),todayQs=open.filter(q=>q.due<=today()).slice(0,3),actualToday=done.filter(q=>q.completedAt?.slice(0,10)===today()).length;
  const queue=questQueue(s),fq=queue[0]??null,upNext=queue[1]??null,bonus=subQuestFor(s),power=combatPower(s);
@@ -172,13 +172,13 @@ export default function App(){
       <small>상태: {store.status}</small></section>
     :<Empty title="예측 자료가 없어요" body="설정과 동기화 → 백업 가져오기 로 최신 파일을 한 번 더 가져오면 채워져요. 예시 공간에서는 바로 만져볼 수 있어요." action={<button className="secondary" onClick={()=>go('settings')}>설정과 동기화 열기<ArrowRight size={15}/></button>}/>}
   </>;}
- const P=Object.keys(picks).length?picks:defaultPicks(sim);
+ const P=picksOf(s);
  const r=projectCash(sim,P), none=projectCash(sim,defaultPicks(sim));
  const best=Object.fromEntries(sim.levers.map(l=>[l.id,l.options.reduce((a,b)=>b.delta>a.delta?b:a).key]));
  const reqs=simRequires(sim,P);
- const set=(id:string,key:string)=>setPicks({...P,[id]:key});
+ const set=(id:string,key:string)=>change(w=>setPicks(w,{...P,[id]:key}));
  return <>{sectionHead('WHAT IF','앞으로 '+sim.months+'달','바꿔 보세요. 돈과 시간이 같이 움직여요. 고르는 건 나예요.',
-   <button className="secondary" onClick={()=>setPicks(best)}>최선으로 맞추기</button>)}
+   <button className="secondary" onClick={()=>change(w=>setPicks(w,best))}>최선으로 맞추기</button>)}
  <section className="panel sim-panel">
   <div className="sim-head">
    <div><span className="eyebrow">{r.zeroMonth?'현금이 0 아래로':'버틴다'}</span>
@@ -194,18 +194,18 @@ export default function App(){
   <p className="sim-basis">지금 현금 {won(sim.cash)} ({sim.asOf}) · 손대지 않으면 매달 {won(sim.netMonthly)}<br/>{sim.flowBasis}</p>
  </section>
  <section className="panel sim-levers"><div className="panel-heading"><div><h2>바꿀 수 있는 것</h2><p>눌러서 바꿔 보세요. 숫자와 선이 바로 따라와요.</p></div>
-  <button className="text-button" onClick={()=>setPicks(defaultPicks(sim))}>되돌리기</button></div>
+  <button className="text-button" onClick={()=>change(w=>setPicks(w,defaultPicks(sim)))}>되돌리기</button></div>
   {(()=>{const gs=sim.groups.length?sim.groups:[{key:'',name:'',note:''}];
    return gs.map(g=>{const mine=sim.levers.filter(l=>(l.group||'')===g.key);
     if(!mine.length)return null;
-    const pulled=mine.filter(l=>{const o=l.options.find(x=>x.key===(P[l.id]??defaultPicks(sim)[l.id]));return o&&o.delta!==0;}).length;
+    const pulled=mine.filter(l=>{const o=l.options.find(x=>x.key===P[l.id]);return o&&(o.delta!==0||o.hours!==0);}).length;
     return <div className="sim-group" key={g.key||'all'}>
      {g.name&&<div className="sim-group-head"><h3>{g.name}</h3>{g.note&&<p>{g.note}</p>}
        <span className="sim-group-count">{pulled}/{mine.length}</span></div>}
      {mine.map(lv=><div className="sim-lever" key={lv.id}>
       <div className="sim-lever-top"><strong>{lv.name}</strong><small>{lv.starts} 부터</small></div>
       <div className="sim-options">{lv.options.map(o=>
-        <button key={o.key} className={(P[lv.id]??defaultPicks(sim)[lv.id])===o.key?'active':''}
+        <button key={o.key} className={P[lv.id]===o.key?'active':''}
           onClick={()=>set(lv.id,o.key)}>{o.label}
           {o.delta?<em className={o.delta<0?'minus':''}>{o.delta>0?'+':'−'}{won(Math.abs(o.delta))}</em>:null}
           {o.hours?<em className={`hours ${o.hours<0?'minus':''}`}>{o.hours>0?'+':'−'}{Math.abs(Math.round(o.hours*10)/10)}시간</em>:null}</button>)}</div>
@@ -217,6 +217,36 @@ export default function App(){
   <p>이 조합으로도 매달 <b>{won(r.needPerMonth)}</b> 이 모자라요.
   {sim.incomeNow?<> 지금 세후 {won(sim.incomeNow)} 이니까 <b>세후 월 {won(sim.incomeNow+r.needPerMonth)}</b> 이면 수지가 맞아요.</>:null}</p>
   <p className="small-note">받을 것 같은 금액이 아니라 <b>맞추려면 필요한 금액</b>이에요. 모자란 만큼은 다른 것으로 메우거나 적자로 남아요.</p></section>}
+ {s.curriculum&&(()=>{const c=s.curriculum!;const done=new Set(s.curriculumDone??[]);
+  const areaName=(k:string)=>c.areas.find(a=>a.key===k)?.name??k;
+  const t=today();
+  const now=c.weeks.find(w=>w.from<=t&&t<=w.to)??c.weeks.find(w=>w.from>t)??null;
+  return <section className="panel curri"><div className="panel-heading"><div><h2>{c.title}</h2>
+    <p>{c.subtitle}</p></div><span className="curri-count">{done.size}/{c.weeks.length}주</span></div>
+   <div className="curri-bar"><i style={{width:`${done.size/Math.max(1,c.weeks.length)*100}%`}}/></div>
+   {(()=>{const known=new Set(c.phases.map(p=>p.key));
+     // 단계에 안 속한 주차도 반드시 그린다 — phases 가 비면 아무것도 안 보이던 적이 있다.
+     const orphan=c.weeks.filter(w=>!known.has(w.phase));
+     const groups=[...c.phases,...(orphan.length?[{key:'__rest',name:'',why:''}]:[])];
+     return groups.map(ph=>{const ws=ph.key==='__rest'?orphan:c.weeks.filter(w=>w.phase===ph.key);
+     if(!ws.length)return null;
+    return <div className="curri-phase" key={ph.key}>
+     {ph.name&&<div className="curri-phase-head"><h3>{ph.name}</h3>{ph.why&&<p>{ph.why}</p>}</div>}
+     {ws.map(w=><label className={`curri-week ${done.has(w.n)?'is-done':''} ${now&&now.n===w.n?'is-now':''}`} key={w.n}>
+       <input type="checkbox" checked={done.has(w.n)} disabled={!ready}
+         onChange={()=>change(x=>toggleWeek(x,w.n),done.has(w.n)?`${w.n}주차를 다시 열었어요`:`${w.n}주차 완료`)}/>
+       <span className="curri-n">{w.n}주</span>
+       <span className="curri-body">
+        <strong>{w.title}</strong>
+        <em>{w.what}</em>
+        <small>끝났다고 말하려면 — {w.done_when}</small>
+        <span className="curri-areas">{w.areas.map(a=><i key={a}>{areaName(a)}</i>)}</span>
+       </span>
+       <span className="curri-when">{w.from.slice(5)}~{w.to.slice(5)}</span>
+      </label>)}
+    </div>;});})()}
+   <p className="small-note">능력을 올리는 것도 손잡이다 — 위 <b>스킬</b> 칸이 이 커리큘럼이고, 하루 1시간을 쓴다.</p>
+  </section>;})()}
  <section className="panel"><div className="panel-heading"><div><h2>이 조합이 성립하려면</h2><p>고른 것들이 요구하는 조건이에요.</p></div><ListChecks size={18}/></div>
   {reqs.length?reqs.map(q=><div className="sim-req" key={q.lever}><strong>{q.lever}</strong><span>{q.option}</span>
     <ul>{q.items.map(it=><li key={it}>{it}</li>)}</ul></div>)
