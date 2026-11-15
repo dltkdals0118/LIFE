@@ -5,9 +5,9 @@ import { AuthGate, NewPassword } from './Auth';
 import HomeView from './Home';
 import { useWorkspace } from './store';
 
-type View='home'|'sim'|'journal'|'settings';
+type View='home'|'sim'|'curriculum'|'journal'|'settings';
 type Dialog={type:'outcome';item:Quest}|{type:'quest';item?:Quest}|{type:'plan';item?:Plan}|{type:'observation'}|{type:'reward'}|{type:'domain'}|{type:'review'}|{type:'import';data:Workspace}|null;
-const nav=[{id:'home',label:'홈',short:'홈',icon:Home},{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'journal',label:'일기',short:'일기',icon:BookOpen}] as const;
+const nav=[{id:'home',label:'홈',short:'홈',icon:Home},{id:'sim',label:'시뮬레이션',short:'예측',icon:TrendingUp},{id:'curriculum',label:'커리큘럼',short:'커리',icon:ListChecks},{id:'journal',label:'일기',short:'일기',icon:BookOpen}] as const;
 const icons={wallet:Wallet,sprout:Sprout,briefcase:BriefcaseBusiness,book:BookOpen,heart:Heart,sparkles:Sparkles};
 const kindNames=OBS_NAME;   // 이름표 정본은 model.ts 하나다
 const text=(f:FormData,k:string)=>String(f.get(k)??'').trim();
@@ -217,11 +217,18 @@ export default function App(){
   <p>이 조합으로도 매달 <b>{won(r.needPerMonth)}</b> 이 모자라요.
   {sim.incomeNow?<> 지금 세후 {won(sim.incomeNow)} 이니까 <b>세후 월 {won(sim.incomeNow+r.needPerMonth)}</b> 이면 수지가 맞아요.</>:null}</p>
   <p className="small-note">받을 것 같은 금액이 아니라 <b>맞추려면 필요한 금액</b>이에요. 모자란 만큼은 다른 것으로 메우거나 적자로 남아요.</p></section>}
- {s.curriculum&&(()=>{const c=s.curriculum!;const done=new Set(s.curriculumDone??[]);
+ 
+
+  <section className="panel"><div className="panel-heading"><div><h2>이 조합이 성립하려면</h2><p>고른 것들이 요구하는 조건이에요.</p></div><ListChecks size={18}/></div>
+  {reqs.length?reqs.map(q=><div className="sim-req" key={q.lever}><strong>{q.lever}</strong><span>{q.option}</span>
+    <ul>{q.items.map(it=><li key={it}>{it}</li>)}</ul></div>)
+   :<Empty title="아직 아무것도 안 바꿨어요" body={`이대로면 ${monthAdd(sim.startMonth,sim.months-1)} 에 ${won(Math.round(none.endCash))} 이에요. 위에서 하나씩 눌러 보세요.`}/>}
+ </section></>;})()}
+ {view==='curriculum'&&(()=>{if(!s.curriculum)return <>{sectionHead('ONE HOUR A DAY','커리큘럼','아직 커리큘럼이 없어요.')}<Empty title="커리큘럼이 없어요" body="설정과 동기화 → 백업 가져오기 로 최신 파일을 한 번 더 가져오면 채워져요." action={<button className="secondary" onClick={()=>go('settings')}>설정과 동기화 열기<ArrowRight size={15}/></button>}/></>;const c=s.curriculum!;const done=new Set(s.curriculumDone??[]);
   const areaName=(k:string)=>c.areas.find(a=>a.key===k)?.name??k;
   const t=today();
   const now=c.weeks.find(w=>w.from<=t&&t<=w.to)??c.weeks.find(w=>w.from>t)??null;
-  return <section className="panel curri"><div className="panel-heading"><div><h2>{c.title}</h2>
+  return <>{sectionHead('ONE HOUR A DAY',c.title,c.subtitle)}<section className="panel curri"><div className="panel-heading"><div><h2>{c.title}</h2>
     <p>{c.subtitle}</p></div><span className="curri-count">{done.size}/{c.weeks.length}주</span></div>
    <div className="curri-bar"><i style={{width:`${done.size/Math.max(1,c.weeks.length)*100}%`}}/></div>
    {(()=>{const known=new Set(c.phases.map(p=>p.key));
@@ -246,12 +253,7 @@ export default function App(){
       </label>)}
     </div>;});})()}
    <p className="small-note">능력을 올리는 것도 손잡이다 — 위 <b>스킬</b> 칸이 이 커리큘럼이고, 하루 1시간을 쓴다.</p>
-  </section>;})()}
- <section className="panel"><div className="panel-heading"><div><h2>이 조합이 성립하려면</h2><p>고른 것들이 요구하는 조건이에요.</p></div><ListChecks size={18}/></div>
-  {reqs.length?reqs.map(q=><div className="sim-req" key={q.lever}><strong>{q.lever}</strong><span>{q.option}</span>
-    <ul>{q.items.map(it=><li key={it}>{it}</li>)}</ul></div>)
-   :<Empty title="아직 아무것도 안 바꿨어요" body={`이대로면 ${monthAdd(sim.startMonth,sim.months-1)} 에 ${won(Math.round(none.endCash))} 이에요. 위에서 하나씩 눌러 보세요.`}/>}
- </section></>;})()}
+  </section></>;})()}
  {view==='settings'&&<>{sectionHead('YOUR SPACE','설정과 동기화','내 기록을 안전하게 보관하고, 다른 기기에서도 이어가요.')}<div className="settings-grid"><section className="panel settings-panel"><h2><Cloud size={20}/>휴대폰 · PC 연결</h2><p>같은 계정으로 로그인하면 개인 공간이 자동으로 동기화돼요.</p>{!store.config&&<div className="notice">아직 클라우드 저장소가 연결되지 않았어요. 지금 기록은 이 기기에만 저장됩니다.</div>}{store.user?<><Badge>{store.user.email}</Badge><p>상태: {store.status}</p><div className="button-row"><button className="primary" onClick={()=>void store.sync()}>지금 동기화</button><button className="secondary" onClick={()=>store.logout().then(()=>{localStorage.removeItem('life:gate');setGate(null);}).catch(e=>notify(e.message))}>로그아웃</button></div></>:<form onSubmit={e=>{e.preventDefault();const run=authMode==='signup'?store.signup(authEmail,authPassword):store.login(authEmail,authPassword).then(()=>false);run.then(needsConfirm=>{setAuthPassword('');if(needsConfirm){setAuthSent(true);notify('가입 확인 메일을 보냈어요. 메일의 링크를 누른 뒤 다시 로그인해 주세요.');}else{setAuthSent(false);notify(authMode==='signup'?'계정을 만들고 로그인했어요.':'로그인했어요.');}}).catch(e=>notify(e.message));}}><Field label="이메일"><input type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} required autoComplete="username" placeholder="name@example.com"/></Field><Field label="비밀번호"><input type="password" value={authPassword} onChange={e=>setAuthPassword(e.target.value)} required minLength={8} autoComplete={authMode==='signup'?'new-password':'current-password'} placeholder="8자 이상"/></Field><button className="primary" disabled={!store.config}>{authMode==='signup'?'계정 만들고 시작하기':'로그인'}<ArrowRight size={16}/></button><button type="button" className="text-button" onClick={()=>{setAuthMode(m=>m==='signup'?'login':'signup');setAuthSent(false);}}>{authMode==='signup'?'이미 계정이 있어요 · 로그인하기':'계정이 없어요 · 새로 만들기'}</button><p className="small-note">{authMode==='signup'?'휴대폰에서도 같은 이메일과 비밀번호로 로그인하면 두 기기가 같은 공간을 씁니다.':'처음이라면 아래에서 계정을 먼저 만들어 주세요.'}</p>{authSent&&<p className="small-note">메일의 확인 링크를 누른 뒤, 이 화면에서 같은 이메일과 비밀번호로 로그인해 주세요.</p>}</form>}<details className="advanced"><summary>동기화 서비스 연결 설정</summary><p className="small-note">본인이 관리하는 Supabase 프로젝트를 연결할 때만 입력하세요. 데이터는 해당 프로젝트로 전송됩니다. DB 설치 파일은 저장소의 app/supabase/schema.sql에 있습니다.</p><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{store.configure({url:text(f,'url'),key:text(f,'key')});notify('서비스를 연결했어요. 이메일로 로그인해 주세요.');}catch(e){notify((e as Error).message);}}}><Field label="프로젝트 URL"><input name="url" type="url" required defaultValue={store.config?.url??''} placeholder="https://project.supabase.co"/></Field><Field label="공개 publishable key"><input name="key" required defaultValue={store.config?.key??''} placeholder="sb_publishable_…" autoComplete="off"/></Field><button className="secondary">연결 저장</button></form></details><p className="small-note">로그인하면 계정별 공간을 불러옵니다. 기기 공간의 기존 기록을 옮기려면 로그인 전에 백업한 뒤 로그인 후 가져와 주세요.</p></section>
  <section className="panel settings-panel"><h2><ArrowDownToLine size={20}/>기록 보관</h2><p>백업 파일에는 현재 공간의 모든 기록이 담겨요. 기기를 바꾸기 전에도 한 번 저장해 두세요.</p><div className="button-row"><button className="primary" onClick={exportBackup}>백업 내려받기</button><button className="secondary" onClick={()=>importRef.current?.click()}>백업 가져오기</button></div><input ref={importRef} hidden type="file" accept="application/json,.json" onChange={e=>void importFile(e.target.files?.[0])}/><hr/><h3>나의 공간</h3><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);change(s=>({...s,name:text(f,'name'),chapter:text(f,'chapter')}),'공간 이름을 바꿨어요.');}}><Field label="공간 이름"><input name="name" required maxLength={100} defaultValue={s.name} key={s.name}/></Field><Field label="현재 챕터"><input name="chapter" required maxLength={150} defaultValue={s.chapter} key={s.chapter}/></Field><button className="secondary">저장</button></form><hr/><button className="text-button" onClick={()=>demo?store.startPersonal():store.viewDemo()}>{demo?'내 개인 공간으로 이동':'가상 예시 다시 둘러보기'}<ArrowRight size={15}/></button><p className="small-note">예시 공간과 개인 기록은 분리돼 있어요. 예시의 변경은 저장되지 않습니다.</p></section></div><section className="panel settings-panel"><h2>최근 변경 이력</h2>{s.events.slice(0,12).map(e=><div className="event-row" key={e.id}><span>{e.text}</span><small>{new Date(e.at).toLocaleString('ko-KR')}</small></div>)}{!s.events.length&&<p className="muted">새로운 활동이 이곳에 기록됩니다.</p>}<p className="small-note">LIFE v0.1 · 실제 관측과 시뮬레이션을 구분합니다. 미래의 성공률은 근거가 쌓이기 전까지 미산정입니다.</p></section></>}
  <footer className="page-footer"><Sprout size={14}/><span>나의 삶은, 계속 자라는 중.</span><span>LIFE · ONE STEP AT A TIME</span></footer>

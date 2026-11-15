@@ -116,8 +116,8 @@ test('모바일 하단 탭으로 모든 화면에 갈 수 있다', async ({page}
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
   const tabs = page.locator('.mobile-nav>button');
-  await expect(tabs).toHaveCount(3);
-  for (const [label, sel] of [['홈', '.home-figure'], ['시뮬레이션', '.sim-panel'], ['일기', '.journal-form']] as const) {
+  await expect(tabs).toHaveCount(4);
+  for (const [label, sel] of [['홈', '.home-figure'], ['시뮬레이션', '.sim-panel'], ['커리큘럼', '.curri'], ['일기', '.journal-form']] as const) {
     await page.locator('.mobile-nav').getByRole('button', {name: label}).click();
     await expect(page.locator(sel)).toBeVisible();
   }
@@ -134,7 +134,7 @@ test('모바일 어느 화면에서도 가로로 넘치지 않는다', async ({p
   test.skip(info.project.name !== 'mobile', '모바일 전용');
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
-  for (const tab of ['홈', '시뮬레이션', '일기']) {
+  for (const tab of ['홈', '시뮬레이션', '커리큘럼', '일기']) {
     await page.locator('.mobile-nav').getByRole('button', {name: tab}).click();
     await page.waitForTimeout(250);
     const m = await page.evaluate(() => {
@@ -160,6 +160,7 @@ test('desktop and mobile screenshots', async ({page}, info) => {
   await page.getByRole('heading', {name: /앞으로 \d+달/}).waitFor();
   await page.waitForTimeout(400);
   await page.screenshot({path: `test-results/${info.project.name}-sim.png`, fullPage: true});
+  await go(page, '커리큘럼');
   if (await page.locator('.curri').count()) {
     await page.locator('.curri').scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
@@ -265,7 +266,7 @@ test('고른 조합이 홈까지 따라간다', async ({page}) => {
 test('커리큘럼 — 주차를 체크하면 보인다', async ({page}) => {
   await page.goto('./');
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
-  await go(page, '시뮬레이션');
+  await go(page, '커리큘럼');
   const curri = page.locator('.curri');
   await expect(curri).toBeVisible();
   await expect(curri.locator('.curri-week')).toHaveCount(3);
@@ -301,13 +302,15 @@ test('개인 공간에서는 선택과 진도가 새로고침 뒤에도 남는�
 
   await go(page, '시뮬레이션');
   await page.locator('.sim-lever').first().getByRole('button', {name: '줄인다'}).click();
+  await go(page, '커리큘럼');
   await page.locator('.curri-week').first().locator('input').check();
   await expect(page.locator('.curri-count')).toHaveText('1/1주');
 
   await page.waitForTimeout(500);
   await page.reload();
-  await go(page, '시뮬레이션');
+  await go(page, '커리큘럼');
   await expect(page.locator('.curri-count')).toHaveText('1/1주');
+  await go(page, '시뮬레이션');
   await expect(page.locator('.sim-options button.active').first()).toHaveText(/줄인다/);
   await go(page, '홈');
   await expect(page.getByText('지금 고른 대로면').first()).toBeVisible();

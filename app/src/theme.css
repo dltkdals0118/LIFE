@@ -704,7 +704,7 @@ input,textarea,select{background-color:#0e1713}
 .home-scene svg{width:100%;height:100%;display:block}
 .home-scene g{transition:transform .5s cubic-bezier(.2,.9,.3,1);transform-origin:50% 60%}
 
-.home-path-drop{stroke:url(#dropG);stroke-width:3;stroke-linecap:round;stroke-dasharray:7 7}
+.home-path-drop{stroke:url(#dropG);stroke-width:3.4;stroke-linecap:round;stroke-dasharray:7 7}
 .home-path-rise{stroke:url(#riseG);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;
   filter:drop-shadow(0 0 10px #5ee89a55)}
 .home-stop{fill:#5ee89a;opacity:0;animation:home-stop .5s cubic-bezier(.2,1.2,.4,1) forwards}
