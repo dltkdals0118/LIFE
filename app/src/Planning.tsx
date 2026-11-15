@@ -1,5 +1,5 @@
 import {useState,type FormEvent,type ReactNode} from 'react';
-import {type Workspace,type Sim,type Lever,simSchema,leverSchema,today,monthAdd,uid,picksOf,projectCash,won,simRequires} from './model';
+import {type Workspace,type Sim,type Lever,simSchema,leverSchema,today,monthAdd,uid,picksOf,projectCash,won,simRequires,OBS_NAME,obsText} from './model';
 import {adoptScenario,baselineNotice,saveBaseline,reviewDecision} from './planning';
 import './planning.css';
 const Field=({label,children}:{label:string;children:ReactNode})=><label className="field"><span>{label}</span>{children}</label>;
@@ -30,6 +30,7 @@ export default function Planning({s,update,onSim,onQuest,onRecord,onReview,onEdi
  <p className="small-note">월수지에는 필수 생활비·상환·예정 지출을 포함해 주세요. 기준월의 남은 기간은 계산하지 않으므로 시작월 직전 월말의 예상 잔액을 기준 현금으로 조정해야 할 수 있어요. 월중 결제일과 일시 비용은 이 모델이 계산하지 않습니다.</p>
  <button className="primary">기준값 저장</button></form></details>
  <button className="secondary" type="button" onClick={onRecord}>실제 관측 추가</button>
+ {s.observations.length>0&&<details><summary>최근 실제 관측 {s.observations.length}건</summary><ul>{[...s.observations].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10).map(o=><li key={o.id}>{o.date} · {OBS_NAME[o.kind]}: {obsText(o.kind,o.value)} {o.note&&`— ${o.note}`}</li>)}</ul></details>}
  </section>
  {sim&&<><section className="panel"><h2>2. 비교할 선택</h2><p>같은 절감액을 여러 항목에 중복 입력하지 마세요. 수입 증가액은 보장된 수익이 아닌 가정입니다.</p>
  {sim.levers.map(l=><details key={l.id}><summary>{l.name} · {l.starts}부터</summary><LeverForm lever={l} onSave={v=>run(w=>({...w,sim:{...w.sim!,levers:w.sim!.levers.map(x=>x.id===v.id?v:x)}}))}/><button className="text-button danger" onClick={()=>{if(confirm('이 선택 항목을 삭제할까요? 채택 당시의 기록은 보존됩니다.'))run(w=>({...w,sim:{...w.sim!,levers:w.sim!.levers.filter(x=>x.id!==l.id)},simPicks:Object.fromEntries(Object.entries(w.simPicks).filter(([k])=>k!==l.id))}));}}>선택 항목 삭제</button></details>)}
@@ -64,6 +65,7 @@ export default function Planning({s,update,onSim,onQuest,onRecord,onReview,onEdi
  <Field label="다음 판단: 유지·축소·교체와 구체적 행동"><input name="next" required maxLength={200}/></Field><button className="primary">검토 저장</button></form>}
  </article>})}
  {s.reviews.slice(0,5).map(r=><article key={r.id} className="decision-card"><h3>{r.date} 주간 회고</h3><p>{r.win}</p><p>장애물: {r.obstacle}</p><p>다음: {r.next}</p></article>)}
+ {s.quests.some(q=>q.status==='done')&&<details><summary>최근 행동 결과</summary>{s.quests.filter(q=>q.status==='done').sort((a,b)=>(b.completedAt??'').localeCompare(a.completedAt??'')).slice(0,10).map(q=><div className="planning-action" key={q.id}><p>{q.title} · {q.outcome==='full'?'완료':q.outcome==='partial'?'일부 실행':'미실행'}</p><button className="text-button" onClick={()=>{if(confirm('이 행동의 완료 기록을 취소할까요?'))onQuest(q.id);}}>완료 취소</button></div>)}</details>}
  </section></fieldset></div>;
 }
 const obstacles={none:'없음',time:'시간 부족',method:'방법이 불명확',waiting:'외부 대기',priority:'우선순위 변화',condition:'컨디션',other:'기타'};

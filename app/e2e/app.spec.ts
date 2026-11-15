@@ -108,7 +108,7 @@ test('예시 공간에 가져오면 저장되지 않는다고 먼저 말한다',
   await expect(d).toContainText('지금은 예시 공간이에요');    // 그리고 저장되지 않는다고 말한다
   await expect(d.getByRole('button', {name: '이 기록으로 교체'})).toHaveCount(0);
   await d.getByRole('button', {name: '내 공간으로 바꾸기'}).click();
-  await expect(page.getByRole('status')).toContainText('내 공간으로 바꿨어요');
+  await expect(page.locator('.toast')).toContainText('내 공간으로 바꿨어요');
 });
 
 test('모바일 하단 탭으로 모든 화면에 갈 수 있다', async ({page}, info) => {

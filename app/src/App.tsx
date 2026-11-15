@@ -312,7 +312,7 @@ export default function App(){
   <p className="small-note">못 했어도 0 이 아니에요. 시도하고 기록한 것이 다음 판단의 근거가 됩니다.</p>
  </Modal>}
  {dialog&&dialog.type!=='outcome'&&<Modal title={{quest:dialog.type==='quest'&&dialog.item?'퀘스트 다듬기':'새로운 작은 한 걸음',plan:'나의 플랜 ABC',observation:'지금의 나 기록하기',reward:'기다려지는 작은 보상',domain:'새로운 성장 분야',review:'이번 주의 나에게',import:'백업 가져오기',outcome:'오늘은 어디까지 갔나요?'}[dialog.type]} onClose={()=>setDialog(null)}>{dialog.type==='import'?<><p>가져올 공간: <b>{dialog.data.name}</b></p>
-<p>퀘스트 {dialog.data.quests.length}개 · 플랜 {dialog.data.plans.length}개 · 기록 {dialog.data.observations.length}개 · 보상 {dialog.data.rewards.length}개</p>
+<p>결정 {dialog.data.decisions.length}개 · 일기 {dialog.data.journal.length}개 · 퀘스트 {dialog.data.quests.length}개 · 플랜 {dialog.data.plans.length}개 · 기록 {dialog.data.observations.length}개 · 보상 {dialog.data.rewards.length}개</p>
 <p>시뮬레이션 {dialog.data.sim?<b>{`손잡이 ${dialog.data.sim.levers.length}개`}</b>:<em className="warn-inline">없음 — 이 파일에는 예측 자료가 안 들어 있어요</em>}</p>
 {demo
  ?<div className="notice warn"><b>지금은 예시 공간이에요.</b> 여기에 가져오면 <b>저장되지 않아요</b> — 새로고침하면 사라져요.<br/>먼저 내 공간으로 바꾼 뒤 다시 가져와 주세요.</div>
