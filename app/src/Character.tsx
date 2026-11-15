@@ -1,11 +1,54 @@
-/** 캐릭터 — 레퍼런스: Roman Kamzolov 'Little Leo' 류의 3D 애니메이션 아이.
+/** 캐릭터 — 레퍼런스: Rotem Talker 'Janner' 류의 마른 소년 모험가.
  *
- *  그 스타일의 핵심은 **비율**이다. 머리가 전체의 3분의 1이고, 눈이 크고,
- *  머리카락이 덩어리로 솟고, 신발이 두껍다. 선을 아무리 다듬어도 비율이 틀리면 안 닮는다.
- *  앞선 두 번의 실패가 그것이었다 — 머리가 작고 눈이 점이었다.
+ *  앞 버전(Little Leo 류)은 3등신 유아였다. 이건 다른 사람이다:
+ *  **4등신, 턱이 좁은 얼굴, 가는 팔다리.** 그리고 의상이 성격을 만든다 —
+ *  목에 묶은 스카프 · **허리에 묶은 옷** · 손가락 없는 장갑 · 걷어올린 바지 · 끈 부츠.
+ *  이 다섯이 빠지면 그냥 티셔츠 입은 아이로 돌아간다.
  *
- *  좌표는 발바닥(G)과 서 있는 자리(L) 기준. 전체 높이는 약 258.
+ *  좌표는 **발바닥이 원점**인 지역 좌표다(위가 음수). 바깥 g 가 (L,G) 로 옮긴다.
+ *  숨쉬기는 CSS transform 이라 translate 와 같은 요소에 두면 서로 덮어쓴다 —
+ *  그래서 바깥(translate)과 안(home-breathe)을 나눈다.
  */
+
+/** 부츠 한 짝. `k:-1` 이 왼발이다.
+ *
+ *  **여기서 `scale(-1,1)` 을 쓰면 안 된다.** SVG 의 `transform` 속성은 CSS `transform`
+ *  과 같은 속성이라, 장면에 걸린 `.home-scene g{transform-origin:50% 60%}` 가 그대로 먹는다.
+ *  그러면 원점이 아니라 **뷰박스 한가운데를 기준으로** 뒤집혀 x≈2150 으로 날아간다.
+ *  실제로 왼쪽 부츠와 왼손이 화면 밖에 그려지고 있었다. 그래서 x 부호를 직접 뒤집는다.
+ */
+function Boot({k}: {k: 1 | -1}) {
+  const n = (v: number) => k * v;
+  return (
+    <g>
+      <rect x={k > 0 ? 8 : -31} y="-50" width="23" height="32" rx="4" fill="url(#ch-boot)"/>
+      <path d={`M${n(5)},-23 h${n(30)} q${n(11)},0 ${n(12)},10 v6 q0,3 ${n(-4)},3 h${n(-38)} q${n(-4)},0 ${n(-4)},-4 z`}
+            fill="url(#ch-boot)"/>
+      <rect x={k > 0 ? 1 : -48} y="-8" width="47" height="8" rx="3.5" fill="#cdc0a6"/>
+      <path d={`M${n(11)},-44 l${n(17)},5 M${n(11)},-38 l${n(17)},5 M${n(11)},-32 l${n(17)},5`}
+            stroke="#e5d8bd" strokeWidth="2.1" strokeLinecap="round" opacity=".9"/>
+      {/* 걷어올린 바짓단 — 부츠 위에 겹친다 */}
+      <path d={`M${n(9)},-64 h${n(23)} q${n(4)},0 ${n(4)},4 v7 q0,4 ${n(-4)},4 h${n(-23)} q${n(-4)},0 ${n(-4)},-4 v-7 q0,-4 ${n(4)},-4 z`}
+            fill="url(#ch-cuff)"/>
+    </g>
+  );
+}
+
+/** 손가락 없는 장갑. 손가락이 보여야 이 의상으로 읽힌다.
+ *  좌우를 뒤집지 않는다 — 위 Boot 의 주석과 같은 이유이고, 이 크기에서는 차이도 안 보인다. */
+function Hand() {
+  return (
+    <g>
+      <rect x="-9" y="-13" width="18" height="11" rx="5" fill="url(#ch-glove)"/>
+      <path d="M-9,-3 q9,-3 18,0 l-1,11 q-8,4 -16,0 z" fill="url(#ch-glove)"/>
+      <rect x="-8" y="7" width="4.4" height="9" rx="2.2" fill="url(#ch-skin2)"/>
+      <rect x="-2.8" y="8" width="4.4" height="10" rx="2.2" fill="url(#ch-skin)"/>
+      <rect x="2.4" y="7" width="4.4" height="9" rx="2.2" fill="url(#ch-skin)"/>
+      <rect x="7" y="5" width="4" height="7" rx="2" fill="url(#ch-skin2)"/>
+    </g>
+  );
+}
+
 export default function Character({L, G}: {L: number; G: number}) {
   return (
     <>
@@ -22,127 +65,142 @@ export default function Character({L, G}: {L: number; G: number}) {
         <linearGradient id="ch-hair2" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#b2764c"/><stop offset="1" stopColor="#6b422a"/>
         </linearGradient>
-        <linearGradient id="ch-tee" x1=".2" y1="0" x2=".9" y2="1">
-          <stop offset="0" stopColor="#fbfaf7"/><stop offset=".55" stopColor="#e6e3dc"/><stop offset="1" stopColor="#b5b1a8"/>
+        <linearGradient id="ch-tunic" x1=".2" y1="0" x2=".9" y2="1">
+          <stop offset="0" stopColor="#f2e9d3"/><stop offset=".55" stopColor="#d5c8a8"/><stop offset="1" stopColor="#9a9177"/>
         </linearGradient>
-        <linearGradient id="ch-sleeve" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f6cc63"/><stop offset="1" stopColor="#c08f2a"/>
+        <linearGradient id="ch-scarf" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#f0bc54"/><stop offset="1" stopColor="#b57c22"/>
         </linearGradient>
-        <linearGradient id="ch-shorts" x1=".2" y1="0" x2=".9" y2="1">
-          <stop offset="0" stopColor="#5b8fd0"/><stop offset=".6" stopColor="#3f6fae"/><stop offset="1" stopColor="#2a4e7e"/>
+        <linearGradient id="ch-sash" x1=".1" y1="0" x2=".9" y2="1">
+          <stop offset="0" stopColor="#b3a673"/><stop offset=".6" stopColor="#8d8255"/><stop offset="1" stopColor="#5d5636"/>
         </linearGradient>
-        <linearGradient id="ch-shoe" x1=".2" y1="0" x2=".9" y2="1">
-          <stop offset="0" stopColor="#f58b76"/><stop offset=".6" stopColor="#e26a54"/><stop offset="1" stopColor="#b14633"/>
+        <linearGradient id="ch-pant" x1=".2" y1="0" x2=".9" y2="1">
+          <stop offset="0" stopColor="#657a8c"/><stop offset=".6" stopColor="#47586a"/><stop offset="1" stopColor="#2b3642"/>
         </linearGradient>
-        <radialGradient id="ch-eye" cx=".38" cy=".32" r=".75">
+        <linearGradient id="ch-cuff" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#5d7183"/><stop offset="1" stopColor="#35424f"/>
+        </linearGradient>
+        <linearGradient id="ch-boot" x1=".2" y1="0" x2=".9" y2="1">
+          <stop offset="0" stopColor="#c08e5c"/><stop offset=".6" stopColor="#95633a"/><stop offset="1" stopColor="#5e3b21"/>
+        </linearGradient>
+        <linearGradient id="ch-glove" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#6b4c34"/><stop offset="1" stopColor="#3a2718"/>
+        </linearGradient>
+        <radialGradient id="ch-eye" cx=".38" cy=".3" r=".75">
           <stop offset="0" stopColor="#7fc9a4"/><stop offset=".6" stopColor="#3f8c69"/><stop offset="1" stopColor="#235340"/>
         </radialGradient>
       </defs>
 
-      <g className="home-breathe">
-        {/* ── 다리와 신발 ── */}
-        <path d={`M${L - 15},${G - 92} q-3,34 -3,52`} stroke="url(#ch-skin2)" strokeWidth="19"
-              strokeLinecap="round" fill="none"/>
-        <path d={`M${L + 15},${G - 92} q3,34 3,52`} stroke="url(#ch-skin)" strokeWidth="19"
-              strokeLinecap="round" fill="none"/>
-        {/* 두꺼운 운동화 — 이 스타일의 표식이다.
-               밑창을 두껍게 밝게 깔지 않으면 어두운 배경에서 발이 뭉개진다. */}
-        <path d={`M${L - 40},${G - 32} q0,-10 11,-10 h15 q8,0 9,9 q1,11 7,13 q9,3 9,10 v4 h-51 z`}
-              fill="url(#ch-shoe)"/>
-        <path d={`M${L + 4},${G - 32} q0,-10 11,-10 h15 q8,0 9,9 q1,11 7,13 q9,3 9,10 v4 h-51 z`}
-              fill="url(#ch-shoe)"/>
-        <rect x={L - 42} y={G - 10} width="53" height="12" rx="6" fill="#fdfdfb"/>
-        <rect x={L + 2} y={G - 10} width="53" height="12" rx="6" fill="#fdfdfb"/>
-        <rect x={L - 42} y={G - 4} width="53" height="6" rx="3" fill="#d8d4cb"/>
-        <rect x={L + 2} y={G - 4} width="53" height="6" rx="3" fill="#d8d4cb"/>
-        <path d={`M${L - 33},${G - 28} l11,7 M${L - 22},${G - 28} l-11,7`} stroke="#fdfdfb" strokeWidth="2.8"
-              strokeLinecap="round"/>
-        <path d={`M${L + 11},${G - 28} l11,7 M${L + 22},${G - 28} l-11,7`} stroke="#fdfdfb" strokeWidth="2.8"
-              strokeLinecap="round"/>
+      <g transform={`translate(${L} ${G})`}>
+        <g className="home-breathe">
+          {/* ── 부츠와 걷어올린 바짓단 ── */}
+          <Boot k={-1}/>
+          <Boot k={1}/>
 
-        {/* ── 반바지 ── */}
-        <path d={`M${L - 29},${G - 128} h58 v44 q0,9 -10,9 h-15 q-4,-12 -4,-20 q0,8 -4,20 h-15 q-10,0 -10,-9 z`}
-              fill="url(#ch-shorts)"/>
-        <path d={`M${L},${G - 95} v18`} stroke="#2a4e7e" strokeWidth="2" opacity=".6"/>
+          {/* ── 바지 — 통이 넓고 발목에서 접힌다 ── */}
+          <path d="M-31,-128 h27 v72 h-25 z" fill="url(#ch-pant)"/>
+          <path d="M31,-128 h-27 v72 h25 z" fill="url(#ch-pant)"/>
+          <path d="M-33,-158 h66 v36 q0,5 -6,5 h-54 q-6,0 -6,-5 z" fill="url(#ch-pant)"/>
+          <path d="M0,-126 v64" stroke="#28323c" strokeWidth="2" opacity=".55"/>
+          <path d="M-28,-96 q11,4 21,0 M7,-96 q11,4 21,0" stroke="#394856" strokeWidth="2"
+                strokeLinecap="round" fill="none" opacity=".8"/>
 
-        {/* ── 티셔츠 (래글런 — 소매만 노란색) ── */}
-        <path d={`M${L - 30},${G - 186} q30,-11 60,0 l5,62 q-35,10 -70,0 z`} fill="url(#ch-tee)"/>
-        <path d={`M${L - 30},${G - 186} q-17,7 -21,27 l19,9 q4,-17 7,-26 z`} fill="url(#ch-sleeve)"/>
-        <path d={`M${L + 30},${G - 186} q17,7 21,27 l-19,9 q-4,-17 -7,-26 z`} fill="url(#ch-sleeve)"/>
-        <path d={`M${L - 11},${G - 190} q11,9 22,0`} stroke="#cfcbc2" strokeWidth="3" fill="none" strokeLinecap="round"/>
+          {/* ── 윗옷 ── */}
+          <path d="M-33,-224 q33,-11 66,0 l4,72 q-37,10 -74,0 z" fill="url(#ch-tunic)"/>
+          <path d="M-33,-224 q-18,7 -22,29 l20,10 q4,-19 8,-28 z" fill="url(#ch-tunic)"/>
+          <path d="M33,-224 q18,7 22,29 l-20,10 q-4,-19 -8,-28 z" fill="#bdb192"/>
 
-        {/* ── 팔과 손목밴드 ── */}
-        <path d={`M${L - 42},${G - 152} q-7,22 -4,40`} stroke="url(#ch-skin2)" strokeWidth="14"
-              strokeLinecap="round" fill="none"/>
-        <path d={`M${L + 42},${G - 152} q7,22 4,40`} stroke="url(#ch-skin)" strokeWidth="14"
-              strokeLinecap="round" fill="none"/>
-        <rect x={L - 53} y={G - 126} width="18" height="10" rx="5" fill="#a8d5e8" transform={`rotate(-8 ${L - 44} ${G - 121})`}/>
-        <rect x={L + 35} y={G - 126} width="18" height="10" rx="5" fill="#a8d5e8" transform={`rotate(8 ${L + 44} ${G - 121})`}/>
-        <circle cx={L - 45} cy={G - 106} r="8.5" fill="url(#ch-skin2)"/>
-        <circle cx={L + 45} cy={G - 106} r="8.5" fill="url(#ch-skin)"/>
+          {/* ── 허리에 묶은 옷 — 이 캐릭터의 가장 큰 표식 ── */}
+          <path d="M-35,-156 q35,-8 70,0 l-1,15 q-34,7 -68,0 z" fill="url(#ch-sash)"/>
+          {/* 자락 — 바지 위로 늘어진다. 어두우면 바지에 먹혀 매듭만 뜬다. */}
+          <path d="M-17,-143 q-9,19 -20,28 q-5,-22 10,-33 z" fill="#9c9262"/>
+          <path d="M-5,-141 q0,22 -5,33 q-12,-13 -6,-34 z" fill="#857c4e"/>
+          <path d="M-16,-150 q11,-7 21,0 q5,9 -5,12 q-13,3 -16,-4 z" fill="#c2b685"/>
+          <path d="M-6,-149 q4,5 0,9" stroke="#7d7449" strokeWidth="2"
+                strokeLinecap="round" fill="none"/>
+          <path d="M-36,-156 q36,-8 72,0" stroke="#4c4830" strokeWidth="2.4" fill="none" opacity=".7"/>
 
-        {/* ── 목 ── */}
-        <rect x={L - 10} y={G - 202} width="20" height="20" rx="9" fill="#d7a177"/>
+          {/* ── 팔 ── */}
+          <path d="M-43,-196 q-9,25 -7,52" stroke="url(#ch-skin2)" strokeWidth="12"
+                strokeLinecap="round" fill="none"/>
+          <path d="M43,-196 q9,25 7,52" stroke="url(#ch-skin)" strokeWidth="12"
+                strokeLinecap="round" fill="none"/>
+          <g transform="translate(-50,-142)"><Hand/></g>
+          <g transform="translate(50,-142)"><Hand/></g>
 
-        {/* ── 귀 — 크게 뻗어 있다 ── */}
-        <ellipse cx={L - 47} cy={G - 232} rx="11" ry="15" fill="url(#ch-skin2)"/>
-        <ellipse cx={L + 47} cy={G - 232} rx="11" ry="15" fill="url(#ch-skin)"/>
-        <ellipse cx={L - 47} cy={G - 232} rx="5.5" ry="8.5" fill="#c98e62" opacity=".55"/>
-        <ellipse cx={L + 47} cy={G - 232} rx="5.5" ry="8.5" fill="#c98e62" opacity=".55"/>
+          {/* ── 목 ── */}
+          <rect x="-9" y="-238" width="18" height="22" rx="8" fill="#d7a177"/>
 
-        {/* ── 머리 — 전체의 3분의 1 ── */}
-        <ellipse cx={L} cy={G - 238} rx="45" ry="47" fill="url(#ch-skin)"/>
-        {/* 머리카락 덩어리 — 두피에 붙지 않고 **위로 솟는다**. 이게 이 스타일의 표식이다. */}
-        <path d={`M${L - 48},${G - 240}
-                  c-7,-44 7,-72 36,-78 c30,-6 54,6 60,32 c4,17 3,33 -1,46
-                  c-5,-25 -16,-36 -27,-40 c-9,13 -28,17 -43,10 c-9,-4 -15,-10 -17,-16
-                  c-8,11 -9,29 -8,46 z`} fill="url(#ch-hair)"/>
-        {/* 갈래 셋 — 오른쪽으로 쓸린다 */}
-        <path d={`M${L - 16},${G - 310} c7,-17 32,-23 48,-8
-                  c-11,-3 -18,-1 -22,3 c15,3 25,14 27,27 c-13,-16 -36,-23 -53,-22 z`} fill="url(#ch-hair2)"/>
-        <path d={`M${L - 34},${G - 300} c-15,3 -24,15 -25,31 c9,-16 19,-25 25,-31 z`} fill="url(#ch-hair2)"/>
-        <path d={`M${L + 20},${G - 300} c16,-4 27,4 30,19 c-9,-11 -19,-16 -30,-19 z`} fill="url(#ch-hair2)"/>
-        <path d={`M${L - 28},${G - 292} c14,14 33,18 48,14`} stroke="#9a6640" strokeWidth="3.6"
-              strokeLinecap="round" fill="none" opacity=".7"/>
-        <path d={`M${L + 4},${G - 300} c13,9 21,20 25,34`} stroke="#9a6640" strokeWidth="3"
-              strokeLinecap="round" fill="none" opacity=".55"/>
+          {/* ── 목에 묶은 스카프 ── */}
+          <path d="M-15,-232 q15,12 30,0 l3,11 q-18,11 -36,0 z" fill="url(#ch-scarf)"/>
+          <ellipse cx="1" cy="-218" rx="7" ry="5.5" fill="#d79b30"/>
+          <path d="M-4,-214 q-4,13 -9,19 q-2,-13 3,-20 z" fill="url(#ch-scarf)"/>
+          <path d="M6,-214 q5,12 3,20 q-8,-8 -7,-20 z" fill="#c98a23"/>
 
-        {/* ── 눈썹 ── */}
-        <path d={`M${L - 28},${G - 252} q9,-6 18,-2`} stroke="#4e2f1e" strokeWidth="3.6"
-              strokeLinecap="round" fill="none"/>
-        <path d={`M${L + 10},${G - 254} q9,-4 18,2`} stroke="#4e2f1e" strokeWidth="3.6"
-              strokeLinecap="round" fill="none"/>
+          {/* ── 머리 — 둥근 아이가 아니라 턱이 좁은 소년이다 ── */}
+          <path d="M-34,-272 c0,-24 2,-38 34,-38 c32,0 34,14 34,38
+                   c0,24 -4,34 -13,42 c-7,6 -14,8 -21,8 c-7,0 -14,-2 -21,-8
+                   c-9,-8 -13,-18 -13,-42 z" fill="url(#ch-skin)"/>
 
-        {/* ── 눈 — 크게. 이 스타일의 중심이다 ── */}
-        <g className="home-blink">
-          <ellipse cx={L - 18} cy={G - 238} rx="13" ry="14.5" fill="#fffdfa"/>
-          <ellipse cx={L + 19} cy={G - 239} rx="13" ry="14.5" fill="#fffdfa"/>
-          <circle cx={L - 16} cy={G - 237} r="8.5" fill="url(#ch-eye)"/>
-          <circle cx={L + 21} cy={G - 238} r="8.5" fill="url(#ch-eye)"/>
-          <circle cx={L - 16} cy={G - 237} r="4" fill="#15211b"/>
-          <circle cx={L + 21} cy={G - 238} r="4" fill="#15211b"/>
-          <circle cx={L - 13} cy={G - 241} r="3.2" fill="#ffffff"/>
-          <circle cx={L + 24} cy={G - 242} r="3.2" fill="#ffffff"/>
-          <circle cx={L - 20} cy={G - 232} r="1.6" fill="#ffffff" opacity=".65"/>
-          <circle cx={L + 17} cy={G - 233} r="1.6" fill="#ffffff" opacity=".65"/>
+          {/* ── 귀 — 크게 뻗는다 ── */}
+          <path d="M-32,-274 c-12,-3 -18,3 -17,14 c1,12 8,19 17,18 z" fill="url(#ch-skin2)"/>
+          <path d="M32,-274 c12,-3 18,3 17,14 c-1,12 -8,19 -17,18 z" fill="url(#ch-skin)"/>
+          <path d="M-35,-268 c-7,-1 -10,3 -9,10 c1,7 5,11 9,11" fill="none" stroke="#c98e62"
+                strokeWidth="2.4" opacity=".6"/>
+          <path d="M35,-268 c7,-1 10,3 9,10 c-1,7 -5,11 -9,11" fill="none" stroke="#c98e62"
+                strokeWidth="2.4" opacity=".6"/>
+
+          {/* ── 머리카락 — 덩어리 위로 갈래가 솟는다 ── */}
+          <path d="M-36,-270 c-3,-34 6,-52 36,-52 c30,0 39,18 36,52
+                   c-5,-19 -13,-28 -21,-31 c-9,9 -27,11 -39,3 c-6,-4 -9,-10 -12,-18
+                   c-5,8 -7,24 0,46 z" fill="url(#ch-hair)"/>
+          <path d="M-27,-308 c-5,-15 1,-28 13,-32 c-7,13 -8,23 -5,32 z" fill="url(#ch-hair2)"/>
+          <path d="M-10,-315 c-3,-17 6,-29 19,-32 c-10,13 -12,23 -10,33 z" fill="url(#ch-hair2)"/>
+          <path d="M8,-315 c5,-16 18,-23 30,-19 c-12,5 -19,12 -22,21 z" fill="url(#ch-hair2)"/>
+          <path d="M24,-305 c11,-11 24,-11 32,-2 c-12,-2 -21,1 -27,8 z" fill="url(#ch-hair2)"/>
+          <path d="M-36,-298 c-9,-10 -11,-22 -6,-31 c0,12 3,21 10,28 z" fill="url(#ch-hair2)"/>
+          <path d="M-28,-296 c14,13 33,17 47,13" stroke="#9a6640" strokeWidth="3.4"
+                strokeLinecap="round" fill="none" opacity=".65"/>
+          <path d="M4,-304 c12,9 19,20 23,33" stroke="#9a6640" strokeWidth="2.8"
+                strokeLinecap="round" fill="none" opacity=".5"/>
+
+          {/* ── 눈썹 ── */}
+          <path d="M-25,-285 q10,-5 18,-1" stroke="#4e2f1e" strokeWidth="3.2"
+                strokeLinecap="round" fill="none"/>
+          <path d="M7,-286 q9,-4 18,1" stroke="#4e2f1e" strokeWidth="3.2"
+                strokeLinecap="round" fill="none"/>
+
+          {/* ── 눈 ── */}
+          <g className="home-blink">
+            <ellipse cx="-15" cy="-270" rx="11.5" ry="13" fill="#fffdfa"/>
+            <ellipse cx="16" cy="-271" rx="11.5" ry="13" fill="#fffdfa"/>
+            <circle cx="-13" cy="-269" r="7.6" fill="url(#ch-eye)"/>
+            <circle cx="18" cy="-270" r="7.6" fill="url(#ch-eye)"/>
+            <circle cx="-13" cy="-269" r="3.6" fill="#15211b"/>
+            <circle cx="18" cy="-270" r="3.6" fill="#15211b"/>
+            <circle cx="-10.5" cy="-273" r="2.9" fill="#ffffff"/>
+            <circle cx="20.5" cy="-274" r="2.9" fill="#ffffff"/>
+            <circle cx="-17" cy="-264" r="1.4" fill="#ffffff" opacity=".6"/>
+            <circle cx="14" cy="-265" r="1.4" fill="#ffffff" opacity=".6"/>
+          </g>
+
+          {/* ── 코·입·볼 ── */}
+          <path d="M1,-257 q6,7 -1,10" stroke="#b5724a" strokeWidth="3.2"
+                strokeLinecap="round" fill="none"/>
+          <path d="M-8,-240 q9,6 17,-1" stroke="#8e5133" strokeWidth="3.2"
+                strokeLinecap="round" fill="none"/>
+          <ellipse cx="-24" cy="-250" rx="8" ry="5" fill="#ef9d8a" opacity=".32"/>
+          <ellipse cx="26" cy="-251" rx="8" ry="5" fill="#ef9d8a" opacity=".32"/>
+
+          {/* ── 림라이트 — 길 쪽에서 오는 빛.
+                 윤곽선을 점선으로 끊어 오른쪽 가장자리만 남긴다.
+                 호를 따로 그리면 반드시 뺨을 가로지른다(처음에 그렇게 했다). ── */}
+          <ellipse cx="0" cy="-266" rx="34.5" ry="44" fill="none" stroke="#e3bd72" strokeWidth="3.2"
+                   pathLength="100" strokeDasharray="16 84" strokeDashoffset="11"
+                   strokeLinecap="round" opacity=".7"/>
+          <path d="M33,-216 q10,34 3,58" stroke="#e3bd72" strokeWidth="2.8"
+                strokeLinecap="round" fill="none" opacity=".42"/>
         </g>
-
-        {/* ── 코·입·볼 ── */}
-        <ellipse cx={L + 2} cy={G - 224} rx="7.5" ry="6" fill="#efb88e"/>
-        <ellipse cx={L + 1} cy={G - 226} rx="4" ry="3" fill="#ffd6b4" opacity=".7"/>
-        <path d={`M${L - 7},${G - 212} q9,8 18,-1`} stroke="#9c5f3e" strokeWidth="3"
-              strokeLinecap="round" fill="none"/>
-        <ellipse cx={L - 31} cy={G - 220} rx="9" ry="6" fill="#ef9d8a" opacity=".38"/>
-        <ellipse cx={L + 33} cy={G - 221} rx="9" ry="6" fill="#ef9d8a" opacity=".38"/>
-
-        {/* ── 림라이트 — 길 쪽에서 오는 빛.
-               윤곽선 자체를 점선으로 끊어 오른쪽 가장자리만 남긴다.
-               호를 따로 그리면 반드시 뺨을 가로지른다(처음에 그렇게 했다). ── */}
-        <ellipse cx={L} cy={G - 238} rx="45.5" ry="47.5" fill="none" stroke="#e3bd72" strokeWidth="3.2"
-                 pathLength="100" strokeDasharray="17 83" strokeDashoffset="11"
-                 strokeLinecap="round" opacity=".7"/>
-        <path d={`M${L + 34},${G - 182} q9,34 2,58`} stroke="#e3bd72" strokeWidth="3"
-              strokeLinecap="round" fill="none" opacity=".45"/>
       </g>
     </>
   );

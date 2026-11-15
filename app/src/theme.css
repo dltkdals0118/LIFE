@@ -744,7 +744,7 @@ input,textarea,select{background-color:#0e1713}
   .home-facts{gap:18px}
   /* 좁은 화면에서는 글이 화면 가운데까지 올라와 캐릭터와 겹친다. 위로 비켜 준다. */
   .home-actor{transform-box:view-box;transform-origin:530px 400px;
-    transform:translate(46px,-112px) scale(.84)}
+    transform:translate(42px,-106px) scale(.74)}
 }
 @media (prefers-reduced-motion:reduce){
   .home-scene g{transition:none}
