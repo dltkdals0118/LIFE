@@ -239,18 +239,21 @@ export default function App(){
      if(!ws.length)return null;
     return <div className="curri-phase" key={ph.key}>
      {ph.name&&<div className="curri-phase-head"><h3>{ph.name}</h3>{ph.why&&<p>{ph.why}</p>}</div>}
-     {ws.map(w=><label className={`curri-week ${done.has(w.n)?'is-done':''} ${now&&now.n===w.n?'is-now':''}`} key={w.n}>
-       <input type="checkbox" checked={done.has(w.n)} disabled={!ready}
+     {ws.map(w=><div className={`curri-week ${done.has(w.n)?'is-done':''} ${now&&now.n===w.n?'is-now':''}`} key={w.n}>
+       <input type="checkbox" aria-label={`${w.n}주차 완료`} checked={done.has(w.n)} disabled={!ready}
          onChange={()=>change(x=>toggleWeek(x,w.n),done.has(w.n)?`${w.n}주차를 다시 열었어요`:`${w.n}주차 완료`)}/>
        <span className="curri-n">{w.n}주</span>
        <span className="curri-body">
         <strong>{w.title}</strong>
-        <em>{w.what}</em>
-        <small>끝났다고 말하려면 — {w.done_when}</small>
+        {w.why&&<em className="curri-why">{w.why}</em>}
+        {w.what&&!w.steps.length&&<em>{w.what}</em>}
+        {!!w.steps.length&&<ol className="curri-steps">{w.steps.map((x,k)=><li key={k}>{x}</li>)}</ol>}
+        {w.tools&&<small className="curri-tools">쓰는 것 — {w.tools}</small>}
+        <small className="curri-done">끝났다고 말하려면 — {w.done_when}</small>
         <span className="curri-areas">{w.areas.map(a=><i key={a}>{areaName(a)}</i>)}</span>
        </span>
        <span className="curri-when">{w.from.slice(5)}~{w.to.slice(5)}</span>
-      </label>)}
+      </div>)}
     </div>;});})()}
    <p className="small-note">능력을 올리는 것도 손잡이다 — 위 <b>스킬</b> 칸이 이 커리큘럼이고, 하루 1시간을 쓴다.</p>
   </section></>;})()}

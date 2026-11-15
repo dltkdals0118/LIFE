@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
+import Character from './Character';
 import {projectCash, picksOf, defaultPicks, today, won, type Sim, type Workspace} from './model';
 
 /** 메인 화면 — 갈림길에 선 사람.
@@ -144,27 +145,6 @@ function Scene({tilt, boxRef, drop, rise, months}: {
           <radialGradient id="shadowG" cx=".5" cy=".5" r=".5">
             <stop offset="0" stopColor="#020504" stopOpacity=".72"/><stop offset="1" stopColor="#020504" stopOpacity="0"/>
           </radialGradient>
-          <linearGradient id="skin" x1=".2" y1="0" x2=".9" y2="1">
-            <stop offset="0" stopColor="#f6d2ae"/><stop offset=".55" stopColor="#e3ae84"/><stop offset="1" stopColor="#bf835b"/>
-          </linearGradient>
-          <linearGradient id="skinDark" x1="0" y1="0" x2="1" y2=".6">
-            <stop offset="0" stopColor="#dcae8a"/><stop offset="1" stopColor="#b2794f"/>
-          </linearGradient>
-          <linearGradient id="hair" x1=".25" y1="0" x2=".8" y2="1">
-            <stop offset="0" stopColor="#4c4757"/><stop offset=".45" stopColor="#2f2b36"/><stop offset="1" stopColor="#1b1921"/>
-          </linearGradient>
-          <linearGradient id="shirt" x1=".2" y1="0" x2=".85" y2="1">
-            <stop offset="0" stopColor="#f1e7d2"/><stop offset=".55" stopColor="#dccbac"/><stop offset="1" stopColor="#ab9878"/>
-          </linearGradient>
-          <linearGradient id="pants" x1=".2" y1="0" x2=".85" y2="1">
-            <stop offset="0" stopColor="#aaa48d"/><stop offset=".6" stopColor="#8d8771"/><stop offset="1" stopColor="#686353"/>
-          </linearGradient>
-          <linearGradient id="bag" x1=".1" y1="0" x2=".9" y2="1">
-            <stop offset="0" stopColor="#e8a461"/><stop offset=".6" stopColor="#c97d39"/><stop offset="1" stopColor="#965a27"/>
-          </linearGradient>
-          <linearGradient id="shoe" x1=".1" y1="0" x2=".9" y2="1">
-            <stop offset="0" stopColor="#e0a566"/><stop offset="1" stopColor="#a56d2d"/>
-          </linearGradient>
         </defs>
 
         <rect x={-400} y={-200} width={w + 800} height={h + 400} fill="url(#sky)"/>
@@ -201,84 +181,9 @@ function Scene({tilt, boxRef, drop, rise, months}: {
           <ellipse cx={L + 150} cy={G - 60} rx="200" ry="150" fill="url(#glow)"/>
           <ellipse cx={L + 4} cy={G + 12} rx="70" ry="16" fill="url(#shadowG)"/>
           <g className="home-figure-art">
-            <g className="home-breathe">
-              {/* 가방 — 몸 뒤 */}
-              <rect x={L - 46} y={G - 128} width="34" height="48" rx="13" fill="url(#bag)"/>
-              <rect x={L - 43} y={G - 117} width="26" height="15" rx="6" fill="#ae6c30" opacity=".55"/>
-
-              {/* 다리 */}
-              <path d={`M${L - 13},${G - 74} q-3,34 -4,62`} stroke="url(#skinDark)" strokeWidth="17"
-                    strokeLinecap="round" fill="none"/>
-              <path d={`M${L + 13},${G - 74} q5,32 7,60`} stroke="url(#skin)" strokeWidth="17"
-                    strokeLinecap="round" fill="none"/>
-              {/* 양말과 신발 */}
-              <rect x={L - 26} y={G - 18} width="17" height="10" rx="3" fill="#f2ece0"/>
-              <rect x={L + 12} y={G - 18} width="17" height="10" rx="3" fill="#f2ece0"/>
-              <path d={`M${L - 29},${G - 9} h22 q8,0 9,6 v3 q0,3 -4,3 h-27 q-3,0 -3,-4 z`} fill="url(#shoe)"/>
-              <path d={`M${L + 9},${G - 9} h22 q8,0 9,6 v3 q0,3 -4,3 h-27 q-3,0 -3,-4 z`} fill="url(#shoe)"/>
-              <rect x={L - 33} y={G - 1} width="39" height="5" rx="2.5" fill="#efe8da"/>
-              <rect x={L + 5} y={G - 1} width="39" height="5" rx="2.5" fill="#efe8da"/>
-
-              {/* 반바지 */}
-              <path d={`M${L - 25},${G - 108} h50 v31 q0,8 -9,8 h-13 q-3,-10 -3,-17 q0,7 -3,17 h-13 q-9,0 -9,-8 z`}
-                    fill="url(#pants)"/>
-              <rect x={L - 26} y={G - 110} width="52" height="7" rx="3" fill="#7b7560"/>
-
-              {/* 상의 */}
-              <path d={`M${L - 26},${G - 154} q26,-9 52,0 l4,52 q-30,8 -60,0 z`} fill="url(#shirt)"/>
-              <path d={`M${L - 26},${G - 154} q-15,5 -18,23 l16,7 q3,-15 6,-22 z`} fill="url(#shirt)"/>
-              <path d={`M${L + 26},${G - 154} q15,5 18,23 l-16,7 q-3,-15 -6,-22 z`} fill="#cdbc9c"/>
-              <path d={`M${L - 9},${G - 157} l9,12 l9,-12 l-4,-3 l-5,6 l-5,-6 z`} fill="#f5edda"/>
-
-              {/* 팔 */}
-              <path d={`M${L - 36},${G - 126} q-8,19 -5,35`} stroke="url(#skinDark)" strokeWidth="13"
-                    strokeLinecap="round" fill="none"/>
-              <path d={`M${L + 36},${G - 126} q9,18 6,34`} stroke="url(#skin)" strokeWidth="13"
-                    strokeLinecap="round" fill="none"/>
-              <circle cx={L - 40} cy={G - 87} r="7.5" fill="url(#skinDark)"/>
-              <circle cx={L + 42} cy={G - 89} r="7.5" fill="url(#skin)"/>
-
-              {/* 가방 끈 */}
-              <path d={`M${L - 17},${G - 152} q-10,23 -10,46`} stroke="#c27b3a" strokeWidth="6"
-                    strokeLinecap="round" fill="none"/>
-
-              {/* 목 */}
-              <rect x={L - 8} y={G - 168} width="16" height="18" rx="7" fill="#c78d64"/>
-
-              {/* 머리 */}
-              <ellipse cx={L - 34} cy={G - 193} rx="6" ry="8" fill="#dca57c"/>
-              <ellipse cx={L + 34} cy={G - 194} rx="6" ry="8" fill="#c78d64"/>
-              <ellipse cx={L} cy={G - 196} rx="34" ry="37" fill="url(#skin)"/>
-              <path d={`M${L - 35},${G - 198} q2,-39 35,-39 q34,0 36,39 q-6,-17 -17,-20
-                        q-7,9 -19,6 q-12,-3 -17,-8 q-11,6 -18,22 z`} fill="url(#hair)"/>
-              <path d={`M${L + 10},${G - 235} q17,-9 23,7 q-11,-6 -23,-7 z`} fill="#3b3644"/>
-              <path d={`M${L - 21},${G - 229} q9,10 23,9`} stroke="#514b5c" strokeWidth="3"
-                    strokeLinecap="round" fill="none" opacity=".8"/>
-
-              <path d={`M${L - 21},${G - 205} q7,-4 14,-1`} stroke="#2b2832" strokeWidth="3"
-                    strokeLinecap="round" fill="none"/>
-              <path d={`M${L + 7},${G - 206} q8,-3 15,1`} stroke="#2b2832" strokeWidth="3"
-                    strokeLinecap="round" fill="none"/>
-              <g className="home-blink">
-                <ellipse cx={L - 13} cy={G - 194} rx="7.5" ry="8.5" fill="#fdfaf5"/>
-                <ellipse cx={L + 15} cy={G - 195} rx="7.5" ry="8.5" fill="#fdfaf5"/>
-                <circle cx={L - 11} cy={G - 193} r="4.2" fill="#2b2530"/>
-                <circle cx={L + 17} cy={G - 194} r="4.2" fill="#2b2530"/>
-                <circle cx={L - 9.6} cy={G - 195} r="1.5" fill="#ffffff"/>
-                <circle cx={L + 18.4} cy={G - 196} r="1.5" fill="#ffffff"/>
-              </g>
-              <path d={`M${L + 1},${G - 186} q3,3 0,5`} stroke="#b57c55" strokeWidth="2.2"
-                    strokeLinecap="round" fill="none"/>
-              <path d={`M${L - 5},${G - 176} q6,5 12,-1`} stroke="#8d5a3c" strokeWidth="2.6"
-                    strokeLinecap="round" fill="none"/>
-              <ellipse cx={L - 23} cy={G - 182} rx="6" ry="4" fill="#e08a7a" opacity=".3"/>
-              <ellipse cx={L + 24} cy={G - 183} rx="6" ry="4" fill="#e08a7a" opacity=".3"/>
-
-              {/* 림라이트 — 길 쪽에서 오는 빛 */}
-              <path d={`M${L + 32},${G - 216} a37,37 0 0 1 2,41`} stroke="#e3bd72" strokeWidth="3"
-                    strokeLinecap="round" fill="none" opacity=".7"/>
-              <path d={`M${L + 30},${G - 150} q8,30 2,52`} stroke="#e3bd72" strokeWidth="3"
-                    strokeLinecap="round" fill="none" opacity=".5"/>
+            {/* 좁은 화면에서는 글과 겹친다 — 위로 올리고 조금 줄인다(.home-actor) */}
+            <g className="home-actor">
+              <Character L={L} G={G}/>
             </g>
           </g>
         </g>

@@ -138,7 +138,10 @@ export const curriculumSchema = z.object({
  weeks:z.array(z.object({
    n:z.number().int().min(1).max(120), phase:z.string().max(4).default(''),
    from:date, to:date, areas:z.array(z.string().max(20)).max(8).default([]),
-   title:label, what:z.string().max(800).default(''), done_when:z.string().max(800).default(''),
+   title:label, why:z.string().max(600).default(''),
+   steps:z.array(z.string().max(300)).max(10).default([]),
+   tools:z.string().max(200).default(''),
+   what:z.string().max(800).default(''), done_when:z.string().max(800).default(''),
  })).max(120).default([]),
 });
 export type Curriculum=z.infer<typeof curriculumSchema>;
@@ -412,17 +415,7 @@ export function createDemo():Workspace{
  s.rewards=[{id:'r1',title:'초록빛 첫 걸음',type:'digital',cost:0,requiredXp:100,domainId:'',note:'첫 발자국을 남긴 날의 기록',status:'used',spent:null,usedAt:new Date().toISOString(),reservedAt:null},{id:'r2',title:'나를 위한 영화 한 편',type:'real',cost:15000,requiredXp:550,domainId:'recovery',note:'회복 습관이 자랐을 때, 보고 싶었던 영화 한 편',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r3',title:'느긋한 오후 산책',type:'real',cost:0,requiredXp:300,domainId:'',note:'느긋하게 걷는 시간',status:'wish',spent:null,usedAt:null,reservedAt:null},{id:'r4',title:'꾸준한 탐험가',type:'digital',cost:0,requiredXp:700,domainId:'',note:'',status:'wish',spent:null,usedAt:null,reservedAt:null}];
  // 예시 공간에도 시뮬레이션을 넣는다 — 가져오기 전에도 '무엇을 돌려보는 것인지' 가 보여야 한다.
  // 예시 공간에도 커리큘럼을 넣는다 — 가져오기 전에도 '무엇을 쌓는 것인지' 가 보여야 한다.
- s.curriculum={title:'배우고 싶은 것',subtitle:'하루 1시간 · 예시예요. 내 커리큘럼을 가져오면 바뀝니다.',
-  areas:[{key:'a',name:'기초'},{key:'b',name:'도구'},{key:'c',name:'결과물'}],
-  phases:[{key:'1',name:'재는 법',why:'잘하고 있는지 모르면 늘었는지도 모른다.'},
-          {key:'2',name:'만들기',why:'배운 것은 남는 것으로 바꿔야 쓸 수 있다.'}],
-  weeks:[
-   {n:1,phase:'1',from:back(0),to:back(-6),areas:['a'],title:'기준 정하기',
-    what:'무엇을 잘한다고 할지 먼저 적는다.',done_when:'기준이 문장으로 있다.'},
-   {n:2,phase:'1',from:back(-7),to:back(-13),areas:['a','b'],title:'지금 수준 재기',
-    what:'그 기준으로 지금을 한 번 재 둔다.',done_when:'숫자가 하나 있다.'},
-   {n:3,phase:'2',from:back(-14),to:back(-20),areas:['b','c'],title:'작은 결과물 하나',
-    what:'배운 것으로 남는 것을 하나 만든다.',done_when:'남 앞에 보여줄 수 있다.'}]};
+ s.curriculum={title:'배우고 싶은 것',subtitle:'하루 1시간 · 예시예요. 내 커리큘럼을 가져오면 바뀝니다.',areas:[{key:'a',name:'기초'},{key:'b',name:'도구'},{key:'c',name:'결과물'}],phases:[{key:'1',name:'1단계 · 재는 법',why:'잘하고 있는지 모르면 늘었는지도 모른다.'},{key:'2',name:'2단계 · 만들기',why:'배운 것은 남는 것으로 바꿔야 쓸 수 있다.'}],weeks:[{n:1,phase:'1',from:back(0),to:back(-6),areas:['a'],title:'무엇을 잘한다고 할지 정하기',why:'기준이 없으면 늘었는지 알 수 없다.',steps:['잘한다는 게 뭔지 세 줄로 적는다','그 중 숫자로 잴 수 있는 것에 표시한다','잴 수 없는 것은 어떻게 볼지 적는다'],tools:'문서 한 장',what:'',done_when:'기준이 문장으로 있다.'},{n:2,phase:'1',from:back(-7),to:back(-13),areas:['a','b'],title:'지금 수준을 한 번 재 두기',why:'출발점을 안 적어 두면 나중에 비교할 것이 없다.',steps:['1주차 기준으로 오늘을 재 본다','숫자와 날짜를 같이 적는다','어려웠던 점 하나를 적는다'],tools:'문서 한 장',what:'',done_when:'숫자가 하나 있고 날짜가 붙어 있다.'},{n:3,phase:'2',from:back(-14),to:back(-20),areas:['b','c'],title:'작은 결과물 하나 만들기',why:'남 앞에 보여줄 수 있어야 실력이 된다.',steps:['배운 것으로 만들 수 있는 가장 작은 것을 고른다','하루 1시간씩 다섯 번 안에 끝낸다','누군가에게 보여주고 반응을 적는다'],tools:'무엇이든 — 작게',what:'',done_when:'남 앞에 보여줄 수 있는 것이 하나 있다.'}]};
  s.curriculumDone=[1];
  s.sim={asOf:today(),cash:3000000,netMonthly:-1800000,startMonth:monthAdd(today().slice(0,7),1),months:6,flowBasis:'예시 값이에요. 내 기록을 가져오면 내 숫자와 내 항목으로 바뀝니다.',incomeNow:2600000,baseFreeHours:2,groups:[{key:'day',name:'하루 쓰기',note:'매일 내가 정하는 것. 시간이 움직여요'},{key:'cut',name:'줄이기',note:'지금 당길 수 있는 돈'},{key:'earn',name:'늘리기',note:'금액이 미확인이면 민감도로만 봐요'}],levers:[{id:'play',name:'취미 시간',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 시간과 돈이 같이 움직이는 칸이에요.',options:[{key:'A',label:'거의 안 한다',delta:500000,hours:3,requires:['그 시간에 무엇을 할지 먼저 정한다']},{key:'B',label:'하루 2시간쯤',delta:250000,hours:1.5,requires:['주간 상한을 정한다']},{key:'C',label:'지금 그대로',delta:0,hours:0,requires:[]}]},{id:'sleep',name:'수면 챙기기',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 시간을 쓰는 쪽이지만 낮이 달라져요.',options:[{key:'A',label:'하루 1시간 더',delta:0,hours:-1,requires:['잠드는 시각을 정해 둔다']},{key:'B',label:'하루 30분 더',delta:0,hours:-0.5,requires:['잠드는 시각을 정해 둔다']},{key:'C',label:'지금 그대로',delta:0,hours:0,requires:[]}]},{id:'study',name:'공부',group:'day',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 매일 조금씩.',options:[{key:'A',label:'하루 1시간',delta:0,hours:-1,requires:['할 시간을 고정한다']},{key:'B',label:'하루 30분',delta:0,hours:-0.5,requires:[]},{key:'C',label:'안 한다',delta:0,hours:0,requires:[]}]},{id:'food',name:'식비·카페',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 보통 가장 큰 칸이에요.',options:[{key:'A',label:'월 80만',delta:800000,hours:0,requires:['주 단위 상한을 정하고 지킨다','배달·카페를 주 N회로 못 박는다']},{key:'B',label:'월 40만',delta:400000,hours:0,requires:['주 단위 상한을 정한다']},{key:'C',label:'그대로',delta:0,hours:0,requires:[]}]},{id:'telecom',name:'통신 요금',group:'cut',starts:monthAdd(today().slice(0,7),1),basis:'예시 — 약정이 변수예요.',options:[{key:'A',label:'월 10만',delta:100000,hours:0,requires:['약정과 위약금을 확인한다']},{key:'B',label:'그대로',delta:0,hours:0,requires:[]}]},{id:'income',name:'수입 늘리기',group:'earn',starts:monthAdd(today().slice(0,7),2),basis:'예시 — 금액이 미확인이면 0 으로 두고 필요한 액수를 역산해요.',options:[{key:'A',label:'만약 +50만이라면',delta:500000,hours:0,requires:['근거가 될 결과물을 만든다']},{key:'B',label:'모름 — 0',delta:0,hours:0,requires:[]}]}]};
  return s;

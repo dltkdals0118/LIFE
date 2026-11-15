@@ -742,6 +742,9 @@ input,textarea,select{background-color:#0e1713}
   .home{margin:-15px -19px 0;min-height:clamp(400px,68vh,560px);border-radius:0 0 16px 16px}
   .home-copy{padding:26px 19px 24px;width:100%}
   .home-facts{gap:18px}
+  /* 좁은 화면에서는 글이 화면 가운데까지 올라와 캐릭터와 겹친다. 위로 비켜 준다. */
+  .home-actor{transform-box:view-box;transform-origin:530px 400px;
+    transform:translate(46px,-112px) scale(.84)}
 }
 @media (prefers-reduced-motion:reduce){
   .home-scene g{transition:none}
@@ -789,3 +792,14 @@ input,textarea,select{background-color:#0e1713}
 @keyframes home-blink{0%,95%,100%{transform:scaleY(1)}97%{transform:scaleY(.12)}}
 .home-blink{transform-box:fill-box;transform-origin:50% 50%}
 @media (prefers-reduced-motion:reduce){.home-breathe,.home-blink{animation:none}}
+
+/* 커리큘럼 본문 — 무엇부터 하는지가 1번 줄에 보여야 한다 (2026-11-15) */
+.curri-why{color:var(--text-2)!important;font-size:12px!important}
+.curri-steps{margin:7px 0 0;padding-left:19px;display:flex;flex-direction:column;gap:5px}
+.curri-steps li{font-size:12.5px;line-height:1.7;color:var(--text);padding-left:2px}
+.curri-steps li::marker{color:var(--neon-dim);font-weight:700;font-size:11px}
+.curri-tools{color:var(--teal)!important;margin-top:7px}
+.curri-done{color:var(--text-3)!important;margin-top:4px}
+.curri-week{cursor:default}
+.curri-week input{cursor:pointer}
+.curri-week.is-done .curri-steps li,.curri-week.is-done .curri-why{color:#4e5b54!important}
