@@ -40,17 +40,17 @@ describe('결과 등급이 성장과 다음 제안에 반영된다',()=>{
   const s=completeQuest(base(),'q1','missed');
   expect(nextSuggestion(s,'q1')?.switchTo).toBeUndefined();
  });
- it('최근 결과가 두 번 이상 약하면 더 가벼운 경로를 권한다',()=>{
+ it('반복 미완료에도 ABC 난이도를 추측하지 않는다',()=>{
   let s=completeQuest(base(),'q1','missed');
   s=completeQuest(s,'q2','partial');
   const sug=nextSuggestion(s,'q2');
-  expect(sug?.switchTo).toBe('B');
-  expect(sug?.planId).toBe('p');
+  expect(sug?.switchTo).toBeUndefined();
+  expect(sug?.text).toContain('A/B/C는 난이도 순서가 아닙니다');
  });
- it('세 번 끝까지 해내면 더 높은 경로를 권한다',()=>{
+ it('연속 완료가 다른 경로의 실행 가능성을 증명하지 않는다',()=>{
   let s=base(); s.plans=[{...s.plans[0],active:'C'}];
   s=completeQuest(s,'q1','full'); s=completeQuest(s,'q2','full'); s=completeQuest(s,'q3','full');
-  expect(nextSuggestion(s,'q3')?.switchTo).toBe('A');
+  expect(nextSuggestion(s,'q3')?.switchTo).toBeUndefined();
  });
 });
 

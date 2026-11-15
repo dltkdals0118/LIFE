@@ -1,0 +1,32 @@
+name: Verify LIFE planning
+on:
+  push:
+    branches: ['improve/**']
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm test -- --no-file-parallelism
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --workers=2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: life-browser-results
+          path: app/test-results
+          retention-days: 7
