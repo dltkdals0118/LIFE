@@ -1,0 +1,4 @@
+# 생성 중간물 — 다시 만들 수 있고 무겁다(11MB). 정본은 life_boy.blend 다.
+_gen/
+__pycache__/
+*.blend1
