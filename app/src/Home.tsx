@@ -19,13 +19,9 @@ export default function Home({s,onGo,update,ready}:{s:Workspace;onGo:(v:'sim'|'j
   return log(next,`${key}${rest?'rest':reduced?'small':'done'}|${rest?'오늘은 쉬기':title}`);
  });}catch(e){setError(e instanceof Error?e.message:'저장하지 못했어요.');}}
  return <section className="daily-home">
- <div className="daily-head">
-  <Character3D className="daily-mascot"/>
-  <div>
-   <p className="daily-eyebrow">LIFE · 오늘 한 걸음</p><h1>{record?'오늘은 여기까지.':'오늘은 얼마나 여유 있어?'}</h1>
-   <p className="daily-intro">{record?'더 채우지 않아도 괜찮아요. 내일 다시 시작해요.':'계획부터 세울 필요 없어요. 지금 가능한 만큼만 골라요.'}</p>
-  </div>
- </div>
+ <Character3D className="daily-stage"/>
+ <p className="daily-eyebrow">LIFE · 오늘 한 걸음</p><h1>{record?'오늘은 여기까지.':'오늘은 얼마나 여유 있어?'}</h1>
+ <p className="daily-intro">{record?'더 채우지 않아도 괜찮아요. 내일 다시 시작해요.':'계획부터 세울 필요 없어요. 지금 가능한 만큼만 골라요.'}</p>
  {error&&<p role="alert">{error}</p>}
  {record?<article className="daily-card"><span className="daily-tag">오늘의 기록</span><h2>{record.text.includes(':rest|')?'오늘은 쉬기로 했어요':record.text.includes(':small|')?'작게 시작했어요':'한 걸음 남겼어요'}</h2><p>{record.text.split('|').slice(1).join('|')}</p></article>:<>
  <div className="daily-capacity" aria-label="오늘 여유">{[[5,'거의 없어'],[20,'20분 정도'],[40,'여유 있어']] .map(([n,label])=><button key={n} aria-pressed={capacity===n} onClick={()=>{setCapacity(Number(n));setSmall(false);}}>{label}</button>)}</div>

@@ -1,13 +1,8 @@
 .daily-home{max-width:680px;margin:48px auto 80px;padding:0 16px}.daily-eyebrow{color:#6cdaa2;letter-spacing:.12em;font-size:12px}.daily-home h1{font-size:clamp(28px,5vw,42px);letter-spacing:-.04em;line-height:1.3;margin:14px 0}.daily-intro{color:#a8bab0;line-height:1.8}.daily-capacity{display:flex;gap:8px;margin:28px 0 18px}.daily-capacity button{flex:1;border:1px solid #344c40;border-radius:14px;background:#101e17;color:#c9d7cf;padding:15px 8px}.daily-capacity button[aria-pressed=true]{border-color:#61dca0;background:#204332;color:#fff}.daily-card{border:1px solid #345040;border-radius:24px;padding:30px;background:linear-gradient(130deg,#1a2d22,#101b16)}.daily-tag{font-size:12px;color:#82d5a7}.daily-card h2{font-size:25px;line-height:1.5;margin:16px 0}.daily-card p{line-height:1.8;color:#d4ded7}.daily-card .daily-reason{font-size:13px;color:#9eb6a7;border-top:1px solid #344c40;padding-top:18px}.daily-buttons{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 14px}.daily-buttons button{min-height:48px;flex:1;white-space:nowrap}.daily-card small{color:#a8bab0;line-height:1.6}.daily-note{display:block;margin:24px auto;background:none;color:#a8bab0;border:0;padding:14px;cursor:pointer}.daily-more{border-top:1px solid #344c40;padding:22px 0;color:#a8bab0}.daily-more summary{cursor:pointer}.daily-more button{margin:12px 8px 0 0}@media(max-width:600px){.daily-home{margin:22px auto 60px;padding:0}.daily-card{padding:22px}.daily-card h2{font-size:22px}.daily-capacity button{font-size:13px}}
 
-/* 인사말 옆에 서는 캐릭터. 글과 밑선을 맞춰야 말을 거는 것처럼 읽힌다.
-   모델 정본은 app/assets3d/life_boy.blend 다. */
-.daily-head{display:flex;gap:18px;align-items:flex-end;margin-bottom:6px}
-.daily-head>div{flex:1;min-width:0}
-.daily-head h1{margin-top:8px}
-/* 폭을 키에서 낸다 — 모델이 세로로 길어 가로를 따로 주면 잘린다. */
-.daily-mascot{--mascot-h:clamp(132px,22vw,188px);
-  flex:0 0 auto;height:var(--mascot-h);width:calc(var(--mascot-h) * .64);
-  margin-bottom:-6px;pointer-events:none}
-@media(max-width:600px){.daily-head{gap:10px}
- .daily-mascot{--mascot-h:clamp(104px,26vw,132px)}}
+/* 책상에서 일하는 캐릭터. 가로로 긴 장면이라 인사말 **위에** 통째로 놓는다 —
+   옆에 끼우면 책상이 잘린다. 모델 정본은 app/assets3d/life_boy.blend 다.
+   pointer-events 를 살려 둔다 — 올리면 이쪽을 보고 누르면 반응한다. */
+.daily-stage{display:block;width:100%;aspect-ratio:5/3;margin:-10px 0 2px;
+  cursor:pointer;touch-action:manipulation}
+@media(max-width:600px){.daily-stage{margin:0 0 4px;aspect-ratio:3/2}}
