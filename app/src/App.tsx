@@ -67,6 +67,9 @@ export default function App(){
  const store=useWorkspace();const {data:s,demo,ready}=store;
  const [view,setView]=useState<View>('home'),[menu,setMenu]=useState(false),[dialog,setDialog]=useState<Dialog>(null),[toast,setToast]=useState(''),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[selectedDomain,setSelectedDomain]=useState('finance'),[gate,setGate]=useState(()=>localStorage.getItem('life:gate')),[planFilter,setPlanFilter]=useState('all'),[planQuery,setPlanQuery]=useState(''),[openPlans,setOpenPlans]=useState<string[]>([]),[suggestion,setSuggestion]=useState<{text:string;switchTo?:'A'|'B'|'C';planId?:string}|null>(null),[authEmail,setAuthEmail]=useState(''),[authPassword,setAuthPassword]=useState(''),[authMode,setAuthMode]=useState<'login'|'signup'>('login'),[authSent,setAuthSent]=useState(false),[simPlan,setSimPlan]=useState(''),[simCash,setSimCash]=useState(''),[simHours,setSimHours]=useState(''),[simOpen,setSimOpen]=useState(false),[levelUp,setLevelUp]=useState<ReturnType<typeof powerDiff>|null>(null);
  const importRef=useRef<HTMLInputElement>(null);
+ const [journalDate,setJournalDate]=useState(today);
+ const journalFormRef=useRef<HTMLFormElement>(null);
+ const selectJournalDate=(date:string)=>{if(!date||date===journalDate)return;const form=journalFormRef.current;const old=journalOf(s,journalDate);if(form){const f=new FormData(form);if(String(f.get('text')??'')!==(old?.text??'')||String(f.get('mood')??'')!==String(old?.mood??'')){if(!confirm('저장하지 않은 내용이 있어요. 날짜를 바꾸고 변경 내용을 버릴까요?'))return;}}setJournalDate(date);};
  const xp=xpOf(s),done=s.quests.filter(q=>q.status==='done'),open=s.quests.filter(q=>q.status==='ready').sort((a,b)=>a.due.localeCompare(b.due)),todayQs=open.filter(q=>q.due<=today()).slice(0,3),actualToday=done.filter(q=>q.completedAt?.slice(0,10)===today()).length;
  const queue=questQueue(s),fq=queue[0]??null,upNext=queue[1]??null,bonus=subQuestFor(s),power=combatPower(s);
  const activeDomain=s.domains.find(d=>d.id===selectedDomain)??s.domains[0];const currentLevel=level(xpOf(s,activeDomain.id));
@@ -136,15 +139,15 @@ export default function App(){
  {!ready&&<p role="status">기록을 불러오고 있어요…</p>}
  {view==='planning'&&<Planning s={s} ready={ready} update={fn=>store.update(fn)} onSim={()=>go('sim')} onQuest={id=>{const q=s.quests.find(q=>q.id===id);if(q)toggle(q);else setDialog({type:'quest'});}} onEdit={id=>{const item=s.quests.find(q=>q.id===id);if(item)setDialog({type:'quest',item});}} onRecord={()=>setDialog({type:'observation'})} onReview={()=>setDialog({type:'review'})}/>}
  {view==='home'&&<HomeView s={s} ready={ready} update={fn=>store.update(fn)} onGo={v=>go(v)}/>}
- {view==='journal'&&(()=>{const d=today();const mine=journalOf(s,d);const streak=journalStreak(s);
+ {view==='journal'&&(()=>{const d=journalDate;const mine=journalOf(s,d);const streak=journalStreak(s);
  return <>{sectionHead('ONE A DAY','일기',streak>0?`${streak}일 연속으로 쓰고 있어요.`:'오늘 하루를 한 단락으로 남겨요.')}
  <section className="panel journal-today">
-  <div className="panel-heading"><div><h2>{d}</h2><p>{mine?'이미 쓴 글이에요. 고치면 덮어써요.':'하루에 한 번이면 충분해요.'}</p></div>
+  <div className="panel-heading"><div><label className="field"><span>일기 날짜</span><input type="date" value={d} onChange={e=>selectJournalDate(e.target.value)} /></label><button type="button" className="text-button" onClick={()=>selectJournalDate(today())}>오늘로</button><h2>{d}</h2><p>{mine?'이미 쓴 글이에요. 고치면 덮어써요.':'하루에 한 번이면 충분해요.'}</p></div>
    {streak>0&&<Badge>{streak}일째</Badge>}</div>
-  <form className="journal-form" onSubmit={e=>{e.preventDefault();
+  <form ref={journalFormRef} className="journal-form" onSubmit={e=>{e.preventDefault();
     const f=new FormData(e.currentTarget);const t=String(f.get('text')??'');
     const m=String(f.get('mood')??'');
-    change(w=>upsertJournal(w,d,t,m?Number(m):null),t.trim()?'일기를 남겼어요.':'오늘 일기를 비웠어요.');}}>
+    change(w=>upsertJournal(w,d,t,m?Number(m):null),t.trim()?'일기를 남겼어요.':'선택한 날짜의 일기를 비웠어요.');}}>
    <label className="sr-only" htmlFor="journal-text">오늘의 일기</label>
    <textarea id="journal-text" name="text" key={mine?.updatedAt??d} defaultValue={mine?.text??''}
      maxLength={20000} rows={9} placeholder="오늘 어땠나요. 잘 안 된 날도 그대로 적어도 돼요."/>
@@ -159,7 +162,7 @@ export default function App(){
  <section className="panel"><div className="panel-heading"><div><h2>지난 일기</h2>
    <p>{(s.journal??[]).length?`${(s.journal??[]).length}개`:'아직 없어요.'}</p></div><BookOpen size={18}/></div>
   {(s.journal??[]).filter(x=>x.date!==d).slice(0,60).map(x=><article className="journal-past" key={x.id}>
-    <div className="journal-past-top"><strong>{x.date}</strong>{x.mood?<span className="journal-mood-chip">컨디션 {x.mood}</span>:null}</div>
+    <div className="journal-past-top"><button className="text-button" onClick={()=>{selectJournalDate(x.date);window.scrollTo({top:0,behavior:'smooth'});}}>{x.date} · 수정</button>{x.mood?<span className="journal-mood-chip">컨디션 {x.mood}</span>:null}</div>
     <p>{x.text}</p></article>)}
   {!(s.journal??[]).filter(x=>x.date!==d).length&&<Empty title="여기가 쌓여요" body="하루 한 단락이면 돼요. 며칠 모이면 시뮬레이션 숫자와 같이 읽을 수 있어요."/>}
  </section></>;})()}
