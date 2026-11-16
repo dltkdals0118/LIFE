@@ -1,0 +1,91 @@
+#!/bin/sh
+# 커밋하면 시뮬레이션이 돈다. (사용자 지시 2026-11-09)
+# 켜기: git config core.hooksPath .githooks
+# 끄기: git config --unset core.hooksPath   또는 한 번만 건너뛰려면  LIFE_SIM_SKIP=1 git commit ...
+set -u
+
+# 1) 스스로를 다시 부르지 않는다. 엔진이 찍는 커밋은 제목이 'sim:' 으로 시작한다.
+case "$(git log -1 --pretty=%s 2>/dev/null)" in
+  sim:*) exit 0 ;;
+esac
+[ "${LIFE_SIM_RUNNING:-}" = "1" ] && exit 0
+[ "${LIFE_SIM_SKIP:-}" = "1" ] && exit 0
+
+# 2) 이력을 다시 쓰는 중이면 끼어들지 않는다 — rebase·merge·cherry-pick 중에는 돌지 않는다.
+GITDIR=$(git rev-parse --git-dir)
+for marker in rebase-merge rebase-apply MERGE_HEAD CHERRY_PICK_HEAD BISECT_LOG; do
+  [ -e "$GITDIR/$marker" ] && exit 0
+done
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT" || exit 0
+LOG="sim/.last-run.log"
+
+# 이 커밋이 app/ 을 건드렸나 — **지금 판단한다.** 아래에서 sim: 커밋을 찍으면 HEAD 가 옮겨가
+# 'HEAD~1..HEAD 에 app 변경' 이 거짓이 된다. 실제로 그래서 포팅이 조용히 건너뛰어졌다(2026-11-15).
+APP_CHANGED=no
+git diff --quiet HEAD~1 HEAD -- app 2>/dev/null || APP_CHANGED=yes
+
+PY=python
+command -v python >/dev/null 2>&1 || PY=python3
+command -v "$PY" >/dev/null 2>&1 || { echo "sim: python 이 없어 건너뛴다"; exit 0; }
+
+LIFE_SIM_RUNNING=1 PYTHONIOENCODING=utf-8 "$PY" sim/run.py >"$LOG" 2>&1
+STATUS=$?
+
+# 2-1) 웹과 주고받는다. 자격증명이 없으면 그냥 건너뛴다 — 커밋을 막지 않는다.
+if [ -f .env.local ]; then
+  LIFE_SIM_RUNNING=1 PYTHONIOENCODING=utf-8 "$PY" sim/sync.py >>"$LOG" 2>&1 || true
+fi
+
+# 3) 엔진이 건드리는 경로만 커밋한다. 남의 변경을 삼키지 않는다.
+# 아직 없는 경로를 넣으면 git add 가 통째로 실패한다 — journal/ 은 첫 일기 전까지 없다.
+PATHS=""
+for pth in journal state/NOW.md simulation/_derived.json simulation/FORECAST.md            simulation/_forecast.json simulation/_predictions.jsonl            reality/facts.json reality/sources.json input/.applied.json; do
+  [ -e "$pth" ] && PATHS="$PATHS $pth"
+done
+[ -n "$PATHS" ] || exit 0
+git add -- $PATHS 2>/dev/null
+if git diff --cached --quiet -- $PATHS 2>/dev/null; then
+  :
+else
+  # cut -c 는 UTF-8 글자를 중간에서 끊는다 — 실제로 '-11,094,118ì' 이 커밋 제목에 남았다.
+  # 첫 줄은 짧으니 그대로 쓰고, 개행만 없앤다.
+  SUMMARY=$(sed -n '1p' "$LOG" | tr -d '
+')
+  [ -n "$SUMMARY" ] || SUMMARY="파생값 갱신"
+  LIFE_SIM_RUNNING=1 git commit -q -m "sim: $SUMMARY" -- $PATHS
+fi
+
+# 3-1) app/ 이 바뀌었으면 public-app 에 따라 붙인다.
+#      main 은 개인 기록이 있어 원격에 못 올리고, 앱은 public-app 으로만 나간다.
+#      오늘 두 번 포팅을 빠뜨려 '올렸는데 안 바뀐다' 가 났다(2026-11-11). **push 는 사람이 한다.**
+if [ "$APP_CHANGED" != "yes" ]; then
+  :
+else
+  # .git 안에 워크트리를 만들면 git 이 index.lock 을 못 만든다 — 바깥에 둔다.
+  # 훅은 git 안에서 돈다 — GIT_DIR·GIT_INDEX_FILE 이 물려 내려와 중첩 git 이 본체를 가리킨다.
+  # 벗기지 않으면 워크트리에서 index.lock 을 못 만든다.
+  unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_OBJECT_DIRECTORY GIT_COMMON_DIR
+  WT="${TMPDIR:-${TEMP:-/tmp}}/life-public-app-$$"
+  rm -rf "$WT" 2>/dev/null
+  if git worktree add --quiet "$WT" public-app 2>>"$LOG"; then
+    SUBJ=$(git log -1 --pretty=%s)
+    if git -C "$WT" checkout main -- app 2>>"$LOG" &&
+       ! git -C "$WT" diff --cached --quiet -- app 2>/dev/null; then
+      git -C "$WT" commit -q -m "$SUBJ" -m "(main 에서 app/ 만 따라 붙였다 — post-commit 훅)" -- app 2>>"$LOG"         && echo "public-app: 따라 붙였다 — push 하면 배포된다"
+    fi
+    git worktree remove --force "$WT" 2>>"$LOG"
+  else
+    echo "public-app: 워크트리를 못 열었다 — $LOG 를 본다"
+  fi
+fi
+
+# 4) 사람에게는 한 줄만. 자세한 것은 로그에 있다.
+if [ "$STATUS" -ne 0 ]; then
+  echo "sim: 입력에 문제가 있다 — $LOG 를 본다"
+  sed -n '1,6p' "$LOG"
+else
+  tail -n 1 "$LOG"
+fi
+exit 0

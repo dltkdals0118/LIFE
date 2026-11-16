@@ -14,3 +14,8 @@ __pycache__/
 node_modules/
 .DS_Store
 Thumbs.db
+
+# 시뮬레이션 엔진 (2026-11-09)
+sim/.last-run.log
+sim/__pycache__/
+

@@ -1,0 +1,525 @@
+{
+  "made_on": "2026-11-16",
+  "start": "2026-12",
+  "months": 6,
+  "cash_now": 5000000,
+  "net_monthly": -2682353,
+  "cash_as_of": "2026-11-09",
+  "flow_basis": "현금 잔액 두 개의 차이 (2026-07-30 → 2026-11-09, 3.4개월). **가계부를 옮겨 적지 않았다.**",
+  "paths": [
+    {
+      "key": "best",
+      "label": "최선",
+      "picks": {
+        "food": "A",
+        "subs": "A",
+        "telecom": "A",
+        "insurance": "A",
+        "rate": "A",
+        "poker": "A",
+        "housing": "A",
+        "promo": "D",
+        "side": "C",
+        "restructure": "B",
+        "sleep": "B",
+        "study": "C",
+        "exercise": "B",
+        "skill": "A"
+      },
+      "rows": [
+        {
+          "month": "2026-12",
+          "flow": 733054,
+          "cash": 5733054,
+          "lever_gain": 3415407
+        },
+        {
+          "month": "2027-01",
+          "flow": 733054,
+          "cash": 6466108,
+          "lever_gain": 3415407
+        },
+        {
+          "month": "2027-02",
+          "flow": 733054,
+          "cash": 7199162,
+          "lever_gain": 3415407
+        },
+        {
+          "month": "2027-03",
+          "flow": 733054,
+          "cash": 7932216,
+          "lever_gain": 3415407
+        },
+        {
+          "month": "2027-04",
+          "flow": 1233054,
+          "cash": 9165270,
+          "lever_gain": 3915407
+        },
+        {
+          "month": "2027-05",
+          "flow": 1233054,
+          "cash": 10398324,
+          "lever_gain": 3915407
+        }
+      ],
+      "end_cash": 10398324,
+      "zero_month": null,
+      "end_flow": 1233054,
+      "requires": [
+        {
+          "lever": "식음료 — 카페·간식·식비",
+          "option": "8·9월 수준으로",
+          "requires": [
+            "주 단위 상한을 정하고 지킨다",
+            "배달·카페를 주 N회로 못 박는다",
+            "장보기로 바꾼다"
+          ]
+        },
+        {
+          "lever": "구독·정기결제",
+          "option": "월 7만 줄인다",
+          "requires": [
+            "결제 내역에서 구독을 전부 찾아낸다",
+            "안 쓰는 것을 해지한다"
+          ]
+        },
+        {
+          "lever": "통신 요금",
+          "option": "알뜰폰으로 — 월 10만",
+          "requires": [
+            "약정과 위약금을 확인한다",
+            "번호이동 가능 시점을 확인한다"
+          ]
+        },
+        {
+          "lever": "보험",
+          "option": "월 10만 줄인다",
+          "requires": [
+            "중복 보장을 찾는다",
+            "**보장 공백이 생기는지 먼저 본다**"
+          ]
+        },
+        {
+          "lever": "대출 금리",
+          "option": "대환으로 — 월 12만",
+          "requires": [
+            "중도상환수수료를 확인한다",
+            "갈아탈 상품을 비교한다",
+            "신용점수 영향을 본다"
+          ]
+        },
+        {
+          "lever": "포커 — 시간과 송금",
+          "option": "거의 안 한다",
+          "requires": [
+            "주간 송금 상한을 0 으로 정한다",
+            "그 시간에 무엇을 할지 먼저 정한다"
+          ]
+        },
+        {
+          "lever": "주거",
+          "option": "월 50만 줄인다",
+          "requires": [
+            "2027-01 까지 대안을 알아본다",
+            "계약서에서 통보 기한을 확인한다",
+            "이사 비용을 계산에 넣는다"
+          ]
+        },
+        {
+          "lever": "수면 챙기기",
+          "option": "하루 30분 더 잔다",
+          "requires": [
+            "잠드는 시각을 정해 둔다"
+          ]
+        },
+        {
+          "lever": "스킬 — AI·마케팅·SEO",
+          "option": "하루 1시간 (커리큘럼대로)",
+          "requires": [
+            "할 시간을 고정한다 (아침 또는 퇴근 직후)",
+            "주마다 '끝났다'고 말할 수 있는 산출물을 남긴다",
+            "**포커 시간을 줄여 자리를 만든다** — 안 그러면 하루가 모자란다"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "likely",
+      "label": "그럴듯한",
+      "picks": {
+        "food": "C",
+        "subs": "B",
+        "telecom": "B",
+        "insurance": "C",
+        "rate": "B",
+        "poker": "C",
+        "housing": "B",
+        "promo": "D",
+        "side": "C",
+        "restructure": "B",
+        "sleep": "B",
+        "study": "C",
+        "exercise": "B",
+        "skill": "B"
+      },
+      "rows": [
+        {
+          "month": "2026-12",
+          "flow": -1634353,
+          "cash": 3365647,
+          "lever_gain": 1048000
+        },
+        {
+          "month": "2027-01",
+          "flow": -1634353,
+          "cash": 1731294,
+          "lever_gain": 1048000
+        },
+        {
+          "month": "2027-02",
+          "flow": -1634353,
+          "cash": 96941,
+          "lever_gain": 1048000
+        },
+        {
+          "month": "2027-03",
+          "flow": -1634353,
+          "cash": -1537412,
+          "lever_gain": 1048000
+        },
+        {
+          "month": "2027-04",
+          "flow": -1384353,
+          "cash": -2921765,
+          "lever_gain": 1298000
+        },
+        {
+          "month": "2027-05",
+          "flow": -1384353,
+          "cash": -4306118,
+          "lever_gain": 1298000
+        }
+      ],
+      "end_cash": -4306118,
+      "zero_month": "2027-03",
+      "end_flow": -1384353,
+      "requires": [
+        {
+          "lever": "식음료 — 카페·간식·식비",
+          "option": "월 60만 줄인다",
+          "requires": [
+            "주 단위 상한을 정한다"
+          ]
+        },
+        {
+          "lever": "구독·정기결제",
+          "option": "월 3만 줄인다",
+          "requires": [
+            "안 쓰는 것 한둘을 해지한다"
+          ]
+        },
+        {
+          "lever": "통신 요금",
+          "option": "요금제만 낮춰 — 월 5만",
+          "requires": [
+            "약정을 확인한다"
+          ]
+        },
+        {
+          "lever": "대출 금리",
+          "option": "금리 인하 요구권 — 월 6만",
+          "requires": [
+            "토스·KB 각각에 신청한다",
+            "승진·재직 서류를 낸다"
+          ]
+        },
+        {
+          "lever": "포커 — 시간과 송금",
+          "option": "하루 3시간쯤",
+          "requires": [
+            "주간 송금 상한을 정한다"
+          ]
+        },
+        {
+          "lever": "주거",
+          "option": "월 25만 줄인다",
+          "requires": [
+            "2027-01 까지 대안을 알아본다",
+            "계약서에서 통보 기한을 확인한다"
+          ]
+        },
+        {
+          "lever": "수면 챙기기",
+          "option": "하루 30분 더 잔다",
+          "requires": [
+            "잠드는 시각을 정해 둔다"
+          ]
+        },
+        {
+          "lever": "스킬 — AI·마케팅·SEO",
+          "option": "하루 30분 (절반 속도)",
+          "requires": [
+            "할 시간을 고정한다",
+            "12주를 24주로 늘려 잡는다"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "worst",
+      "label": "아무것도 안 하면",
+      "picks": {
+        "food": "D",
+        "subs": "C",
+        "telecom": "C",
+        "insurance": "C",
+        "rate": "C",
+        "poker": "D",
+        "housing": "C",
+        "promo": "D",
+        "side": "C",
+        "restructure": "B",
+        "sleep": "C",
+        "study": "C",
+        "exercise": "C",
+        "skill": "C"
+      },
+      "rows": [
+        {
+          "month": "2026-12",
+          "flow": -2682353,
+          "cash": 2317647,
+          "lever_gain": 0
+        },
+        {
+          "month": "2027-01",
+          "flow": -2682353,
+          "cash": -364706,
+          "lever_gain": 0
+        },
+        {
+          "month": "2027-02",
+          "flow": -2682353,
+          "cash": -3047059,
+          "lever_gain": 0
+        },
+        {
+          "month": "2027-03",
+          "flow": -2682353,
+          "cash": -5729412,
+          "lever_gain": 0
+        },
+        {
+          "month": "2027-04",
+          "flow": -2682353,
+          "cash": -8411765,
+          "lever_gain": 0
+        },
+        {
+          "month": "2027-05",
+          "flow": -2682353,
+          "cash": -11094118,
+          "lever_gain": 0
+        }
+      ],
+      "end_cash": -11094118,
+      "zero_month": "2027-01",
+      "end_flow": -2682353,
+      "requires": []
+    }
+  ],
+  "sensitivity": [
+    {
+      "lever": "식음료 — 카페·간식·식비",
+      "option": "8·9월 수준으로",
+      "monthly": 2100000,
+      "gain_over_horizon": 12600000,
+      "starts": "2026-12",
+      "requires": [
+        "주 단위 상한을 정하고 지킨다",
+        "배달·카페를 주 N회로 못 박는다",
+        "장보기로 바꾼다"
+      ]
+    },
+    {
+      "lever": "포커 — 시간과 송금",
+      "option": "거의 안 한다",
+      "monthly": 925407,
+      "gain_over_horizon": 5552442,
+      "starts": "2026-12",
+      "requires": [
+        "주간 송금 상한을 0 으로 정한다",
+        "그 시간에 무엇을 할지 먼저 정한다"
+      ]
+    },
+    {
+      "lever": "과장 승진 — 연봉",
+      "option": "만약 세후 +80만이라면",
+      "monthly": 800000,
+      "gain_over_horizon": 4000000,
+      "starts": "2027-01",
+      "requires": [
+        "DX 1차 결과 + **출력 품질 측정기**를 들고 간다 (커리큘럼 A단계)",
+        "블로그 SEO 자동화의 **전후 지표**를 들고 간다 (B단계)",
+        "지각 0 을 유지한다"
+      ]
+    },
+    {
+      "lever": "부업 — SEO·자동화",
+      "option": "만약 월 80만이라면",
+      "monthly": 800000,
+      "gain_over_horizon": 4000000,
+      "starts": "2027-01",
+      "requires": [
+        "**SEO 자동 진단 리포트**를 새로 만든다 (커리큘럼 B단계 산출물)",
+        "사례 1건의 전후 숫자를 남긴다 (C단계)",
+        "겸업 규정을 확인한다",
+        "**회사 산출물을 영업 자료로 쓰지 않는다** — 그것이 발각 경로다"
+      ]
+    },
+    {
+      "lever": "채무 재조정",
+      "option": "만약 채무조정으로 월 20만 준다면",
+      "monthly": 200000,
+      "gain_over_horizon": 1200000,
+      "starts": "2026-12",
+      "requires": [
+        "신용회복위원회 1600-5500 에 상담한다",
+        "상담만으로 기록이 남는지 먼저 묻는다"
+      ]
+    },
+    {
+      "lever": "주거",
+      "option": "월 50만 줄인다",
+      "monthly": 500000,
+      "gain_over_horizon": 1000000,
+      "starts": "2027-04",
+      "requires": [
+        "2027-01 까지 대안을 알아본다",
+        "계약서에서 통보 기한을 확인한다",
+        "이사 비용을 계산에 넣는다"
+      ]
+    },
+    {
+      "lever": "대출 금리",
+      "option": "대환으로 — 월 12만",
+      "monthly": 120000,
+      "gain_over_horizon": 720000,
+      "starts": "2026-12",
+      "requires": [
+        "중도상환수수료를 확인한다",
+        "갈아탈 상품을 비교한다",
+        "신용점수 영향을 본다"
+      ]
+    },
+    {
+      "lever": "통신 요금",
+      "option": "알뜰폰으로 — 월 10만",
+      "monthly": 100000,
+      "gain_over_horizon": 600000,
+      "starts": "2026-12",
+      "requires": [
+        "약정과 위약금을 확인한다",
+        "번호이동 가능 시점을 확인한다"
+      ]
+    },
+    {
+      "lever": "보험",
+      "option": "월 10만 줄인다",
+      "monthly": 100000,
+      "gain_over_horizon": 600000,
+      "starts": "2026-12",
+      "requires": [
+        "중복 보장을 찾는다",
+        "**보장 공백이 생기는지 먼저 본다**"
+      ]
+    },
+    {
+      "lever": "구독·정기결제",
+      "option": "월 7만 줄인다",
+      "monthly": 70000,
+      "gain_over_horizon": 420000,
+      "starts": "2026-12",
+      "requires": [
+        "결제 내역에서 구독을 전부 찾아낸다",
+        "안 쓰는 것을 해지한다"
+      ]
+    },
+    {
+      "lever": "수면 챙기기",
+      "option": "하루 1시간 더 잔다",
+      "monthly": 0,
+      "gain_over_horizon": 0,
+      "starts": "2026-12",
+      "requires": [
+        "잠드는 시각을 정해 둔다",
+        "포커 딥런으로 회복 기회를 놓치지 않는다",
+        "진료 때 출근 영향이 생겼다고 전한다"
+      ]
+    },
+    {
+      "lever": "스킬 — AI·마케팅·SEO",
+      "option": "하루 1시간 (커리큘럼대로)",
+      "monthly": 0,
+      "gain_over_horizon": 0,
+      "starts": "2026-12",
+      "requires": [
+        "할 시간을 고정한다 (아침 또는 퇴근 직후)",
+        "주마다 '끝났다'고 말할 수 있는 산출물을 남긴다",
+        "**포커 시간을 줄여 자리를 만든다** — 안 그러면 하루가 모자란다"
+      ]
+    },
+    {
+      "lever": "겸사겸사 — 수학·영어·책",
+      "option": "하루 1시간",
+      "monthly": 0,
+      "gain_over_horizon": 0,
+      "starts": "2026-12",
+      "requires": [
+        "할 시간을 고정한다"
+      ]
+    },
+    {
+      "lever": "운동",
+      "option": "하루 40분",
+      "monthly": 0,
+      "gain_over_horizon": 0,
+      "starts": "2026-12",
+      "requires": [
+        "요일과 시간을 정한다"
+      ]
+    }
+  ],
+  "base_end": -11094118,
+  "scored": [],
+  "predictions_added": 0,
+  "targets": [
+    {
+      "path": "best",
+      "label": "최선",
+      "monthly_need": 0,
+      "horizon_need": 0,
+      "effective_months": 5
+    },
+    {
+      "path": "likely",
+      "label": "그럴듯한",
+      "monthly_need": 1384353,
+      "horizon_need": 861224,
+      "effective_months": 5
+    },
+    {
+      "path": "worst",
+      "label": "아무것도 안 하면",
+      "monthly_need": 2682353,
+      "horizon_need": 2218824,
+      "effective_months": 5
+    }
+  ],
+  "promo_starts": "2027-01",
+  "income_now": 2600000,
+  "promo_note": "승진·부업·채무조정은 **모든 경로에서 0** 이다. 금액이 미확인이고(FACT-0210) 추정하면 최선 경로가 부풀려진다. 필요한 금액은 FORECAST.md 「협상 목표」에서 역산한다.",
+  "overlap_note": "레버끼리 겹치지 않게 쪼갰다. 식음료·구독·통신·보험·금리·포커·주거는 서로 다른 칸이라 더해도 된다. 겹쳐 세면 최선이 과대평가된다."
+}

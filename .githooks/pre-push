@@ -1,0 +1,25 @@
+#!/bin/sh
+# main 은 원격에 올리지 않는다. 개인 기록(reality/ · state/ · simulation/ · journal/)이 전부 거기 있고
+# 저장소는 공개다. 앱은 public-app 브랜치로만 나간다.
+#
+# 2026-11-15: `git push origin` 이 혼자 실행돼 main 을 올리려 했다. 그때 막아 준 것은
+# non-fast-forward 였지 장치가 아니었다 — 원격이 뒤처져 있었으면 그대로 나갔다.
+# `branch.main.pushRemote` 는 remote 를 명시하면 무시된다. 그래서 훅으로 막는다.
+#
+# 정말 올려야 하면:  LIFE_ALLOW_MAIN_PUSH=1 git push ...
+set -u
+
+[ "${LIFE_ALLOW_MAIN_PUSH:-}" = "1" ] && exit 0
+
+while read -r local_ref _local_sha _remote_ref _remote_sha; do
+  case "$local_ref" in
+    refs/heads/main)
+      echo "pre-push: **main 은 올리지 않는다.** 개인 기록이 들어 있고 저장소는 공개다." >&2
+      echo "          앱을 배포하려면:  git push origin public-app:main" >&2
+      echo "          그래도 올려야 하면:  LIFE_ALLOW_MAIN_PUSH=1 git push ..." >&2
+      exit 1
+      ;;
+  esac
+done
+
+exit 0

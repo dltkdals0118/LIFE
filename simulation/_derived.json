@@ -1,0 +1,86 @@
+{
+  "as_of": "2026-11-16",
+  "inputs": {
+    "cash": {
+      "value": 5000000,
+      "as_of": "2026-11-09",
+      "fact": "FACT-0212"
+    },
+    "income": {
+      "value": 2600000,
+      "as_of": "2026-10-28",
+      "fact": "FACT-0060"
+    },
+    "spend": {
+      "value": 8268480,
+      "as_of": "2026-10-31",
+      "fact": "FACT-0202"
+    },
+    "inflow": {
+      "value": 4806321,
+      "as_of": "2026-10-31",
+      "fact": "FACT-0203"
+    },
+    "debt": {
+      "value": 47000000,
+      "as_of": "2026-11-02",
+      "fact": "FACT-0204"
+    },
+    "debt_payment": {
+      "value": 790000,
+      "as_of": "2026-11-02",
+      "fact": "FACT-0205"
+    }
+  },
+  "derived": {
+    "deficit": 3462159,
+    "deficit_basis": "월 총유출 − 월 총유입 (둘 다 측정값)",
+    "runway_months_with_income": 1.4,
+    "runway_months_no_inflow": 0.6,
+    "one_month_gap_cost": 8268480,
+    "net_from_cash": {
+      "per_month": -2682353,
+      "from": {
+        "date": "2026-07-30",
+        "cash": 14000000,
+        "fact": "FACT-0025"
+      },
+      "to": {
+        "date": "2026-11-09",
+        "cash": 5000000,
+        "fact": "FACT-0212"
+      },
+      "span_months": 3.4,
+      "note": "현금 잔액 두 개의 차이. 가계부를 옮겨 적지 않아도 나온다. 다만 **대출을 새로 받으면 현금이 늘어 적자가 가려진다** — 그래서 debt 도 가끔 적는다."
+    },
+    "job_baseline_net_monthly": 3770000,
+    "rehab_band": [
+      {
+        "min_living": 1500000,
+        "free_income": 1100000,
+        "total_repaid": 39600000,
+        "forgiven": 7400000,
+        "payment_delta": 310000
+      },
+      {
+        "min_living": 1430000,
+        "free_income": 1170000,
+        "total_repaid": 42120000,
+        "forgiven": 4880000,
+        "payment_delta": 380000
+      }
+    ],
+    "rehab_note": "과거 생계비 가정의 산술 예시이며 사건의 예상 변제액·면책액이 아니다. 인정 생계비·청산가치·기간·비용 미확인. 상담·서류 준비 중(완료 미확인). execution/REHABILITATION_PREP_20261115.md 참조.",
+    "univ_fulltime_12m": 99221760
+  },
+  "unknown": {
+    "offer_net": "offer_net 기록이 없다. 입력함에 `offer_net  <오퍼의 세후 월급>` 을 적으면 채워진다.",
+    "offer_gap": "offer_net 기록이 없다. 입력함에 `offer_net  <오퍼의 세후 월급>` 을 적으면 채워진다."
+  },
+  "assumptions_used": [
+    "ASM-0101",
+    "ASM-0102",
+    "ASM-0103"
+  ],
+  "contract": "simulated — reality/ 에 쓰지 않는다"
+}

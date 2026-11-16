@@ -1,0 +1,29 @@
+{
+  "_note": "엔진이 쓰는 가정. 값이 아니라 가정이므로 근거와 만료를 함께 둔다 (DATA_CONTRACT '가정').",
+  "assumptions": [
+    {
+      "id": "ASM-0101", "variable": "minimum_living_cost_1person",
+      "range": {"min": 1430000, "max": 1500000}, "unit": "KRW/month",
+      "rationale": "개인회생 가용소득 = 소득 − 최저생계비(기준중위소득 60%). 2026년 값 미확인이라 범위로 둔다.",
+      "category": "제도", "applies_to": ["rehab"], "reviewed_at": "2026-11-03",
+      "expires_at": "2027-01-31", "sensitivity": "ordinary", "owner": "user",
+      "source_ids": ["SRC-118"]
+    },
+    {
+      "id": "ASM-0102", "variable": "stabilize_remaining_shortfall",
+      "value": 1170000, "unit": "KRW/month",
+      "rationale": "STABILIZE_20261029 §4 — 지출·통신·금리·주거 레버를 전부 써도 남는 적자. 이직 기준선의 기준이 된다.",
+      "category": "재정", "applies_to": ["job_move"], "reviewed_at": "2026-10-29",
+      "expires_at": null, "sensitivity": "personal", "owner": "user",
+      "source_ids": ["SRC-049"]
+    },
+    {
+      "id": "ASM-0103", "variable": "rehab_repayment_months",
+      "value": 36, "unit": "month",
+      "rationale": "개인회생 변제기간 일반값. 사건별로 다를 수 있고 법적 판단이 아니다(H2).",
+      "category": "제도", "applies_to": ["rehab"], "reviewed_at": "2026-11-03",
+      "expires_at": "2027-05-03", "sensitivity": "ordinary", "owner": "user",
+      "source_ids": ["SRC-118"]
+    }
+  ]
+}
