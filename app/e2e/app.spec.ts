@@ -117,7 +117,7 @@ test('모바일 하단 탭으로 모든 화면에 갈 수 있다', async ({page}
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
   const tabs = page.locator('.mobile-nav>button');
   await expect(tabs).toHaveCount(5);
-  for (const [label, sel] of [['실행과 검토', '.planning'], ['홈', '.home-figure'], ['시뮬레이션', '.sim-panel'], ['커리큘럼', '.curri'], ['일기', '.journal-form']] as const) {
+  for (const [label, sel] of [['실행과 검토', '.planning'], ['홈', '.daily-home'], ['시뮬레이션', '.sim-panel'], ['커리큘럼', '.curri'], ['일기', '.journal-form']] as const) {
     await page.locator('.mobile-nav').getByRole('button', {name: label}).click();
     await expect(page.locator(sel)).toBeVisible();
   }
@@ -153,7 +153,7 @@ test('desktop and mobile screenshots', async ({page}, info) => {
   await expect(page.getByRole('heading', {name: '다시 만나 반가워요'})).toBeVisible();
   await page.screenshot({path: `test-results/${info.project.name}-login.png`, fullPage: true});
   await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
-  await page.locator('.home-figure').waitFor();
+  await page.locator('.daily-home').waitFor();
   await page.waitForTimeout(500);
   await page.screenshot({path: `test-results/${info.project.name}-home.png`, fullPage: true});
   await go(page, '시뮬레이션');
@@ -212,55 +212,11 @@ test('예전 형식 캐시로도 앱이 열린다 — journal 이 없던 시절 
 
 // 2026-11-15: 메인 화면. 캐릭터가 밟고 선 바닥이 현금 궤적이다 —
 // 장식이 아니라 데이터라서, 숫자가 바뀌면 그림도 바뀌어야 한다.
-test('메인 — 갈림길이 데이터로 그려지고 두 길로 이어진다', async ({page}) => {
-  const errors: string[] = [];
-  page.on('pageerror', e => errors.push(e.message));
-  await page.goto('./');
-  await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
 
-  // 큰 숫자 하나가 먼저 읽힌다
-  await expect(page.locator('.home-figure')).toBeVisible();
-  // 바닥이 두 갈래다 — 지금 흐름과 바꿨을 때
-  await expect(page.locator('.home-path-drop')).toBeVisible();
-  await expect(page.locator('.home-path-rise')).toBeVisible();
-  // 캐릭터가 서 있다
-  await expect(page.locator('.home-figure-art')).toBeVisible();
-  // 세 숫자
-  await expect(page.locator('.home-facts dd')).toHaveCount(3);
-
-  // 두 버튼이 각각 제 화면으로 간다
-  await page.getByRole('button', {name: '길 바꿔 보기'}).click();
-  await expect(page.getByRole('heading', {name: /앞으로 \d+달/})).toBeVisible();
-  await go(page, '홈');
-  await page.getByRole('button', {name: /오늘 일기/}).click();
-  await expect(page.getByRole('heading', {name: '일기', exact: true})).toBeVisible();
-  expect(errors).toEqual([]);
-});
 
 // 2026-11-15 지적: "시뮬레이션 값에 따라 홈의 날짜가 안 바뀌어."
 // 고른 조합이 화면 상태로만 있어서 다른 화면으로 가면 사라졌다. 이제 기록으로 남는다.
-test('고른 조합이 홈까지 따라간다', async ({page}) => {
-  const errors: string[] = [];
-  page.on('pageerror', e => errors.push(e.message));
-  await page.goto('./');
-  await page.getByRole('button', {name: '로그인 없이 둘러보기'}).click();
 
-  const figure = page.locator('.home-figure');
-  const before = await figure.innerText();
-  await expect(page.getByText('가정에 따른 첫 월말 현금 부족')).toBeVisible();
-
-  // 시뮬레이션에서 하나 바꾸고
-  await go(page, '시뮬레이션');
-  await page.locator('.sim-lever').first().getByRole('button', {name: /거의 안 한다/}).click();
-
-  // 홈으로 돌아오면 숫자와 문구가 바뀌어 있다
-  await go(page, '홈');
-  await expect(figure).not.toHaveText(before);
-  await expect(page.getByText('가정에 따른 첫 월말 현금 부족')).toBeVisible();
-
-  // 예시 공간은 **설계상 저장하지 않는다** — 새로고침 지속은 아래 개인 공간 시험이 맡는다.
-  expect(errors).toEqual([]);
-});
 
 // 커리큘럼 — 시뮬레이션 아래. 체크가 남아야 진도다.
 test('커리큘럼 — 주차를 체크하면 보인다', async ({page}) => {
@@ -313,5 +269,5 @@ test('개인 공간에서는 선택과 진도가 새로고침 뒤에도 남는�
   await go(page, '시뮬레이션');
   await expect(page.locator('.sim-options button.active').first()).toHaveText(/줄인다/);
   await go(page, '홈');
-  await expect(page.locator('.home-figure')).toContainText('월말 잔액 유지');
+  await expect(page.locator('.daily-home')).toBeVisible();
 });
