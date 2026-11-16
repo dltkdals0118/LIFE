@@ -3,7 +3,7 @@ async function go(page:Page,name:string){const mobile=page.locator('.mobile-nav'
 test('새 공간에서 입력 선택 채택 실행 검토 재접속',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('./');await page.getByRole('button',{name:'이 기기에만 저장하고 시작하기'}).click();
- await page.getByRole('button',{name:'현재 상황 입력하기'}).click();
+ await go(page,'실행과 검토');
  await page.getByLabel('기준일',{exact:true}).fill('2026-01-31');
  await page.getByLabel('기준 현금 (원)',{exact:true}).fill('3000000');
  await page.getByLabel('월수지 (유입 − 유출, 적자는 음수)').fill('-100000');

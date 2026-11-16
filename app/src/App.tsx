@@ -135,7 +135,7 @@ export default function App(){
  {store.error&&<div className="error-banner" role="alert"><span>{store.error}</span><button onClick={()=>store.setError('')} aria-label="알림 닫기"><X size={17}/></button></div>}
  {!ready&&<p role="status">기록을 불러오고 있어요…</p>}
  {view==='planning'&&<Planning s={s} ready={ready} update={fn=>store.update(fn)} onSim={()=>go('sim')} onQuest={id=>{const q=s.quests.find(q=>q.id===id);if(q)toggle(q);else setDialog({type:'quest'});}} onEdit={id=>{const item=s.quests.find(q=>q.id===id);if(item)setDialog({type:'quest',item});}} onRecord={()=>setDialog({type:'observation'})} onReview={()=>setDialog({type:'review'})}/>}
- {view==='home'&&<HomeView s={s} onGo={v=>go(v)}/>}
+ {view==='home'&&<HomeView s={s} ready={ready} update={fn=>store.update(fn)} onGo={v=>go(v)}/>}
  {view==='journal'&&(()=>{const d=today();const mine=journalOf(s,d);const streak=journalStreak(s);
  return <>{sectionHead('ONE A DAY','일기',streak>0?`${streak}일 연속으로 쓰고 있어요.`:'오늘 하루를 한 단락으로 남겨요.')}
  <section className="panel journal-today">
